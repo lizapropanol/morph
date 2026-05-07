@@ -1,0 +1,36 @@
+#ifndef SERVICE_MANAGER_H
+#define SERVICE_MANAGER_H
+
+#include <QObject>
+#include <QVariantList>
+#include "../network/NetworkManager.h"
+#include "../services/YandexService.h"
+#include "../services/SoundCloudService.h"
+
+class ServiceManager : public QObject {
+    Q_OBJECT
+public:
+    explicit ServiceManager(QObject* parent = nullptr);
+
+public slots:
+    void search(const QString& query);
+    void getCharts();
+    void getWave();
+    void resolve(const QString& serviceName, const QString& trackId);
+    void reportPlay(const QString& serviceName, const QString& trackId);
+    void setYandexToken(const QString& token);
+    void setSoundCloudClientId(const QString& clientId);
+
+signals:
+    void searchResultsReady(const QString& serviceName, const QVariantList& results);
+    void streamUrlReady(const QString& trackId, const QString& streamUrl);
+    void chartsReady(const QString& serviceName, const QVariantList& tracks);
+    void waveReady(const QString& serviceName, const QVariantList& tracks);
+
+private:
+    NetworkManager* net;
+    YandexService* yandex;
+    SoundCloudService* soundcloud;
+};
+
+#endif

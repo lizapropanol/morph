@@ -1,0 +1,175 @@
+#include "SettingsManager.h"
+#include "../utils/PathProvider.h"
+#include <QDir>
+
+SettingsManager::SettingsManager(QObject* parent) : QObject(parent) {
+    m_path = PathProvider::getDataPath() + "/settings.json";
+    load();
+}
+
+void SettingsManager::load() {
+    QFile file(m_path);
+    if (file.open(QIODevice::ReadOnly)) {
+        m_data = QJsonDocument::fromJson(file.readAll()).object();
+        file.close();
+
+        if (m_data.contains("playlists") && m_data["playlists"].isObject()) {
+            QJsonObject playlists = m_data["playlists"].toObject();
+            bool changed = false;
+            for (auto it = playlists.begin(); it != playlists.end(); ++it) {
+                if (it.value().isArray()) {
+                    QJsonObject newPl;
+                    newPl["tracks"] = it.value().toArray();
+                    newPl["coverUrl"] = "";
+                    playlists[it.key()] = newPl;
+                    changed = true;
+                }
+            }
+            if (changed) {
+                m_data["playlists"] = playlists;
+                save();
+            }
+        }
+    }
+}
+
+void SettingsManager::save() {
+    QFile file(m_path);
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(m_data).toJson());
+        file.close();
+    }
+}
+
+void SettingsManager::saveSession(const QVariantMap& session) {
+    m_data["session"] = QJsonObject::fromVariantMap(session);
+    save();
+}
+
+QVariantMap SettingsManager::loadSession() {
+    return m_data["session"].toObject().toVariantMap();
+}
+
+void SettingsManager::toggleLike(const QVariantMap& track) {
+    QJsonArray likes = m_data["likes"].toArray();
+    QString id = track["id"].toString();
+    bool found = false;
+    for (int i = 0; i < likes.size(); ++i) {
+        if (likes[i].toObject()["id"].toString() == id) {
+            likes.removeAt(i);
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        likes.append(QJsonObject::fromVariantMap(track));
+    }
+    m_data["likes"] = likes;
+    save();
+    emit likesChanged();
+}
+
+bool SettingsManager::isLiked(const QString& trackId) {
+    QJsonArray likes = m_data["likes"].toArray();
+    for (int i = 0; i < likes.size(); ++i) {
+        if (likes[i].toObject()["id"].toString() == trackId) return true;
+    }
+    return false;
+}
+
+QVariantList SettingsManager::getLikedTracks() {
+    return m_data["likes"].toArray().toVariantList();
+}
+
+void SettingsManager::createPlaylist(const QString& name, const QString& coverUrl) {
+    QJsonObject playlists = m_data["playlists"].toObject();
+    if (!playlists.contains(name)) {
+        QJsonObject playlistData;
+        playlistData["coverUrl"] = coverUrl;
+        playlistData["tracks"] = QJsonArray();
+        playlists[name] = playlistData;
+        m_data["playlists"] = playlists;
+        save();
+        emit playlistsChanged();
+    }
+}
+
+void SettingsManager::renamePlaylist(const QString& oldName, const QString& newName, const QString& coverUrl) {
+    QJsonObject playlists = m_data["playlists"].toObject();
+    if (playlists.contains(oldName)) {
+        QJsonObject playlistData = playlists[oldName].toObject();
+        playlistData["coverUrl"] = coverUrl;
+        playlists.remove(oldName);
+        playlists[newName] = playlistData;
+        m_data["playlists"] = playlists;
+        save();
+        emit playlistsChanged();
+    }
+}
+
+void SettingsManager::deletePlaylist(const QString& name) {
+    QJsonObject playlists = m_data["playlists"].toObject();
+    if (playlists.contains(name)) {
+        playlists.remove(name);
+        m_data["playlists"] = playlists;
+        save();
+        emit playlistsChanged();
+    }
+}
+
+void SettingsManager::addToPlaylist(const QString& playlistName, const QVariantMap& track) {
+    QJsonObject playlists = m_data["playlists"].toObject();
+    QJsonObject playlistData = playlists[playlistName].toObject();
+    QJsonArray tracks = playlistData["tracks"].toArray();
+    tracks.append(QJsonObject::fromVariantMap(track));
+    playlistData["tracks"] = tracks;
+    playlists[playlistName] = playlistData;
+    m_data["playlists"] = playlists;
+    save();
+    emit playlistsChanged();
+}
+
+QVariantMap SettingsManager::getPlaylists() {
+    if (!m_data.contains("playlists") || !m_data["playlists"].isObject()) return QVariantMap();
+    return m_data["playlists"].toObject().toVariantMap();
+}
+
+void SettingsManager::setYandexToken(const QString& token) {
+    m_data["yandex_token"] = token;
+    save();
+}
+
+QString SettingsManager::getYandexToken() {
+    return m_data["yandex_token"].toString();
+}
+
+void SettingsManager::setSoundCloudToken(const QString& token) {
+    m_data["soundcloud_token"] = token;
+    save();
+}
+
+QString SettingsManager::getSoundCloudToken() {
+    return m_data["soundcloud_token"].toString();
+}
+
+void SettingsManager::addSearchHistory(const QVariantMap& track) {
+    QJsonArray history = m_data["history"].toArray();
+    QJsonObject trackObj = QJsonObject::fromVariantMap(track);
+    
+    for (int i = 0; i < history.size(); ++i) {
+        if (history[i].toObject()["id"].toString() == trackObj["id"].toString()) {
+            history.removeAt(i);
+            break;
+        }
+    }
+    
+    history.insert(0, trackObj);
+    if (history.size() > 20) history.removeLast();
+    
+    m_data["history"] = history;
+    save();
+}
+
+QVariantList SettingsManager::getSearchHistory() {
+    return m_data["history"].toArray().toVariantList();
+}
