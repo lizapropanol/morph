@@ -36,7 +36,14 @@ void SoundCloudService::search(const QString& query) {
             TrackData track;
             track.id = QString::number(obj["id"].toInt());
             track.title = obj["title"].toString();
-            track.artist = obj["user"].toObject()["username"].toString();
+            
+            QJsonObject pub = obj["publisher_metadata"].toObject();
+            if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {
+                track.artist = pub["artist"].toString();
+            } else {
+                track.artist = obj["user"].toObject()["username"].toString();
+            }
+            
             track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
             
             QJsonArray transcodings = obj["media"].toObject()["transcodings"].toArray();

@@ -41,7 +41,12 @@ void YandexService::search(const QString& query) {
             TrackData track;
             track.id = QString::number(obj["id"].toInt());
             track.title = obj["title"].toString();
-            track.artist = obj["artists"].toArray()[0].toObject()["name"].toString();
+            
+            QJsonArray artists = obj["artists"].toArray();
+            QStringList artistNames;
+            for (const QJsonValue& a : artists) artistNames.append(a.toObject()["name"].toString());
+            track.artist = artistNames.join(", ");
+            
             track.coverUrl = "https://" + obj["coverUri"].toString().replace("%%", "400x400");
             results.append(track.toVariantMap());
         }
@@ -71,9 +76,9 @@ void YandexService::getCharts() {
             track.title = trackObj["title"].toString();
             
             QJsonArray artists = trackObj["artists"].toArray();
-            if (!artists.isEmpty()) {
-                track.artist = artists[0].toObject()["name"].toString();
-            }
+            QStringList artistNames;
+            for (const QJsonValue& a : artists) artistNames.append(a.toObject()["name"].toString());
+            track.artist = artistNames.join(", ");
             
             QJsonArray albums = trackObj["albums"].toArray();
             if (!albums.isEmpty()) {
@@ -112,9 +117,9 @@ void YandexService::getWave() {
             track.title = trackObj["title"].toString();
             
             QJsonArray artists = trackObj["artists"].toArray();
-            if (!artists.isEmpty()) {
-                track.artist = artists[0].toObject()["name"].toString();
-            }
+            QStringList artistNames;
+            for (const QJsonValue& a : artists) artistNames.append(a.toObject()["name"].toString());
+            track.artist = artistNames.join(", ");
             
             QJsonArray albums = trackObj["albums"].toArray();
             if (!albums.isEmpty()) {
