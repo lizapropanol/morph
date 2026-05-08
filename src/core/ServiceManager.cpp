@@ -22,9 +22,13 @@ ServiceManager::ServiceManager(QObject* parent) : QObject(parent) {
     connect(soundcloud, &BaseService::streamUrlReady, this, &ServiceManager::streamUrlReady);
 }
 
-void ServiceManager::search(const QString& query) {
-    yandex->search(query);
-    soundcloud->search(query);
+void ServiceManager::search(const QString& query, const QString& serviceName) {
+    if (serviceName == "all" || serviceName == "yandex") {
+        yandex->search(query);
+    }
+    if (serviceName == "all" || serviceName == "soundcloud") {
+        soundcloud->search(query);
+    }
 }
 
 void ServiceManager::getCharts() {

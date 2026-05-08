@@ -13,7 +13,7 @@ public:
     explicit ServiceManager(QObject* parent = nullptr);
 
 public slots:
-    void search(const QString& query);
+    void search(const QString& query, const QString& serviceName = "all");
     void getCharts();
     void getWave();
     void resolve(const QString& serviceName, const QString& trackId);
