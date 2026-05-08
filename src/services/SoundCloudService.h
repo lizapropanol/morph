@@ -18,6 +18,9 @@ public:
     void reportPlay(const QString& trackId) override;
 
 private:
+    void fetchStreamUrl(const QString& trackId, const QString& transcodingUrl);
+
+private:
     NetworkManager* net;
     QString m_token;
     QMap<QString, QString> m_trackLinks;

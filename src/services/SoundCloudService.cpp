@@ -66,9 +66,40 @@ void SoundCloudService::reportPlay(const QString& trackId) {
 }
 
 void SoundCloudService::resolveStreamUrl(const QString& trackId) {
-    if (!m_trackLinks.contains(trackId)) return;
+    if (m_token.isEmpty()) return;
 
-    QUrl url(m_trackLinks[trackId]);
+    if (m_trackLinks.contains(trackId)) {
+        fetchStreamUrl(trackId, m_trackLinks[trackId]);
+    } else {
+        QUrl url("https://api-v2.soundcloud.com/tracks/" + trackId);
+        QUrlQuery q;
+        q.addQueryItem("client_id", m_token);
+        url.setQuery(q);
+
+        net->get(url, "", [this, trackId](QNetworkReply* reply) {
+            if (reply->error() != QNetworkReply::NoError) return;
+            
+            QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+            QJsonArray transcodings = doc.object()["media"].toObject()["transcodings"].toArray();
+            QString transcodingUrl;
+            for (const QJsonValue& t : transcodings) {
+                QJsonObject to = t.toObject();
+                if (to["format"].toObject()["protocol"].toString() == "progressive") {
+                    transcodingUrl = to["url"].toString();
+                    break;
+                }
+            }
+            
+            if (!transcodingUrl.isEmpty()) {
+                m_trackLinks[trackId] = transcodingUrl;
+                fetchStreamUrl(trackId, transcodingUrl);
+            }
+        });
+    }
+}
+
+void SoundCloudService::fetchStreamUrl(const QString& trackId, const QString& transcodingUrl) {
+    QUrl url(transcodingUrl);
     QUrlQuery q;
     q.addQueryItem("client_id", m_token);
     url.setQuery(q);
