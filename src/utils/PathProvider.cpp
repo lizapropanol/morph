@@ -23,9 +23,11 @@ QString PathProvider::getStyleFilePath() {
 void PathProvider::ensureConfigExists() {
     QString configPath = getConfigPath();
     QString dataPath = getDataPath();
+    QString assetsPath = configPath + "/assets";
     
     QDir().mkpath(configPath);
     QDir().mkpath(dataPath);
+    QDir().mkpath(assetsPath);
 
     QString oldSettings = configPath + "/settings.json";
     QString newSettings = dataPath + "/settings.json";
@@ -35,24 +37,22 @@ void PathProvider::ensureConfigExists() {
 
     QString styleFile = getStyleFilePath();
     if (!QFile::exists(styleFile)) {
-        QFile file(styleFile);
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QTextStream out(&file);
-            out << "import QtQuick 2.15\n"
-                << "import QtQuick.Controls 2.15\n\n"
-                << "ApplicationWindow {\n"
-                << "    visible: true\n"
-                << "    width: 800\n"
-                << "    height: 600\n"
-                << "    title: \"morph\"\n"
-                << "    color: \"#0a0a0a\"\n\n"
-                << "    Text {\n"
-                << "        anchors.centerIn: parent\n"
-                << "        text: \"morph\"\n"
-                << "        color: \"white\"\n"
-                << "        font.pixelSize: 32\n"
-                << "    }\n"
-                << "}\n";
+        QFile::copy(":/ui/style.qml", styleFile);
+        QFile::setPermissions(styleFile, QFile::WriteUser | QFile::ReadUser);
+    }
+
+    QStringList assets = {
+        "heart-outline.svg", "heart.svg", "magnify.svg", "pause-circle.svg", 
+        "pause.svg", "play-circle.svg", "play.svg", "plus-box.svg", "plus.svg", 
+        "repeat-once.svg", "repeat.svg", "skip-next.svg", "skip-previous.svg", 
+        "soundcloud_icon.svg", "yandex_music_icon.svg"
+    };
+
+    for (const QString& asset : assets) {
+        QString dest = assetsPath + "/" + asset;
+        if (!QFile::exists(dest)) {
+            QFile::copy(":/assets/" + asset, dest);
+            QFile::setPermissions(dest, QFile::WriteUser | QFile::ReadUser);
         }
     }
 }

@@ -1,0 +1,20 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>ui/style.qml</file>
+    <file>assets/heart-outline.svg</file>
+    <file>assets/heart.svg</file>
+    <file>assets/magnify.svg</file>
+    <file>assets/pause-circle.svg</file>
+    <file>assets/pause.svg</file>
+    <file>assets/play-circle.svg</file>
+    <file>assets/play.svg</file>
+    <file>assets/plus-box.svg</file>
+    <file>assets/plus.svg</file>
+    <file>assets/repeat-once.svg</file>
+    <file>assets/repeat.svg</file>
+    <file>assets/skip-next.svg</file>
+    <file>assets/skip-previous.svg</file>
+    <file>assets/soundcloud_icon.svg</file>
+    <file>assets/yandex_music_icon.svg</file>
+</qresource>
+</RCC>

@@ -11,6 +11,7 @@ set(CMAKE_AUTOUIC ON)
 find_package(Qt5 COMPONENTS Core Quick Qml Network Multimedia DBus REQUIRED)
 
 add_executable(morph
+    resources.qrc
     src/main.cpp
     src/core/Application.h src/core/Application.cpp
     src/utils/PathProvider.h src/utils/PathProvider.cpp
