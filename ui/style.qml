@@ -26,6 +26,18 @@ ApplicationWindow {
     property bool repeatOne: false
     property var fullPlaylistTracks: []
     property int loadedTracksCount: 0
+    property var streamUrlCache: ({})
+
+    function preResolveNext() {
+        var model = currentView === "search" ? (searchModel.count > 0 ? searchModel : historyModel) : libraryModel
+        if (currentTrackIndex + 1 < model.count) {
+            var nextTrack = model.get(currentTrackIndex + 1)
+            var service = nextTrack.service || (nextTrack.coverUrl && nextTrack.coverUrl.indexOf("yandex") !== -1 ? "Yandex" : "SoundCloud")
+            if (!streamUrlCache[nextTrack.id]) {
+                MorphServices.resolve(service, nextTrack.id)
+            }
+        }
+    }
 
     Component.onCompleted: {
         var yToken = MorphSettings.getYandexToken()
@@ -117,10 +129,17 @@ ApplicationWindow {
         }
         currentTrack = cleanTrack
         currentTrackIndex = index
-        MorphServices.resolve(cleanTrack.service, cleanTrack.id)
+        
+        if (streamUrlCache[cleanTrack.id]) {
+            MorphAudio.play(streamUrlCache[cleanTrack.id])
+        } else {
+            MorphServices.resolve(cleanTrack.service, cleanTrack.id)
+            MorphAudio.play("")
+        }
+
         MorphServices.reportPlay(cleanTrack.service, cleanTrack.id, cleanTrack.album)
         MorphMpris.updateMetadata(cleanTrack)
-        MorphAudio.play("")
+        preResolveNext()
     }
 
     function playNext() {
@@ -860,8 +879,11 @@ ApplicationWindow {
             if (libraryModel.count > 0) playTrack(libraryModel.get(0), 0)
         }
         function onStreamUrlReady(trackId, streamUrl) {
-            MorphAudio.play(streamUrl)
-            if (currentTrackIndex === -1) { var oldPos = MorphAudio.position; MorphAudio.pause(); MorphAudio.position = oldPos }
+            streamUrlCache[trackId] = streamUrl
+            if (currentTrack && currentTrack.id === trackId) {
+                MorphAudio.play(streamUrl)
+                if (currentTrackIndex === -1) { var oldPos = MorphAudio.position; MorphAudio.pause(); MorphAudio.position = oldPos }
+            }
         }
         function onPlaylistImported(name, coverUrl, tracks) {
             MorphSettings.createPlaylistWithTracks(name, coverUrl, tracks)
