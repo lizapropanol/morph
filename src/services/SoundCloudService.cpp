@@ -76,6 +76,19 @@ void SoundCloudService::reportPlay(const QString& trackId, const QString& albumI
 void SoundCloudService::importPlaylist(const QString& url) {
     if (m_token.isEmpty()) return;
 
+    if (url.contains("on.soundcloud.com")) {
+        net->get(QUrl(url), "", [this](QNetworkReply* reply) {
+            QUrl redirectedUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            if (redirectedUrl.isValid()) {
+                QString finalUrl = reply->url().resolved(redirectedUrl).toString();
+                importPlaylist(finalUrl);
+            } else {
+                importPlaylist(reply->url().toString());
+            }
+        });
+        return;
+    }
+
     QUrl apiUrl("https://api-v2.soundcloud.com/resolve");
     QUrlQuery q;
     q.addQueryItem("url", url);
@@ -100,25 +113,69 @@ void SoundCloudService::importPlaylist(const QString& url) {
         QString coverUrl = result["artwork_url"].toString().replace("-large", "-t500x500");
         QJsonArray tracks = result["tracks"].toArray();
         
-        QVariantList tracksList;
+        QStringList allTrackIds;
         for (const QJsonValue& val : tracks) {
-            QJsonObject obj = val.toObject();
-            TrackData track;
-            track.id = QString::number(obj["id"].toInt());
-            track.title = obj["title"].toString();
-            
-            QJsonObject pub = obj["publisher_metadata"].toObject();
-            if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {
-                track.artist = pub["artist"].toString();
-            } else {
-                track.artist = obj["user"].toObject()["username"].toString();
-            }
-            
-            track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
-            track.service = "SoundCloud";
-            tracksList.append(track.toVariantMap());
+            QString tid = val.toObject()["id"].toVariant().toString();
+            if (!tid.isEmpty()) allTrackIds.append(tid);
         }
-        emit playlistImported(name, coverUrl, tracksList);
+
+        if (allTrackIds.isEmpty()) {
+            emit errorOccurred("Playlist is empty");
+            return;
+        }
+
+        fetchPlaylistTracksMetadata(name, coverUrl, allTrackIds);
+    });
+}
+
+void SoundCloudService::fetchPlaylistTracksMetadata(const QString& playlistName, const QString& coverUrl, const QStringList& trackIds) {
+    auto remainingIds = new QStringList(trackIds);
+    auto allTracks = new QVariantList();
+    fetchNextPlaylistChunk(playlistName, coverUrl, remainingIds, allTracks);
+}
+
+void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, const QString& coverUrl, QStringList* remainingIds, QVariantList* allTracks) {
+    if (remainingIds->isEmpty()) {
+        emit playlistImported(playlistName, coverUrl, *allTracks);
+        delete remainingIds;
+        delete allTracks;
+        return;
+    }
+
+    int chunkSize = 50;
+    QStringList currentChunk;
+    for (int i = 0; i < chunkSize && !remainingIds->isEmpty(); ++i) {
+        currentChunk.append(remainingIds->takeFirst());
+    }
+
+    QUrl url("https://api-v2.soundcloud.com/tracks");
+    QUrlQuery q;
+    q.addQueryItem("ids", currentChunk.join(","));
+    q.addQueryItem("client_id", m_token);
+    url.setQuery(q);
+
+    net->get(url, "", [this, playlistName, coverUrl, remainingIds, allTracks](QNetworkReply* reply) {
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonArray results = QJsonDocument::fromJson(reply->readAll()).array();
+            for (const QJsonValue& val : results) {
+                QJsonObject obj = val.toObject();
+                TrackData track;
+                track.id = obj["id"].toVariant().toString();
+                track.title = obj["title"].toString();
+                
+                QJsonObject pub = obj["publisher_metadata"].toObject();
+                if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {
+                    track.artist = pub["artist"].toString();
+                } else {
+                    track.artist = obj["user"].toObject()["username"].toString();
+                }
+                
+                track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
+                track.service = "SoundCloud";
+                allTracks->append(track.toVariantMap());
+            }
+        }
+        fetchNextPlaylistChunk(playlistName, coverUrl, remainingIds, allTracks);
     });
 }
 
