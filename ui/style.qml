@@ -6,8 +6,10 @@ import QtGraphicalEffects 1.15
 ApplicationWindow {
     id: window
     visible: true
-    width: 950
-    height: 650
+    width: 1280
+    height: 720
+    minimumWidth: 600
+    minimumHeight: 320
     title: "morph"
     color: "black"
 
