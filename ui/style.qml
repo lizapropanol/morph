@@ -244,113 +244,124 @@ ApplicationWindow {
                         }
 
                         Item {
-                            ColumnLayout {
-                                anchors.fill: parent; anchors.margins: 35; spacing: 35
+                            Flickable {
+                                id: homeFlickable
+                                anchors.fill: parent; contentHeight: homeContent.height + 70; clip: true
+                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
                                 
-                                Rectangle {
-                                    id: vibeCard
-                                    Layout.fillWidth: true; Layout.preferredHeight: 180; radius: 25
-                                    clip: true; border.color: "#333"; border.width: 1
-                                    color: "#1a1a1a"
-                                    
-                                    ColumnLayout {
-                                        anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter; anchors.margins: 30; spacing: 5
-                                        Text { text: "MY VIBE"; color: "white"; font.family: "Rubik"; font.pixelSize: 28; font.weight: Font.Black }
-                                        Text { 
-                                            text: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "PLAYING NOW" : "PERSONALIZED WAVE"
-                                            color: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "#44ff44" : "white"
-                                            font.family: "Rubik"; font.pixelSize: 14; opacity: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 1.0 : 0.8 
-                                            font.weight: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? Font.Bold : Font.Normal
-                                        }
-                                    }
+                                ColumnLayout {
+                                    id: homeContent
+                                    width: homeFlickable.width - 70
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top; anchors.topMargin: 35
+                                    spacing: 35
                                     
                                     Rectangle {
-                                        anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; anchors.margins: 30
-                                        width: 64; height: 64; radius: 32; color: "#333"
-                                        Image {
-                                            anchors.centerIn: parent; 
-                                            source: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "assets/pause.svg" : "assets/play.svg"
-                                            Layout.preferredWidth: 32; Layout.preferredHeight: 32
-                                            layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                        id: vibeCard
+                                        Layout.fillWidth: true; Layout.preferredHeight: 180; radius: 25
+                                        clip: true; border.color: "#333"; border.width: 1
+                                        color: "#1a1a1a"
+                                        
+                                        ColumnLayout {
+                                            anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter; anchors.margins: 30; spacing: 5
+                                            Text { text: "MY VIBE"; color: "white"; font.family: "Rubik"; font.pixelSize: 28; font.weight: Font.Black }
+                                            Text { 
+                                                text: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "PLAYING NOW" : "PERSONALIZED WAVE"
+                                                color: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "#44ff44" : "white"
+                                                font.family: "Rubik"; font.pixelSize: 14; opacity: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 1.0 : 0.8 
+                                                font.weight: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? Font.Bold : Font.Normal
+                                            }
                                         }
-                                        MouseArea { 
-                                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor; 
-                                            onClicked: {
-                                                if (currentPlaylist === "MY_VIBE") {
-                                                    MorphAudio.isPlaying ? MorphAudio.pause() : MorphAudio.resume()
-                                                } else {
-                                                    MorphServices.getWave()
+                                        
+                                        Rectangle {
+                                            anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; anchors.margins: 30
+                                            width: 64; height: 64; radius: 32; color: "#333"
+                                            Image {
+                                                anchors.centerIn: parent; 
+                                                source: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "assets/pause.svg" : "assets/play.svg"
+                                                Layout.preferredWidth: 32; Layout.preferredHeight: 32
+                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            }
+                                            MouseArea { 
+                                                anchors.fill: parent; cursorShape: Qt.PointingHandCursor; 
+                                                onClicked: {
+                                                    if (currentPlaylist === "MY_VIBE") {
+                                                        MorphAudio.isPlaying ? MorphAudio.pause() : MorphAudio.resume()
+                                                    } else {
+                                                        MorphServices.getWave()
+                                                    }
                                                 }
                                             }
                                         }
                                     }
-                                }
 
-                                ColumnLayout {
-                                    Layout.fillWidth: true; Layout.fillHeight: true; spacing: 20
-                                    Text { text: "CHARTS"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Black }
-                                    ListView {
-                                        Layout.fillWidth: true; Layout.fillHeight: true; clip: true
-                                        model: chartsModel.count > 0 ? Math.min(10, Math.ceil(chartsModel.count / 2)) : 0
-                                        delegate: RowLayout {
-                                            width: ListView.view.width; height: 54; spacing: 20
-                                            property var leftTrack: chartsModel.get(index)
-                                            property var rightTrack: (index + 10 < chartsModel.count) ? chartsModel.get(index + 10) : null
-                                            
-                                            ItemDelegate {
-                                                Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; hoverEnabled: true
-                                                background: Rectangle { color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#1a1a1a" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
-                                                contentItem: RowLayout {
-                                                    spacing: 15
-                                                    Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
-                                                    Image { 
-                                                        source: leftTrack ? (leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
-                                                        layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                    ColumnLayout {
+                                        Layout.fillWidth: true; spacing: 20
+                                        Text { text: "CHARTS"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Black }
+                                        ListView {
+                                            id: chartsListView
+                                            Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
+                                            model: chartsModel.count > 0 ? Math.min(10, Math.ceil(chartsModel.count / 2)) : 0
+                                            delegate: RowLayout {
+                                                width: chartsListView.width; height: 54; spacing: 20
+                                                property var leftTrack: chartsModel.get(index)
+                                                property var rightTrack: (index + 10 < chartsModel.count) ? chartsModel.get(index + 10) : null
+                                                
+                                                ItemDelegate {
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; hoverEnabled: true
+                                                    background: Rectangle { color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#1a1a1a" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
+                                                    contentItem: RowLayout {
+                                                        spacing: 15
+                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Image { 
+                                                            source: leftTrack ? (leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
+                                                            layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                                        }
+                                                        Column {
+                                                            Layout.fillWidth: true
+                                                            Text { text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { text: leftTrack ? leftTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                        }
                                                     }
-                                                    Column {
-                                                        Layout.fillWidth: true
-                                                        Text { text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                        Text { text: leftTrack ? leftTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                    MouseArea { 
+                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                        onClicked: if (leftTrack) {
+                                                            libraryModel.clear()
+                                                            for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
+                                                            playTrack(libraryModel.get(index), index)
+                                                        }
                                                     }
                                                 }
-                                                MouseArea { 
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onClicked: if (leftTrack) {
-                                                        libraryModel.clear()
-                                                        for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
-                                                        playTrack(libraryModel.get(index), index)
-                                                    }
-                                                }
-                                            }
 
-                                            ItemDelegate {
-                                                Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; hoverEnabled: true
-                                                visible: rightTrack !== null
-                                                background: Rectangle { color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#1a1a1a" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
-                                                contentItem: RowLayout {
-                                                    spacing: 15
-                                                    Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
-                                                    Image { 
-                                                        source: rightTrack ? (rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
-                                                        layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                                ItemDelegate {
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; hoverEnabled: true
+                                                    visible: rightTrack !== null
+                                                    background: Rectangle { color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#1a1a1a" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
+                                                    contentItem: RowLayout {
+                                                        spacing: 15
+                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Image { 
+                                                            source: rightTrack ? (rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
+                                                            layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                                        }
+                                                        Column {
+                                                            Layout.fillWidth: true
+                                                            Text { text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { text: rightTrack ? rightTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                        }
                                                     }
-                                                    Column {
-                                                        Layout.fillWidth: true
-                                                        Text { text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                        Text { text: rightTrack ? rightTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                    MouseArea { 
+                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                        onClicked: if (rightTrack) {
+                                                            libraryModel.clear()
+                                                            for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
+                                                            playTrack(libraryModel.get(index + 10), index + 10)
+                                                        }
                                                     }
                                                 }
-                                                MouseArea { 
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onClicked: if (rightTrack) {
-                                                        libraryModel.clear()
-                                                        for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
-                                                        playTrack(libraryModel.get(index + 10), index + 10)
-                                                    }
-                                                }
+                                                
+                                                Item { Layout.fillWidth: true; Layout.preferredWidth: 1; visible: rightTrack === null }
                                             }
-                                            
-                                            Item { Layout.fillWidth: true; Layout.preferredWidth: 1; visible: rightTrack === null }
                                         }
                                     }
                                 }
