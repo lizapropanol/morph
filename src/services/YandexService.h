@@ -14,9 +14,11 @@ public:
     void getCharts() override;
     void getWave() override;
     void reportPlay(const QString& trackId, const QString& albumId) override;
+    void importPlaylist(const QString& url) override;
 
 private:
     void fetchDownloadInfo(const QString& trackId, const QUrl& url);
+    QVariantList parseYandexTracks(const QJsonArray& tracksArray);
 
 private:
     NetworkManager* net;

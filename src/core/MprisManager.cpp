@@ -13,8 +13,6 @@ MprisManager::MprisManager(AudioEngine* audio, QObject* parent) : QObject(parent
     QDBusConnection::sessionBus().registerObject("/org/mpris/MediaPlayer2", this);
 }
 
-#include <QDebug>
-
 MprisPlayerAdaptor::MprisPlayerAdaptor(AudioEngine* audio, QObject* parent) 
     : QDBusAbstractAdaptor(parent), m_audio(audio) {
     
@@ -48,7 +46,6 @@ void MprisPlayerAdaptor::sendPropertiesChanged(const QString& propertyName, cons
 }
 
 void MprisPlayerAdaptor::updateMetadata(const QVariantMap& track) {
-    qDebug() << "MPRIS_UPDATE:" << track["title"] << track["artist"];
     m_metadata.clear();
     
     QString trackId = track["id"].toString();

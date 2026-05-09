@@ -18,6 +18,7 @@ public slots:
     void getWave();
     void resolve(const QString& serviceName, const QString& trackId);
     void reportPlay(const QString& serviceName, const QString& trackId, const QString& albumId);
+    void importPlaylist(const QString& url);
     void setYandexToken(const QString& token);
     void setSoundCloudClientId(const QString& clientId);
 
@@ -26,6 +27,8 @@ signals:
     void streamUrlReady(const QString& trackId, const QString& streamUrl);
     void chartsReady(const QString& serviceName, const QVariantList& tracks);
     void waveReady(const QString& serviceName, const QVariantList& tracks);
+    void playlistImported(const QString& name, const QString& coverUrl, const QVariantList& tracks);
+    void errorOccurred(const QString& message);
 
 private:
     NetworkManager* net;

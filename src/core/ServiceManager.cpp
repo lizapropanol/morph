@@ -20,6 +20,12 @@ ServiceManager::ServiceManager(QObject* parent) : QObject(parent) {
 
     connect(yandex, &BaseService::streamUrlReady, this, &ServiceManager::streamUrlReady);
     connect(soundcloud, &BaseService::streamUrlReady, this, &ServiceManager::streamUrlReady);
+
+    connect(yandex, &BaseService::playlistImported, this, &ServiceManager::playlistImported);
+    connect(soundcloud, &BaseService::playlistImported, this, &ServiceManager::playlistImported);
+
+    connect(yandex, &BaseService::errorOccurred, this, &ServiceManager::errorOccurred);
+    connect(soundcloud, &BaseService::errorOccurred, this, &ServiceManager::errorOccurred);
 }
 
 void ServiceManager::search(const QString& query, const QString& serviceName) {
@@ -54,6 +60,16 @@ void ServiceManager::reportPlay(const QString& serviceName, const QString& track
         yandex->reportPlay(trackId, albumId);
     } else if (serviceName == "SoundCloud") {
         soundcloud->reportPlay(trackId, albumId);
+    }
+}
+
+void ServiceManager::importPlaylist(const QString& url) {
+    if (url.contains("yandex")) {
+        yandex->importPlaylist(url);
+    } else if (url.contains("soundcloud")) {
+        soundcloud->importPlaylist(url);
+    } else {
+        emit errorOccurred("Unsupported URL. Use Yandex or SoundCloud.");
     }
 }
 

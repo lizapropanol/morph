@@ -4,12 +4,42 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QUrlQuery>
+#include <QRegularExpression>
 
 YandexService::YandexService(NetworkManager* network, QObject* parent) 
     : BaseService(parent), net(network) {}
 
 void YandexService::setToken(const QString& token) {
     m_token = token;
+}
+
+QVariantList YandexService::parseYandexTracks(const QJsonArray& tracks) {
+    QVariantList tracksList;
+    for (const QJsonValue& val : tracks) {
+        QJsonObject trackObj = val.isObject() && val.toObject().contains("track") ? val.toObject()["track"].toObject() : val.toObject();
+        if (trackObj.isEmpty()) continue;
+        
+        TrackData track;
+        track.id = trackObj["id"].toVariant().toString();
+        track.title = trackObj["title"].toString();
+        
+        QJsonArray artists = trackObj["artists"].toArray();
+        QStringList artistNames;
+        for (const QJsonValue& a : artists) artistNames.append(a.toObject()["name"].toString());
+        track.artist = artistNames.join(", ");
+        
+        QJsonArray albums = trackObj["albums"].toArray();
+        if (!albums.isEmpty()) {
+            track.album = QString::number(albums[0].toObject()["id"].toInt());
+            QString coverUri = albums[0].toObject()["coverUri"].toString();
+            if (!coverUri.isEmpty()) track.coverUrl = "https://" + coverUri.replace("%%", "400x400");
+        } else if (trackObj.contains("coverUri")) {
+            track.coverUrl = "https://" + trackObj["coverUri"].toString().replace("%%", "400x400");
+        }
+        track.service = "Yandex";
+        tracksList.append(track.toVariantMap());
+    }
+    return tracksList;
 }
 
 void YandexService::search(const QString& query) {
@@ -25,37 +55,12 @@ void YandexService::search(const QString& query) {
 
     net->get(url, m_token, [this](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) {
-            qCritical() << "YANDEX_ERROR:" << reply->errorString();
             return;
         }
 
         QByteArray data = reply->readAll();
-        qDebug() << "YANDEX_DATA:" << data;
-
-        QJsonDocument doc = QJsonDocument::fromJson(data);
-        QJsonArray tracks = doc.object()["result"].toObject()["tracks"].toObject()["results"].toArray();
-        
-        QVariantList results;
-        for (const QJsonValue& value : tracks) {
-            QJsonObject obj = value.toObject();
-            TrackData track;
-            track.id = QString::number(obj["id"].toInt());
-            track.title = obj["title"].toString();
-            
-            QJsonArray artists = obj["artists"].toArray();
-            QStringList artistNames;
-            for (const QJsonValue& a : artists) artistNames.append(a.toObject()["name"].toString());
-            track.artist = artistNames.join(", ");
-            
-            QJsonArray albums = obj["albums"].toArray();
-            if (!albums.isEmpty()) {
-                track.album = QString::number(albums[0].toObject()["id"].toInt());
-            }
-            
-            track.coverUrl = "https://" + obj["coverUri"].toString().replace("%%", "400x400");
-            results.append(track.toVariantMap());
-        }
-        emit searchResultsReady("Yandex", results);
+        QJsonArray tracks = QJsonDocument::fromJson(data).object()["result"].toObject()["tracks"].toObject()["results"].toArray();
+        emit searchResultsReady("Yandex", parseYandexTracks(tracks));
     });
 }
 
@@ -65,40 +70,8 @@ void YandexService::getCharts() {
     QUrl url("https://api.music.yandex.net/users/414787002/playlists/1076");
     net->get(url, m_token, [this](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
-
-        QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        QJsonArray tracks = doc.object()["result"].toObject()["tracks"].toArray();
-        if (tracks.isEmpty()) return;
-
-        QVariantList results;
-        for (const QJsonValue& val : tracks) {
-            QJsonObject trackObj = val.toObject()["track"].toObject();
-            if (trackObj.isEmpty()) continue;
-            
-            TrackData track;
-            track.id = QString::number(trackObj["id"].toInt());
-            if (track.id == "0") track.id = trackObj["id"].toString();
-            track.title = trackObj["title"].toString();
-            
-            QJsonArray artists = trackObj["artists"].toArray();
-            QStringList artistNames;
-            for (const QJsonValue& a : artists) artistNames.append(a.toObject()["name"].toString());
-            track.artist = artistNames.join(", ");
-            
-            QJsonArray albums = trackObj["albums"].toArray();
-            if (!albums.isEmpty()) {
-                track.album = QString::number(albums[0].toObject()["id"].toInt());
-                QString coverUri = albums[0].toObject()["coverUri"].toString();
-                if (!coverUri.isEmpty()) {
-                    track.coverUrl = "https://" + coverUri.replace("%%", "400x400");
-                }
-            } else if (trackObj.contains("coverUri")) {
-                track.coverUrl = "https://" + trackObj["coverUri"].toString().replace("%%", "400x400");
-            }
-            
-            results.append(track.toVariantMap());
-        }
-        emit chartsReady("Yandex", results);
+        QJsonArray tracks = QJsonDocument::fromJson(reply->readAll()).object()["result"].toObject()["tracks"].toArray();
+        emit chartsReady("Yandex", parseYandexTracks(tracks));
     });
 }
 
@@ -108,40 +81,64 @@ void YandexService::getWave() {
     QUrl url("https://api.music.yandex.net/rotor/station/user:onyourwave/tracks");
     net->get(url, m_token, [this](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
-
-        QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        QJsonArray sequence = doc.object()["result"].toObject()["sequence"].toArray();
-        
-        QVariantList results;
-        for (const QJsonValue& val : sequence) {
-            QJsonObject trackObj = val.toObject()["track"].toObject();
-            if (trackObj.isEmpty()) continue;
-
-            TrackData track;
-            track.id = QString::number(trackObj["id"].toInt());
-            if (track.id == "0") track.id = trackObj["id"].toString();
-            track.title = trackObj["title"].toString();
-            
-            QJsonArray artists = trackObj["artists"].toArray();
-            QStringList artistNames;
-            for (const QJsonValue& a : artists) artistNames.append(a.toObject()["name"].toString());
-            track.artist = artistNames.join(", ");
-            
-            QJsonArray albums = trackObj["albums"].toArray();
-            if (!albums.isEmpty()) {
-                track.album = QString::number(albums[0].toObject()["id"].toInt());
-                QString coverUri = albums[0].toObject()["coverUri"].toString();
-                if (!coverUri.isEmpty()) {
-                    track.coverUrl = "https://" + coverUri.replace("%%", "400x400");
-                }
-            } else if (trackObj.contains("coverUri")) {
-                track.coverUrl = "https://" + trackObj["coverUri"].toString().replace("%%", "400x400");
-            }
-            
-            results.append(track.toVariantMap());
-        }
-        emit waveReady("Yandex", results);
+        QJsonArray sequence = QJsonDocument::fromJson(reply->readAll()).object()["result"].toObject()["sequence"].toArray();
+        emit waveReady("Yandex", parseYandexTracks(sequence));
     });
+}
+
+void YandexService::importPlaylist(const QString& url) {
+    if (m_token.isEmpty()) return;
+
+    QRegularExpression classicRe("users/([^/]+)/playlists/(\\d+)");
+    QRegularExpression sharedRe("playlists/([a-zA-Z0-9\\.-]+)");
+    
+    QRegularExpressionMatch classicMatch = classicRe.match(url);
+    QRegularExpressionMatch sharedMatch = sharedRe.match(url);
+
+    if (classicMatch.hasMatch()) {
+        QString user = classicMatch.captured(1);
+        QString id = classicMatch.captured(2);
+        QUrl apiUrl(QString("https://api.music.yandex.net/users/%1/playlists/%2").arg(user, id));
+        net->get(apiUrl, m_token, [this](QNetworkReply* reply) {
+            if (reply->error() != QNetworkReply::NoError) {
+                emit errorOccurred("Yandex API Error: " + reply->errorString());
+                return;
+            }
+            QJsonObject result = QJsonDocument::fromJson(reply->readAll()).object()["result"].toObject();
+            QString name = result["title"].toString();
+            QString coverUrl = "";
+            if (result.contains("cover")) coverUrl = "https://" + result["cover"].toObject()["uri"].toString().replace("%%", "400x400");
+            else if (result.contains("ogImage")) coverUrl = "https://" + result["ogImage"].toString().replace("%%", "400x400");
+            emit playlistImported(name, coverUrl, parseYandexTracks(result["tracks"].toArray()));
+        });
+    } else if (sharedMatch.hasMatch()) {
+        QString uuid = sharedMatch.captured(1);
+
+        QUrl apiUrl(QString("https://api.music.yandex.net/playlist/%1").arg(uuid));
+        QUrlQuery q;
+        q.addQueryItem("rich-tracks", "true");
+        apiUrl.setQuery(q);
+
+        net->get(apiUrl, m_token, [this, apiUrl](QNetworkReply* reply) {
+            if (reply->error() != QNetworkReply::NoError) {
+                QByteArray body = reply->readAll();
+                emit errorOccurred(QString("Yandex API Error: %1\nURL: %2\nResponse: %3").arg(reply->errorString(), apiUrl.toString(), QString(body)));
+                return;
+            }
+            QJsonObject result = QJsonDocument::fromJson(reply->readAll()).object()["result"].toObject();
+            if (result.isEmpty()) {
+                emit errorOccurred("Playlist not found (UUID)");
+                return;
+            }
+            QString name = result["title"].toString();
+            QString coverUrl = "";
+            if (result.contains("cover")) coverUrl = "https://" + result["cover"].toObject()["uri"].toString().replace("%%", "400x400");
+            else if (result.contains("ogImage")) coverUrl = "https://" + result["ogImage"].toString().replace("%%", "400x400");
+            emit playlistImported(name, coverUrl, parseYandexTracks(result["tracks"].toArray()));
+        });
+    } else {
+        emit errorOccurred("Invalid Yandex Music playlist URL");
+    }
 }
 
 void YandexService::resolveStreamUrl(const QString& trackId) {
@@ -183,9 +180,7 @@ void YandexService::reportPlay(const QString& trackId, const QString& albumId) {
 
     net->post(url, q.toString(QUrl::FullyEncoded).toUtf8(), m_token, [](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) {
-            qWarning() << "Yandex Play Report Failed:" << reply->errorString() << "Body:" << reply->readAll();
         } else {
-            qDebug() << "Yandex Play Report OK";
         }
     });
 }

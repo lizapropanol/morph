@@ -24,6 +24,8 @@ ApplicationWindow {
     property int likesVersion: 0
     property int playlistsVersion: 0
     property bool repeatOne: false
+    property var fullPlaylistTracks: []
+    property int loadedTracksCount: 0
 
     Component.onCompleted: {
         var yToken = MorphSettings.getYandexToken()
@@ -64,19 +66,44 @@ ApplicationWindow {
     function openPlaylist(name) {
         currentPlaylist = name
         libraryModel.clear()
+        fullPlaylistTracks = []
+        loadedTracksCount = 0
         if (name === "LIKED") {
             currentPlaylist = ""
             var likes = MorphSettings.getLikedTracks()
-            for(var i = likes.length - 1; i >= 0; i--) libraryModel.append(likes[i])
+            for(var i = likes.length - 1; i >= 0; i--) {
+                var item = likes[i]
+                if (!item.service) item.service = "Yandex"
+                fullPlaylistTracks.push(item)
+            }
         } else {
             var pls = MorphSettings.getPlaylists()
             var pData = pls[name]
             if (pData) {
-                var tracks = pData.tracks || (Array.isArray(pData) ? pData : [])
-                for (var i = 0; i < tracks.length; i++) libraryModel.append(tracks[i])
+                var ts = pData.tracks || (Array.isArray(pData) ? pData : [])
+                for (var i = 0; i < ts.length; i++) {
+                    var t = ts[i]
+                    if (!t.service) {
+                        if (t.coverUrl && t.coverUrl.indexOf("yandex") !== -1) t.service = "Yandex"
+                        else if (t.coverUrl && t.coverUrl.indexOf("sndcdn") !== -1) t.service = "SoundCloud"
+                        else t.service = "Yandex"
+                    }
+                    fullPlaylistTracks.push(t)
+                }
             }
         }
+        loadNextChunk()
         librarySubView = "tracks"
+        libraryFlickable.contentY = 0
+    }
+
+    function loadNextChunk() {
+        if (loadedTracksCount >= fullPlaylistTracks.length) return
+        var limit = Math.min(loadedTracksCount + 100, fullPlaylistTracks.length)
+        for (var i = loadedTracksCount; i < limit; i++) {
+            libraryModel.append(fullPlaylistTracks[i])
+        }
+        loadedTracksCount = limit
     }
 
     function playTrack(track, index) {
@@ -86,7 +113,7 @@ ApplicationWindow {
             artist: track.artist,
             album: track.album || "",
             coverUrl: track.coverUrl,
-            service: track.service
+            service: track.service || (track.coverUrl && track.coverUrl.indexOf("yandex") !== -1 ? "Yandex" : "SoundCloud")
         }
         currentTrack = cleanTrack
         currentTrackIndex = index
@@ -389,6 +416,7 @@ ApplicationWindow {
                                 id: libraryFlickable
                                 anchors.fill: parent; contentHeight: libraryContent.height + 70; clip: true
                                 ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                                onAtYEndChanged: if (atYEnd && librarySubView === "tracks") loadNextChunk()
 
                                 ColumnLayout {
                                     id: libraryContent
@@ -410,15 +438,24 @@ ApplicationWindow {
                                                 Layout.fillWidth: true
                                                 Text { text: "LIBRARY"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Black }
                                                 Item { Layout.fillWidth: true }
-                                                Button {
-                                                    text: "NEW PLAYLIST"
-                                                    onClicked: createPlaylistPopup.open()
-                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                    background: Rectangle { color: "#333"; radius: 6 }
+                                                RowLayout {
+                                                    spacing: 10
+                                                    Button {
+                                                        text: "IMPORT"
+                                                        onClicked: importPlaylistPopup.open()
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                        contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        background: Rectangle { color: "#444"; radius: 6 }
+                                                    }
+                                                    Button {
+                                                        text: "NEW PLAYLIST"
+                                                        onClicked: createPlaylistPopup.open()
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                        contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        background: Rectangle { color: "#333"; radius: 6 }
+                                                    }
                                                 }
-                                            }
-                                            
+                                            }                                            
                                             GridView {
                                                 id: libraryGridView
                                                 Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
@@ -826,6 +863,15 @@ ApplicationWindow {
             MorphAudio.play(streamUrl)
             if (currentTrackIndex === -1) { var oldPos = MorphAudio.position; MorphAudio.pause(); MorphAudio.position = oldPos }
         }
+        function onPlaylistImported(name, coverUrl, tracks) {
+            MorphSettings.createPlaylistWithTracks(name, coverUrl, tracks)
+            importPlaylistPopup.isBusy = false
+            importPlaylistPopup.close()
+        }
+        function onErrorOccurred(message) {
+            importPlaylistPopup.isBusy = false
+            importPlaylistPopup.errorMsg = message
+        }
     }
     
     Connections {
@@ -940,5 +986,70 @@ ApplicationWindow {
                 }
             }
         }
+    }
+
+    Popup {
+        id: importPlaylistPopup
+        parent: Overlay.overlay
+        x: (parent.width - width) / 2; y: (parent.height - height) / 2
+        width: 450; height: 280; modal: true; focus: true
+        background: Rectangle { color: "#1a1a1a"; radius: 12; border.color: "#333" }
+        
+        property bool isBusy: false
+        property string errorMsg: ""
+
+        ColumnLayout {
+            anchors.fill: parent; anchors.margins: 20; spacing: 15
+            Text { text: "IMPORT PLAYLIST"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold }
+            
+            TextField {
+                id: importUrlField; placeholderText: "YANDEX OR SOUNDCLOUD URL"; Layout.fillWidth: true
+                color: "white"; font.family: "Rubik"; font.pixelSize: 12; padding: 10; enabled: !importPlaylistPopup.isBusy
+                background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
+            }
+
+            ScrollView {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                visible: importPlaylistPopup.errorMsg !== ""
+                clip: true
+                TextArea {
+                    text: importPlaylistPopup.errorMsg; color: "#ff4444"; font.family: "Rubik"; font.pixelSize: 10
+                    readOnly: true; selectByMouse: true; wrapMode: Text.Wrap
+                    background: Rectangle { color: "#100000"; radius: 4; border.color: "#300" }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true; spacing: 15
+                BusyIndicator { 
+                    running: importPlaylistPopup.isBusy; visible: running
+                    Layout.preferredWidth: 30; Layout.preferredHeight: 30
+                }
+                Item { Layout.fillWidth: true }
+                Button {
+                    text: "IMPORT"; Layout.preferredWidth: 100; Layout.preferredHeight: 40
+                    visible: !importPlaylistPopup.isBusy
+                    onClicked: {
+                        if (importUrlField.text !== "") {
+                            importPlaylistPopup.isBusy = true
+                            importPlaylistPopup.errorMsg = ""
+                            MorphServices.importPlaylist(importUrlField.text)
+                        }
+                    }
+                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                    contentItem: Text { text: parent.text; color: "black"; font.family: "Rubik"; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    background: Rectangle { color: "white"; radius: 6 }
+                }
+                Button {
+                    text: "CANCEL"; Layout.preferredWidth: 100; Layout.preferredHeight: 40
+                    visible: !importPlaylistPopup.isBusy
+                    onClicked: importPlaylistPopup.close()
+                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                    contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    background: Rectangle { color: "#333"; radius: 6 }
+                }
+            }
+        }
+        onClosed: { importPlaylistPopup.isBusy = false; importPlaylistPopup.errorMsg = ""; importUrlField.text = "" }
     }
 }

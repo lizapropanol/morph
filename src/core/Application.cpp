@@ -23,8 +23,6 @@ void Application::start() {
     connect(engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *obj, const QUrl &objUrl) {
         if (!obj && objUrl == QUrl::fromLocalFile(PathProvider::getStyleFilePath())) {
             qCritical() << "MORPH_ERROR: Could not load QML file!" << objUrl;
-        } else if (obj) {
-            qDebug() << "MORPH_DEBUG: QML loaded successfully!";
         }
     }, Qt::QueuedConnection);
 

@@ -55,6 +55,7 @@ void SoundCloudService::search(const QString& query) {
                 }
             }
             
+            track.service = "SoundCloud";
             results.append(track.toVariantMap());
         }
         emit searchResultsReady("SoundCloud", results);
@@ -70,6 +71,55 @@ void SoundCloudService::getWave() {
 }
 
 void SoundCloudService::reportPlay(const QString& trackId, const QString& albumId) {
+}
+
+void SoundCloudService::importPlaylist(const QString& url) {
+    if (m_token.isEmpty()) return;
+
+    QUrl apiUrl("https://api-v2.soundcloud.com/resolve");
+    QUrlQuery q;
+    q.addQueryItem("url", url);
+    q.addQueryItem("client_id", m_token);
+    apiUrl.setQuery(q);
+
+    net->get(apiUrl, "", [this](QNetworkReply* reply) {
+        if (reply->error() != QNetworkReply::NoError) {
+            emit errorOccurred("SoundCloud API Error: " + reply->errorString());
+            return;
+        }
+        
+        QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+        QJsonObject result = doc.object();
+        
+        if (result["kind"].toString() != "playlist") {
+            emit errorOccurred("Invalid SoundCloud URL or not a playlist");
+            return;
+        }
+
+        QString name = result["title"].toString();
+        QString coverUrl = result["artwork_url"].toString().replace("-large", "-t500x500");
+        QJsonArray tracks = result["tracks"].toArray();
+        
+        QVariantList tracksList;
+        for (const QJsonValue& val : tracks) {
+            QJsonObject obj = val.toObject();
+            TrackData track;
+            track.id = QString::number(obj["id"].toInt());
+            track.title = obj["title"].toString();
+            
+            QJsonObject pub = obj["publisher_metadata"].toObject();
+            if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {
+                track.artist = pub["artist"].toString();
+            } else {
+                track.artist = obj["user"].toObject()["username"].toString();
+            }
+            
+            track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
+            track.service = "SoundCloud";
+            tracksList.append(track.toVariantMap());
+        }
+        emit playlistImported(name, coverUrl, tracksList);
+    });
 }
 
 void SoundCloudService::resolveStreamUrl(const QString& trackId) {

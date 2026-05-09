@@ -16,6 +16,7 @@ public:
     void getCharts() override;
     void getWave() override;
     void reportPlay(const QString& trackId, const QString& albumId) override;
+    void importPlaylist(const QString& url) override;
 
 private:
     void fetchStreamUrl(const QString& trackId, const QString& transcodingUrl);

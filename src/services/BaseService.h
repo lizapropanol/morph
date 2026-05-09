@@ -14,12 +14,15 @@ public:
     virtual void getCharts() = 0;
     virtual void getWave() = 0;
     virtual void reportPlay(const QString& trackId, const QString& albumId) = 0;
+    virtual void importPlaylist(const QString& url) = 0;
 
 signals:
     void searchResultsReady(const QString& serviceName, const QVariantList& results);
     void streamUrlReady(const QString& trackId, const QString& streamUrl);
     void chartsReady(const QString& serviceName, const QVariantList& tracks);
     void waveReady(const QString& serviceName, const QVariantList& tracks);
+    void playlistImported(const QString& name, const QString& coverUrl, const QVariantList& tracks);
+    void errorOccurred(const QString& message);
 };
 
 #endif

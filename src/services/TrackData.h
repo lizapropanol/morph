@@ -11,6 +11,7 @@ struct TrackData {
     QString album;
     QString coverUrl;
     QString streamUrl;
+    QString service;
 
     QVariantMap toVariantMap() const {
         QVariantMap map;
@@ -20,6 +21,7 @@ struct TrackData {
         map["album"] = album;
         map["coverUrl"] = coverUrl;
         map["streamUrl"] = streamUrl;
+        map["service"] = service;
         return map;
     }
 };

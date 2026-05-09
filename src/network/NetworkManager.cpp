@@ -17,10 +17,8 @@ void NetworkManager::get(const QUrl& url, const QString& token, std::function<vo
         request.setRawHeader("Authorization", "OAuth " + token.toUtf8());
     }
     
-    qDebug() << "NETWORK_GET:" << url.toString() << "TokenLen:" << token.length();
     QNetworkReply* reply = manager->get(request);
     connect(reply, &QNetworkReply::finished, [reply, callback, url]() {
-        qDebug() << "NETWORK_REPLY:" << url.toString() << "Status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         callback(reply);
         reply->deleteLater();
     });
@@ -38,10 +36,8 @@ void NetworkManager::post(const QUrl& url, const QByteArray& data, const QString
         request.setRawHeader("Authorization", "OAuth " + token.toUtf8());
     }
     
-    qDebug() << "NETWORK_POST:" << url.toString();
     QNetworkReply* reply = manager->post(request, data);
     connect(reply, &QNetworkReply::finished, [reply, callback, url]() {
-        qDebug() << "NETWORK_REPLY_POST:" << url.toString() << "Status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         callback(reply);
         reply->deleteLater();
     });

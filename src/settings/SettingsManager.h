@@ -22,6 +22,7 @@ public slots:
     QVariantList getLikedTracks();
 
     void createPlaylist(const QString& name, const QString& coverUrl = "");
+    void createPlaylistWithTracks(const QString& name, const QString& coverUrl, const QVariantList& tracks);
     void renamePlaylist(const QString& oldName, const QString& newName, const QString& coverUrl);
     void deletePlaylist(const QString& name);
     void addToPlaylist(const QString& playlistName, const QVariantMap& track);

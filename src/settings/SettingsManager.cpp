@@ -94,6 +94,21 @@ void SettingsManager::createPlaylist(const QString& name, const QString& coverUr
     }
 }
 
+void SettingsManager::createPlaylistWithTracks(const QString& name, const QString& coverUrl, const QVariantList& tracks) {
+    QJsonObject playlists = m_data["playlists"].toObject();
+    QJsonObject playlistData;
+    playlistData["coverUrl"] = coverUrl;
+    
+    QJsonArray tracksArray;
+    for (const QVariant& t : tracks) tracksArray.append(QJsonObject::fromVariantMap(t.toMap()));
+    playlistData["tracks"] = tracksArray;
+    
+    playlists[name] = playlistData;
+    m_data["playlists"] = playlists;
+    save();
+    emit playlistsChanged();
+}
+
 void SettingsManager::renamePlaylist(const QString& oldName, const QString& newName, const QString& coverUrl) {
     QJsonObject playlists = m_data["playlists"].toObject();
     if (playlists.contains(oldName)) {
