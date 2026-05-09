@@ -82,13 +82,14 @@ ApplicationWindow {
             id: track.id,
             title: track.title,
             artist: track.artist,
+            album: track.album || "",
             coverUrl: track.coverUrl,
             service: track.service
         }
         currentTrack = cleanTrack
         currentTrackIndex = index
         MorphServices.resolve(cleanTrack.service, cleanTrack.id)
-        MorphServices.reportPlay(cleanTrack.service, cleanTrack.id)
+        MorphServices.reportPlay(cleanTrack.service, cleanTrack.id, cleanTrack.album)
         MorphMpris.updateMetadata(cleanTrack)
         MorphAudio.play("")
     }

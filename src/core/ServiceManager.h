@@ -17,7 +17,7 @@ public slots:
     void getCharts();
     void getWave();
     void resolve(const QString& serviceName, const QString& trackId);
-    void reportPlay(const QString& serviceName, const QString& trackId);
+    void reportPlay(const QString& serviceName, const QString& trackId, const QString& albumId);
     void setYandexToken(const QString& token);
     void setSoundCloudClientId(const QString& clientId);
 

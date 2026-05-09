@@ -47,6 +47,11 @@ void YandexService::search(const QString& query) {
             for (const QJsonValue& a : artists) artistNames.append(a.toObject()["name"].toString());
             track.artist = artistNames.join(", ");
             
+            QJsonArray albums = obj["albums"].toArray();
+            if (!albums.isEmpty()) {
+                track.album = QString::number(albums[0].toObject()["id"].toInt());
+            }
+            
             track.coverUrl = "https://" + obj["coverUri"].toString().replace("%%", "400x400");
             results.append(track.toVariantMap());
         }
@@ -82,6 +87,7 @@ void YandexService::getCharts() {
             
             QJsonArray albums = trackObj["albums"].toArray();
             if (!albums.isEmpty()) {
+                track.album = QString::number(albums[0].toObject()["id"].toInt());
                 QString coverUri = albums[0].toObject()["coverUri"].toString();
                 if (!coverUri.isEmpty()) {
                     track.coverUrl = "https://" + coverUri.replace("%%", "400x400");
@@ -123,6 +129,7 @@ void YandexService::getWave() {
             
             QJsonArray albums = trackObj["albums"].toArray();
             if (!albums.isEmpty()) {
+                track.album = QString::number(albums[0].toObject()["id"].toInt());
                 QString coverUri = albums[0].toObject()["coverUri"].toString();
                 if (!coverUri.isEmpty()) {
                     track.coverUrl = "https://" + coverUri.replace("%%", "400x400");
@@ -157,25 +164,28 @@ void YandexService::resolveStreamUrl(const QString& trackId) {
 #include <QXmlStreamReader>
 #include <QDateTime>
 
-void YandexService::reportPlay(const QString& trackId) {
+void YandexService::reportPlay(const QString& trackId, const QString& albumId) {
     if (m_token.isEmpty()) return;
 
     QUrl url("https://api.music.yandex.net/play-audio");
-    QString timestamp = QDateTime::currentDateTimeUtc().toString(Qt::ISODate) + "Z";
+    QString timestamp = QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
     
     QUrlQuery q;
     q.addQueryItem("track-id", trackId);
-    q.addQueryItem("from", "desktop_win");
-    q.addQueryItem("play-id", "morph-play-" + QString::number(QDateTime::currentMSecsSinceEpoch()));
+    if (!albumId.isEmpty() && albumId != "0") q.addQueryItem("album-id", albumId);
+    q.addQueryItem("from", "desktop-win");
+    q.addQueryItem("play-id", QString::number(QDateTime::currentMSecsSinceEpoch()) + "-morph");
     q.addQueryItem("timestamp", timestamp);
     q.addQueryItem("client-now", timestamp);
-    q.addQueryItem("total-played-seconds", "30");
+    q.addQueryItem("track-length-seconds", "180");
+    q.addQueryItem("total-played-seconds", "0");
+    q.addQueryItem("end-position-seconds", "0");
 
-    net->post(url, q.toString().toUtf8(), m_token, [](QNetworkReply* reply) {
+    net->post(url, q.toString(QUrl::FullyEncoded).toUtf8(), m_token, [](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) {
-            qWarning() << "Yandex Play Report Failed:" << reply->errorString();
+            qWarning() << "Yandex Play Report Failed:" << reply->errorString() << "Body:" << reply->readAll();
         } else {
-            qDebug() << "Yandex Play Report OK:" << reply->readAll();
+            qDebug() << "Yandex Play Report OK";
         }
     });
 }

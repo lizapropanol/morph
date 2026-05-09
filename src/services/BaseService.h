@@ -13,7 +13,7 @@ public:
     virtual void resolveStreamUrl(const QString& trackId) = 0;
     virtual void getCharts() = 0;
     virtual void getWave() = 0;
-    virtual void reportPlay(const QString& trackId) = 0;
+    virtual void reportPlay(const QString& trackId, const QString& albumId) = 0;
 
 signals:
     void searchResultsReady(const QString& serviceName, const QVariantList& results);

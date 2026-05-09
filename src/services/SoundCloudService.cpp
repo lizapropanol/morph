@@ -69,7 +69,7 @@ void SoundCloudService::getWave() {
     emit waveReady("SoundCloud", QVariantList());
 }
 
-void SoundCloudService::reportPlay(const QString& trackId) {
+void SoundCloudService::reportPlay(const QString& trackId, const QString& albumId) {
 }
 
 void SoundCloudService::resolveStreamUrl(const QString& trackId) {

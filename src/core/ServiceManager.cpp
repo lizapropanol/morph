@@ -49,11 +49,11 @@ void ServiceManager::resolve(const QString& serviceName, const QString& trackId)
     }
 }
 
-void ServiceManager::reportPlay(const QString& serviceName, const QString& trackId) {
+void ServiceManager::reportPlay(const QString& serviceName, const QString& trackId, const QString& albumId) {
     if (serviceName == "Yandex") {
-        yandex->reportPlay(trackId);
+        yandex->reportPlay(trackId, albumId);
     } else if (serviceName == "SoundCloud") {
-        soundcloud->reportPlay(trackId);
+        soundcloud->reportPlay(trackId, albumId);
     }
 }
 

@@ -13,7 +13,7 @@ public:
     void resolveStreamUrl(const QString& trackId) override;
     void getCharts() override;
     void getWave() override;
-    void reportPlay(const QString& trackId) override;
+    void reportPlay(const QString& trackId, const QString& albumId) override;
 
 private:
     void fetchDownloadInfo(const QString& trackId, const QUrl& url);
