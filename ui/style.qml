@@ -197,50 +197,65 @@ ApplicationWindow {
                         }
                         
                         Item {
-                            ColumnLayout {
-                                anchors.fill: parent; anchors.margins: 35; spacing: 20
-                                
-                                RowLayout {
-                                    Layout.fillWidth: true; spacing: 10
-                                    
-                                    TextField {
-                                        id: searchField; placeholderText: "SEARCH"; Layout.fillWidth: true; color: "white"; font.family: "Rubik"; font.pixelSize: 14; padding: 12
-                                        background: Rectangle { color: "#151515"; radius: 8; border.color: "#333" }
-                                        onAccepted: { searchModel.clear(); MorphServices.search(text, searchSource) }
-                                    }
+                            Flickable {
+                                id: searchFlickable
+                                anchors.fill: parent; contentHeight: searchContent.height + 70; clip: true
+                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                ColumnLayout {
+                                    id: searchContent
+                                    width: searchFlickable.width - 70
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top; anchors.topMargin: 35
+                                    spacing: 20
                                     
                                     RowLayout {
-                                        spacing: 5
-                                        Repeater {
-                                            model: ["all", "yandex", "soundcloud"]
-                                            Button {
-                                                Layout.preferredHeight: 36; Layout.preferredWidth: 80
-                                                text: modelData.toUpperCase()
-                                                onClicked: { searchSource = modelData; if(searchField.text !== "") { searchModel.clear(); MorphServices.search(searchField.text, searchSource) } }
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                contentItem: Text { text: parent.text; color: searchSource === modelData ? "black" : "#888"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                background: Rectangle { color: searchSource === modelData ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                        Layout.fillWidth: true; spacing: 10
+                                        
+                                        TextField {
+                                            id: searchField; placeholderText: "SEARCH"; Layout.fillWidth: true; color: "white"; font.family: "Rubik"; font.pixelSize: 14; padding: 12
+                                            background: Rectangle { color: "#151515"; radius: 8; border.color: "#333" }
+                                            onAccepted: { searchModel.clear(); MorphServices.search(text, searchSource) }
+                                        }
+                                        
+                                        RowLayout {
+                                            spacing: 5
+                                            Repeater {
+                                                model: ["all", "yandex", "soundcloud"]
+                                                Button {
+                                                    Layout.preferredHeight: 36; Layout.preferredWidth: 80
+                                                    text: modelData.toUpperCase()
+                                                    onClicked: { searchSource = modelData; if(searchField.text !== "") { searchModel.clear(); MorphServices.search(searchField.text, searchSource) } }
+                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                    contentItem: Text { text: parent.text; color: searchSource === modelData ? "black" : "#888"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                    background: Rectangle { color: searchSource === modelData ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                }
                                             }
                                         }
                                     }
-                                }
-                                
-                                StackLayout {
-                                    Layout.fillWidth: true; Layout.fillHeight: true
-                                    currentIndex: searchModel.count > 0 ? 1 : 0
                                     
-                                    ColumnLayout {
-                                        spacing: 20
-                                        Text { text: "RECENT SEARCHES"; color: "#444"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black }
-                                        ListView { 
-                                            Layout.fillWidth: true; Layout.fillHeight: true; clip: true
-                                            model: historyModel; delegate: trackDelegate
+                                    StackLayout {
+                                        Layout.fillWidth: true; Layout.preferredHeight: {
+                                            if (searchModel.count > 0) return searchResultsList.contentHeight
+                                            return historyList.contentHeight + 40
                                         }
-                                    }
-                                    
-                                    ListView { 
-                                        Layout.fillWidth: true; Layout.fillHeight: true; clip: true
-                                        model: searchModel; delegate: trackDelegate
+                                        currentIndex: searchModel.count > 0 ? 1 : 0
+                                        
+                                        ColumnLayout {
+                                            spacing: 20
+                                            Text { text: "RECENT SEARCHES"; color: "#444"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black }
+                                            ListView { 
+                                                id: historyList
+                                                Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
+                                                model: historyModel; delegate: trackDelegate
+                                            }
+                                        }
+                                        
+                                        ListView { 
+                                            id: searchResultsList
+                                            Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
+                                            model: searchModel; delegate: trackDelegate
+                                        }
                                     }
                                 }
                             }
@@ -370,130 +385,146 @@ ApplicationWindow {
                         }
                         
                         Item {
-                            ColumnLayout {
-                                anchors.fill: parent; anchors.margins: 35; spacing: 20
-                                
-                                StackLayout {
-                                    Layout.fillWidth: true; Layout.fillHeight: true
-                                    currentIndex: librarySubView === "grid" ? 0 : 1
+                            Flickable {
+                                id: libraryFlickable
+                                anchors.fill: parent; contentHeight: libraryContent.height + 70; clip: true
+                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-                                    ColumnLayout {
-                                        spacing: 20
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            Text { text: "LIBRARY"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Black }
-                                            Item { Layout.fillWidth: true }
-                                            Button {
-                                                text: "NEW PLAYLIST"
-                                                onClicked: createPlaylistPopup.open()
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                background: Rectangle { color: "#333"; radius: 6 }
-                                            }
+                                ColumnLayout {
+                                    id: libraryContent
+                                    width: libraryFlickable.width - 70
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top; anchors.topMargin: 35
+                                    spacing: 20
+                                    
+                                    StackLayout {
+                                        Layout.fillWidth: true; Layout.preferredHeight: {
+                                            if (librarySubView === "grid") return libraryGridView.contentHeight + 60
+                                            return libraryTracksColumn.height
                                         }
-                                        
-                                        GridView {
-                                            Layout.fillWidth: true; Layout.fillHeight: true; clip: true
-                                            cellWidth: 160; cellHeight: 200
-                                            model: playlistsModel
-                                            header: Item {
-                                                width: 160; height: 200
-                                                Rectangle {
-                                                    anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12
-                                                    ColumnLayout {
-                                                        anchors.fill: parent; anchors.margins: 10; spacing: 8
-                                                        Rectangle {
-                                                            Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
-                                                            Image {
-                                                                anchors.centerIn: parent
-                                                                source: "assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
-                                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                                            }
-                                                        }
-                                                        Text { text: "LIKED TRACKS"; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
-                                                    }
-                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: openPlaylist("LIKED") }
-                                                }
-                                            }
-                                            delegate: Item {
-                                                width: 160; height: 200
-                                                Rectangle {
-                                                    anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12
-                                                    ColumnLayout {
-                                                        anchors.fill: parent; anchors.margins: 10; spacing: 8
-                                                        Rectangle {
-                                                            Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
-                                                            Image {
-                                                                anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop
-                                                                visible: model.coverUrl !== ""; layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 120; height: 120; radius: 8 } }
-                                                            }
-                                                            Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.pixelSize: 40; visible: model.coverUrl === "" }
-                                                        }
-                                                        Text { text: model.name; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
-                                                    }
-                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: openPlaylist(model.name) }
-                                                }
-                                            }
-                                        }
-                                    }
+                                        currentIndex: librarySubView === "grid" ? 0 : 1
 
-                                    ColumnLayout {
-                                        spacing: 20
-                                        RowLayout {
-                                            Layout.fillWidth: true; spacing: 15
-                                            Button {
-                                                text: "← BACK"
-                                                onClicked: librarySubView = "grid"
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                contentItem: Text { text: parent.text; color: "#888"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold }
-                                                background: Item {}
-                                            }
-                                            Image {
-                                                id: playlistHeaderImage
-                                                source: {
-                                                    if (currentPlaylist === "") return ""
-                                                    var pls = MorphSettings.getPlaylists()
-                                                    return (pls[currentPlaylist] && pls[currentPlaylist].coverUrl) ? pls[currentPlaylist].coverUrl : ""
-                                                }
-                                                visible: currentPlaylist !== "" && source.toString() !== ""
-                                                Layout.preferredWidth: visible ? 40 : 0; Layout.preferredHeight: 40; fillMode: Image.PreserveAspectCrop
-                                                layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 40; height: 40; radius: 8 } }
-                                            }
-                                            Text { 
-                                                text: currentPlaylist === "" ? "LIKED TRACKS" : currentPlaylist.toUpperCase()
-                                                color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold 
-                                            }
-                                            Item { Layout.fillWidth: true }
-                                            
+                                        ColumnLayout {
+                                            spacing: 20
                                             RowLayout {
-                                                visible: currentPlaylist !== ""
-                                                spacing: 10
+                                                Layout.fillWidth: true
+                                                Text { text: "LIBRARY"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Black }
+                                                Item { Layout.fillWidth: true }
                                                 Button {
-                                                    text: "EDIT"
-                                                    onClicked: {
-                                                        var pls = MorphSettings.getPlaylists()
-                                                        plNameField.text = currentPlaylist
-                                                        oldPlaylistName = currentPlaylist
-                                                        plCoverField.text = pls[currentPlaylist].coverUrl || ""
-                                                        isEditingPlaylist = true
-                                                        createPlaylistPopup.open()
-                                                    }
+                                                    text: "NEW PLAYLIST"
+                                                    onClicked: createPlaylistPopup.open()
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                    background: Rectangle { color: "#333"; radius: 4; border.color: "#444" }
+                                                    contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                    background: Rectangle { color: "#333"; radius: 6 }
                                                 }
-                                                Button {
-                                                    text: "DELETE"
-                                                    onClicked: deleteConfirmationPopup.open()
-                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: "#ff4444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                    background: Rectangle { color: "#220000"; radius: 4; border.color: "#441111" }
+                                            }
+                                            
+                                            GridView {
+                                                id: libraryGridView
+                                                Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
+                                                cellWidth: 160; cellHeight: 200
+                                                model: playlistsModel
+                                                header: Item {
+                                                    width: 160; height: 200
+                                                    Rectangle {
+                                                        anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12
+                                                        ColumnLayout {
+                                                            anchors.fill: parent; anchors.margins: 10; spacing: 8
+                                                            Rectangle {
+                                                                Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
+                                                                Image {
+                                                                    anchors.centerIn: parent
+                                                                    source: "assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
+                                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                                }
+                                                            }
+                                                            Text { text: "LIKED TRACKS"; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
+                                                        }
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: openPlaylist("LIKED") }
+                                                    }
+                                                }
+                                                delegate: Item {
+                                                    width: 160; height: 200
+                                                    Rectangle {
+                                                        anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12
+                                                        ColumnLayout {
+                                                            anchors.fill: parent; anchors.margins: 10; spacing: 8
+                                                            Rectangle {
+                                                                Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
+                                                                Image {
+                                                                    anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop
+                                                                    visible: model.coverUrl !== ""; layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 120; height: 120; radius: 8 } }
+                                                                }
+                                                                Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.pixelSize: 40; visible: model.coverUrl === "" }
+                                                            }
+                                                            Text { text: model.name; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
+                                                        }
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: openPlaylist(model.name) }
+                                                    }
                                                 }
                                             }
                                         }
-                                        ListView { 
-                                            Layout.fillWidth: true; Layout.fillHeight: true; clip: true
-                                            model: libraryModel; delegate: trackDelegate
+
+                                        ColumnLayout {
+                                            id: libraryTracksColumn
+                                            spacing: 20
+                                            RowLayout {
+                                                Layout.fillWidth: true; spacing: 15
+                                                Button {
+                                                    text: "← BACK"
+                                                    onClicked: librarySubView = "grid"
+                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                    contentItem: Text { text: parent.text; color: "#888"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold }
+                                                    background: Item {}
+                                                }
+                                                Image {
+                                                    id: playlistHeaderImage
+                                                    source: {
+                                                        if (currentPlaylist === "") return ""
+                                                        var pls = MorphSettings.getPlaylists()
+                                                        return (pls[currentPlaylist] && pls[currentPlaylist].coverUrl) ? pls[currentPlaylist].coverUrl : ""
+                                                    }
+                                                    visible: currentPlaylist !== "" && source.toString() !== ""
+                                                    Layout.preferredWidth: visible ? 40 : 0; Layout.preferredHeight: 40; fillMode: Image.PreserveAspectCrop
+                                                    layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 40; height: 40; radius: 8 } }
+                                                }
+                                                Text { 
+                                                    text: currentPlaylist === "" ? "LIKED TRACKS" : currentPlaylist.toUpperCase()
+                                                    color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold 
+                                                }
+                                                Item { Layout.fillWidth: true }
+                                                
+                                                RowLayout {
+                                                    visible: currentPlaylist !== ""
+                                                    spacing: 10
+                                                    Button {
+                                                        text: "EDIT"
+                                                        onClicked: {
+                                                            var pls = MorphSettings.getPlaylists()
+                                                            plNameField.text = currentPlaylist
+                                                            oldPlaylistName = currentPlaylist
+                                                            plCoverField.text = pls[currentPlaylist].coverUrl || ""
+                                                            isEditingPlaylist = true
+                                                            createPlaylistPopup.open()
+                                                        }
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                        contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        background: Rectangle { color: "#333"; radius: 4; border.color: "#444" }
+                                                    }
+                                                    Button {
+                                                        text: "DELETE"
+                                                        onClicked: deleteConfirmationPopup.open()
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                        contentItem: Text { text: parent.text; color: "#ff4444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        background: Rectangle { color: "#220000"; radius: 4; border.color: "#441111" }
+                                                    }
+                                                }
+                                            }
+                                            ListView { 
+                                                id: libraryTracksList
+                                                Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
+                                                model: libraryModel; delegate: trackDelegate
+                                            }
                                         }
                                     }
                                 }
@@ -501,40 +532,47 @@ ApplicationWindow {
                         }
 
                         Item {
-                            ColumnLayout {
-                                anchors.fill: parent
-                                anchors.margins: 35
-                                spacing: 25
-                                Text { text: "SETTINGS"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold }
+                            Flickable {
+                                id: settingsFlickable
+                                anchors.fill: parent; contentHeight: settingsContent.height + 70; clip: true
+                                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
                                 ColumnLayout {
-                                    Layout.fillWidth: true; spacing: 10
-                                    Text { text: "Yandex Music Token"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
-                                    TextField {
-                                        id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
-                                        color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
-                                        background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
+                                    id: settingsContent
+                                    width: settingsFlickable.width - 70
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top; anchors.topMargin: 35
+                                    spacing: 25
+                                    Text { text: "SETTINGS"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold }
+                                    ColumnLayout {
+                                        Layout.fillWidth: true; spacing: 10
+                                        Text { text: "Yandex Music Token"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                        TextField {
+                                            id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
+                                            color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
+                                            background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
+                                        }
+                                    }
+                                    ColumnLayout {
+                                        Layout.fillWidth: true; spacing: 10
+                                        Text { text: "SoundCloud Client ID"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                        TextField {
+                                            id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
+                                            color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
+                                            background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
+                                        }
+                                    }
+                                    Button {
+                                        text: "SAVE SETTINGS"; Layout.preferredWidth: 150
+                                        onClicked: {
+                                            MorphSettings.setYandexToken(yandexTokenField.text); MorphSettings.setSoundCloudToken(soundcloudTokenField.text)
+                                            MorphServices.setYandexToken(yandexTokenField.text); MorphServices.setSoundCloudClientId(soundcloudTokenField.text)
+                                        }
+                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                        contentItem: Text { text: parent.text; color: "black"; font.family: "Rubik"; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                        background: Rectangle { color: "white"; radius: 6 }
                                     }
                                 }
-                                ColumnLayout {
-                                    Layout.fillWidth: true; spacing: 10
-                                    Text { text: "SoundCloud Client ID"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
-                                    TextField {
-                                        id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
-                                        color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
-                                        background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
-                                    }
-                                }
-                                Button {
-                                    text: "SAVE SETTINGS"; Layout.preferredWidth: 150
-                                    onClicked: {
-                                        MorphSettings.setYandexToken(yandexTokenField.text); MorphSettings.setSoundCloudToken(soundcloudTokenField.text)
-                                        MorphServices.setYandexToken(yandexTokenField.text); MorphServices.setSoundCloudClientId(soundcloudTokenField.text)
-                                    }
-                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                    contentItem: Text { text: parent.text; color: "black"; font.family: "Rubik"; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                    background: Rectangle { color: "white"; radius: 6 }
-                                }
-                                Item { Layout.fillHeight: true }
                             }
                         }
                     }
