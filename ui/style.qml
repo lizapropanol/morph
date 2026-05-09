@@ -17,7 +17,7 @@ ApplicationWindow {
     property string currentPlaylist: ""
     property string searchSource: "all"
     property string oldPlaylistName: ""
-    property string librarySubView: "grid" // "grid" or "tracks"
+    property string librarySubView: "grid"
     property bool isEditingPlaylist: false
     property int likesVersion: 0
     property int playlistsVersion: 0
@@ -566,74 +566,86 @@ ApplicationWindow {
 
                         Item {
                             Layout.fillWidth: true; Layout.fillHeight: true
+                            
                             RowLayout {
                                 anchors.fill: parent; anchors.leftMargin: 30; anchors.rightMargin: 30; spacing: 0
-
-                                RowLayout {
-                                    Layout.preferredWidth: 280; spacing: 15; visible: currentTrack !== null
-                                    Image { 
-                                        source: currentTrack ? currentTrack.coverUrl : ""; Layout.preferredWidth: 48; Layout.preferredHeight: 48; fillMode: Image.PreserveAspectCrop
-                                        layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 48; height: 48; radius: 10 } }
-                                    }
-                                    Column {
-                                        Layout.fillWidth: true
-                                        Text { text: currentTrack ? currentTrack.title : ""; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                        RowLayout {
-                                            spacing: 6
-                                            Image { source: currentTrack ? getServiceIcon(currentTrack.service) : ""; Layout.preferredWidth: 10; Layout.preferredHeight: 10 }
-                                            Text { text: currentTrack ? currentTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                
+                                Item {
+                                    Layout.fillWidth: true; Layout.preferredWidth: 1; Layout.fillHeight: true
+                                    RowLayout {
+                                        id: trackInfoRow
+                                        anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
+                                        width: Math.min(parent.width, 350); spacing: 15; visible: currentTrack !== null
+                                        Image { 
+                                            source: currentTrack ? currentTrack.coverUrl : ""; Layout.preferredWidth: 48; Layout.preferredHeight: 48; fillMode: Image.PreserveAspectCrop
+                                            layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 48; height: 48; radius: 10 } }
+                                        }
+                                        Column {
+                                            Layout.fillWidth: true; clip: true
+                                            Text { width: parent.width; text: currentTrack ? currentTrack.title : ""; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                            RowLayout {
+                                                width: parent.width; spacing: 6
+                                                Image { source: currentTrack ? getServiceIcon(currentTrack.service) : ""; Layout.preferredWidth: 10; Layout.preferredHeight: 10 }
+                                                Text { Layout.fillWidth: true; text: currentTrack ? currentTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                            }
                                         }
                                     }
                                 }
-                                Item { Layout.preferredWidth: 280; visible: currentTrack === null }
-                                Item { Layout.fillWidth: true }
 
-                                RowLayout {
-                                    anchors.centerIn: parent; spacing: 25
-                                    Image {
-                                        source: repeatOne ? "assets/repeat-once.svg" : "assets/repeat.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                        MouseArea { anchors.fill: parent; onClicked: repeatOne = !repeatOne; cursorShape: Qt.PointingHandCursor }
-                                    }
-                                    Image {
-                                        source: "assets/skip-previous.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                        MouseArea { anchors.fill: parent; onClicked: playPrevious(); cursorShape: Qt.PointingHandCursor }
-                                    }
-                                    Image {
-                                        source: MorphAudio.isPlaying ? "assets/pause-circle.svg" : "assets/play-circle.svg"; Layout.preferredWidth: 50; Layout.preferredHeight: 50; sourceSize: Qt.size(128, 128); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                        MouseArea { anchors.fill: parent; onClicked: MorphAudio.isPlaying ? MorphAudio.pause() : MorphAudio.resume(); cursorShape: Qt.PointingHandCursor }
-                                    }
-                                    Image {
-                                        source: "assets/skip-next.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                        MouseArea { anchors.fill: parent; onClicked: playNext(); cursorShape: Qt.PointingHandCursor }
-                                    }
-                                    Image {
-                                        source: (window.likesVersion, currentTrack && MorphSettings.isLiked(currentTrack.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                        MouseArea { anchors.fill: parent; onClicked: if(currentTrack) MorphSettings.toggleLike(currentTrack); cursorShape: Qt.PointingHandCursor }
-                                    }
-                                }
-                                Item { Layout.fillWidth: true }
-
-                                RowLayout {
-                                    Layout.alignment: Qt.AlignRight; spacing: 12
-                                    
-                                    Rectangle {
-                                        visible: MorphAudio.bitrate > 0
-                                        width: bitrateText.width + 10; height: 16; radius: 4; color: "#1a1a1a"
-                                        Text {
-                                            id: bitrateText; anchors.centerIn: parent
-                                            text: MorphAudio.bitrate + " kbps"
-                                            color: MorphAudio.bitrate <= 128 ? "#ff4444" : (MorphAudio.bitrate <= 256 ? "#ffcc00" : "#44ff44")
-                                            font.family: "Rubik"; font.pixelSize: 9; font.weight: Font.Bold
+                                Item {
+                                    Layout.preferredWidth: playbackControls.width; Layout.fillHeight: true
+                                    RowLayout {
+                                        id: playbackControls
+                                        anchors.centerIn: parent; spacing: 25
+                                        Image {
+                                            source: repeatOne ? "assets/repeat-once.svg" : "assets/repeat.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            MouseArea { anchors.fill: parent; onClicked: repeatOne = !repeatOne; cursorShape: Qt.PointingHandCursor }
+                                        }
+                                        Image {
+                                            source: "assets/skip-previous.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            MouseArea { anchors.fill: parent; onClicked: playPrevious(); cursorShape: Qt.PointingHandCursor }
+                                        }
+                                        Image {
+                                            source: MorphAudio.isPlaying ? "assets/pause-circle.svg" : "assets/play-circle.svg"; Layout.preferredWidth: 50; Layout.preferredHeight: 50; sourceSize: Qt.size(128, 128); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            MouseArea { anchors.fill: parent; onClicked: MorphAudio.isPlaying ? MorphAudio.pause() : MorphAudio.resume(); cursorShape: Qt.PointingHandCursor }
+                                        }
+                                        Image {
+                                            source: "assets/skip-next.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            MouseArea { anchors.fill: parent; onClicked: playNext(); cursorShape: Qt.PointingHandCursor }
+                                        }
+                                        Image {
+                                            source: (window.likesVersion, currentTrack && MorphSettings.isLiked(currentTrack.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            MouseArea { anchors.fill: parent; onClicked: if(currentTrack) MorphSettings.toggleLike(currentTrack); cursorShape: Qt.PointingHandCursor }
                                         }
                                     }
+                                }
 
-                                    Text { text: "VOL"; color: "#444"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Black }
-                                    Slider {
-                                        id: volumeSlider; Layout.preferredWidth: 80; Layout.preferredHeight: 20; from: 0; to: 100; value: MorphAudio.volume; onMoved: MorphAudio.volume = value
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                        background: Rectangle { x: volumeSlider.leftPadding; y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2; width: volumeSlider.availableWidth; height: 3; radius: 1.5; color: "#333"
-                                            Rectangle { width: volumeSlider.visualPosition * parent.width; height: parent.height; color: "white"; radius: 1.5 } }
-                                        handle: Rectangle { x: volumeSlider.leftPadding + volumeSlider.visualPosition * (volumeSlider.availableWidth - width); y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2; width: 10; height: 10; radius: 5; color: "white" }
+                                Item {
+                                    Layout.fillWidth: true; Layout.preferredWidth: 1; Layout.fillHeight: true
+                                    RowLayout {
+                                        id: volumeRow
+                                        anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
+                                        spacing: window.width > 700 ? 12 : 8
+                                        
+                                        Rectangle {
+                                            visible: MorphAudio.bitrate > 0 && window.width > 900
+                                            width: bitrateText.width + 10; height: 16; radius: 4; color: "#1a1a1a"
+                                            Text {
+                                                id: bitrateText; anchors.centerIn: parent
+                                                text: MorphAudio.bitrate + " kbps"
+                                                color: MorphAudio.bitrate <= 128 ? "#ff4444" : (MorphAudio.bitrate <= 256 ? "#ffcc00" : "#44ff44")
+                                                font.family: "Rubik"; font.pixelSize: 9; font.weight: Font.Bold
+                                            }
+                                        }
+
+                                        Text { text: "VOL"; color: "#444"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Black; visible: window.width > 800 }
+                                        Slider {
+                                            id: volumeSlider; Layout.preferredWidth: window.width > 700 ? 80 : 50; Layout.preferredHeight: 20; from: 0; to: 100; value: MorphAudio.volume; onMoved: MorphAudio.volume = value
+                                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                            background: Rectangle { x: volumeSlider.leftPadding; y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2; width: volumeSlider.availableWidth; height: 3; radius: 1.5; color: "#333"
+                                                Rectangle { width: volumeSlider.visualPosition * parent.width; height: parent.height; color: "white"; radius: 1.5 } }
+                                            handle: Rectangle { x: volumeSlider.leftPadding + volumeSlider.visualPosition * (volumeSlider.availableWidth - width); y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2; width: 10; height: 10; radius: 5; color: "white" }
+                                        }
                                     }
                                 }
                             }
