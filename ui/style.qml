@@ -580,7 +580,7 @@ ApplicationWindow {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 100
+                    Layout.preferredHeight: 80
                     color: "black"
                     
                     ColumnLayout {
@@ -589,15 +589,34 @@ ApplicationWindow {
 
                         Item {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 4
+                            Layout.preferredHeight: 5
                             Layout.leftMargin: 20
                             Layout.rightMargin: 20
                             Slider {
                                 id: progressSlider; anchors.fill: parent
                                 from: 0; to: MorphAudio.duration > 0 ? MorphAudio.duration : 1
                                 value: MorphAudio.position; onMoved: MorphAudio.position = value; padding: 0
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                background: Rectangle { radius: 16; color: "#1a1a1a"; Rectangle { width: progressSlider.visualPosition * parent.width; height: parent.height; color: "white"; radius: 16 } }
+                                
+                                MouseArea { 
+                                    id: progressHoverArea
+                                    anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton 
+                                }
+
+                                Text {
+                                    visible: progressHoverArea.containsMouse
+                                    text: formatTime(MorphAudio.position)
+                                    color: "white"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold
+                                    y: -12; x: (progressSlider.visualPosition * parent.width) - (width / 2)
+                                }
+
+                                Text {
+                                    visible: progressHoverArea.containsMouse
+                                    text: formatTime(MorphAudio.duration)
+                                    color: "#666"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold
+                                    anchors.right: parent.right; y: -12
+                                }
+
+                                background: Rectangle { anchors.bottom: parent.bottom; anchors.bottomMargin: 1; width: parent.width; height: 4; radius: 16; color: "#1a1a1a"; Rectangle { width: progressSlider.visualPosition * parent.width; height: parent.height; color: "white"; radius: 16 } }
                                 handle: Item {}
                             }
                         }
