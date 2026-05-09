@@ -320,13 +320,12 @@ ApplicationWindow {
                                                             source: leftTrack ? (leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                         }
-                                                        Column {
-                                                            Layout.fillWidth: true
-                                                            Text { text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                            Text { text: leftTrack ? leftTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                        ColumnLayout {
+                                                            Layout.fillWidth: true; spacing: 2
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
                                                         }
-                                                    }
-                                                    MouseArea { 
+                                                    }                                                    MouseArea { 
                                                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                                         onClicked: if (leftTrack) {
                                                             libraryModel.clear()
@@ -347,13 +346,12 @@ ApplicationWindow {
                                                             source: rightTrack ? (rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                         }
-                                                        Column {
-                                                            Layout.fillWidth: true
-                                                            Text { text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                            Text { text: rightTrack ? rightTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                        ColumnLayout {
+                                                            Layout.fillWidth: true; spacing: 2
+                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
                                                         }
-                                                    }
-                                                    MouseArea { 
+                                                    }                                                    MouseArea { 
                                                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                                         onClicked: if (rightTrack) {
                                                             libraryModel.clear()
@@ -677,12 +675,13 @@ ApplicationWindow {
                     layer.enabled: true
                     layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                 }
-                Column {
-                    Layout.fillWidth: true
-                    Text { text: model.title || ""; color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }                    RowLayout {
-                        spacing: 6
+                ColumnLayout {
+                    Layout.fillWidth: true; spacing: 2
+                    Text { Layout.fillWidth: true; text: model.title || ""; color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                    RowLayout {
+                        Layout.fillWidth: true; spacing: 6
                         Image { source: getServiceIcon(model.service); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
-                        Text { text: model.artist || ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                        Text { Layout.fillWidth: true; text: model.artist || ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
                     }
                 }
                 Image {
