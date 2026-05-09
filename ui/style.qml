@@ -614,8 +614,19 @@ ApplicationWindow {
                                 Item { Layout.fillWidth: true }
 
                                 RowLayout {
-                                    Layout.preferredWidth: 150; Layout.alignment: Qt.AlignRight; spacing: 12
-                                    Item { Layout.fillWidth: true }
+                                    Layout.alignment: Qt.AlignRight; spacing: 12
+                                    
+                                    Rectangle {
+                                        visible: MorphAudio.bitrate > 0
+                                        width: bitrateText.width + 10; height: 16; radius: 4; color: "#1a1a1a"
+                                        Text {
+                                            id: bitrateText; anchors.centerIn: parent
+                                            text: MorphAudio.bitrate + " kbps"
+                                            color: MorphAudio.bitrate <= 128 ? "#ff4444" : (MorphAudio.bitrate <= 256 ? "#ffcc00" : "#44ff44")
+                                            font.family: "Rubik"; font.pixelSize: 9; font.weight: Font.Bold
+                                        }
+                                    }
+
                                     Text { text: "VOL"; color: "#444"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Black }
                                     Slider {
                                         id: volumeSlider; Layout.preferredWidth: 80; Layout.preferredHeight: 20; from: 0; to: 100; value: MorphAudio.volume; onMoved: MorphAudio.volume = value

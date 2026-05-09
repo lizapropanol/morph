@@ -18,6 +18,8 @@ AudioEngine::AudioEngine(QObject* parent) : QObject(parent) {
         if (status == QMediaPlayer::EndOfMedia) emit finished();
     });
     
+    connect(player, QOverload<>::of(&QMediaPlayer::metaDataChanged), this, &AudioEngine::bitrateChanged);
+    
     connect(pollTimer, &QTimer::timeout, this, &AudioEngine::positionChanged);
 }
 
@@ -35,6 +37,12 @@ void AudioEngine::setPosition(qint64 position) {
 qint64 AudioEngine::duration() const { return player->duration(); }
 
 bool AudioEngine::isPlaying() const { return player->state() == QMediaPlayer::PlayingState; }
+
+int AudioEngine::bitrate() const {
+    int b = player->metaData("AudioBitRate").toInt();
+    if (b <= 0) b = player->metaData("bitrate").toInt();
+    return (b + 500) / 1000;
+}
 
 void AudioEngine::play(const QString& url) {
     player->setMedia(QUrl(url));

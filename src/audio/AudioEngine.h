@@ -12,6 +12,7 @@ class AudioEngine : public QObject {
     Q_PROPERTY(qint64 position READ position WRITE setPosition NOTIFY positionChanged)
     Q_PROPERTY(qint64 duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(bool isPlaying READ isPlaying NOTIFY stateChanged)
+    Q_PROPERTY(int bitrate READ bitrate NOTIFY bitrateChanged)
 
 public:
     explicit AudioEngine(QObject* parent = nullptr);
@@ -24,6 +25,7 @@ public:
 
     qint64 duration() const;
     bool isPlaying() const;
+    int bitrate() const;
 
 public slots:
     void play(const QString& url);
@@ -36,6 +38,7 @@ signals:
     void positionChanged();
     void durationChanged();
     void stateChanged();
+    void bitrateChanged();
     void seeked(qint64 position);
     void finished();
 
