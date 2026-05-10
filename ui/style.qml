@@ -23,10 +23,12 @@ ApplicationWindow {
     property bool isEditingPlaylist: false
     property int likesVersion: 0
     property int playlistsVersion: 0
+    property int settingsVersion: 0
     property bool repeatOne: false
     property var fullPlaylistTracks: []
     property int loadedTracksCount: 0
     property var streamUrlCache: ({})
+    property real lastKnownPosition: 0
 
     function preResolveNext() {
         var model = currentView === "search" ? (searchModel.count > 0 ? searchModel : historyModel) : libraryModel
@@ -642,11 +644,70 @@ ApplicationWindow {
                                             background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
                                         }
                                     }
+                                    ColumnLayout {
+                                        Layout.fillWidth: true; spacing: 10
+                                        Text { text: "Audio Quality"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                        RowLayout {
+                                            spacing: 10
+                                            Button {
+                                                id: lowQualBtn; text: "192k"; Layout.preferredWidth: 100
+                                                property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "low")
+                                                onClicked: {
+                                                    MorphSettings.setAudioQuality("low")
+                                                    MorphServices.setAudioQuality("low")
+                                                    streamUrlCache = ({})
+                                                    if (currentTrack && currentTrack.service === "Yandex") {
+                                                        lastKnownPosition = MorphAudio.position
+                                                        MorphServices.resolve(currentTrack.service, currentTrack.id)
+                                                        currentTrackIndex = -1
+                                                    }
+                                                }
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                contentItem: Text { text: parent.text; color: lowQualBtn.active ? "black" : "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                background: Rectangle { color: lowQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                            }
+                                            Button {
+                                                id: medQualBtn; text: "320k"; Layout.preferredWidth: 100
+                                                property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "medium")
+                                                onClicked: {
+                                                    MorphSettings.setAudioQuality("medium")
+                                                    MorphServices.setAudioQuality("medium")
+                                                    streamUrlCache = ({})
+                                                    if (currentTrack && currentTrack.service === "Yandex") {
+                                                        lastKnownPosition = MorphAudio.position
+                                                        MorphServices.resolve(currentTrack.service, currentTrack.id)
+                                                        currentTrackIndex = -1
+                                                    }
+                                                }
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                contentItem: Text { text: parent.text; color: medQualBtn.active ? "black" : "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                background: Rectangle { color: medQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                            }
+                                            Button {
+                                                id: highQualBtn; text: "LOSSLESS"; Layout.preferredWidth: 100
+                                                property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "high")
+                                                onClicked: {
+                                                    MorphSettings.setAudioQuality("high")
+                                                    MorphServices.setAudioQuality("high")
+                                                    streamUrlCache = ({})
+                                                    if (currentTrack && currentTrack.service === "Yandex") {
+                                                        lastKnownPosition = MorphAudio.position
+                                                        MorphServices.resolve(currentTrack.service, currentTrack.id)
+                                                        currentTrackIndex = -1
+                                                    }
+                                                }
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                contentItem: Text { text: parent.text; color: highQualBtn.active ? "black" : "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                background: Rectangle { color: highQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                            }
+                                        }
+                                    }
                                     Button {
                                         text: "SAVE SETTINGS"; Layout.preferredWidth: 150
                                         onClicked: {
                                             MorphSettings.setYandexToken(yandexTokenField.text); MorphSettings.setSoundCloudToken(soundcloudTokenField.text)
                                             MorphServices.setYandexToken(yandexTokenField.text); MorphServices.setSoundCloudClientId(soundcloudTokenField.text)
+                                            MorphServices.setAudioQuality(MorphSettings.getAudioQuality())
                                         }
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                         contentItem: Text { text: parent.text; color: "black"; font.family: "Rubik"; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
@@ -951,13 +1012,16 @@ ApplicationWindow {
             }
             if (libraryModel.count > 0) playTrack(libraryModel.get(0), 0)
         }
-        function onStreamUrlReady(trackId, streamUrl) {
-            streamUrlCache[trackId] = streamUrl
-            if (currentTrack && currentTrack.id === trackId) {
-                MorphAudio.play(streamUrl)
-                if (currentTrackIndex === -1) { var oldPos = MorphAudio.position; MorphAudio.pause(); MorphAudio.position = oldPos }
+    function onStreamUrlReady(trackId, streamUrl) {
+        streamUrlCache[trackId] = streamUrl
+        if (currentTrack && currentTrack.id === trackId) {
+            MorphAudio.play(streamUrl)
+            if (currentTrackIndex === -1) { 
+                MorphAudio.position = lastKnownPosition
+                currentTrackIndex = loadedTracksCount // dummy positive index to avoid loop
             }
         }
+    }
         function onPlaylistImported(name, coverUrl, tracks) {
             MorphSettings.createPlaylistWithTracks(name, coverUrl, tracks)
             importPlaylistPopup.isBusy = false
@@ -971,6 +1035,7 @@ ApplicationWindow {
     
     Connections {
         target: MorphSettings
+        function onSettingsChanged() { window.settingsVersion++ }
         function onLikesChanged() { 
             window.likesVersion++
             if (currentView === "library" && currentPlaylist === "") {

@@ -40,9 +40,13 @@ public slots:
     void addSearchHistory(const QVariantMap& track);
     QVariantList getSearchHistory();
 
+    void setAudioQuality(const QString& quality);
+    QString getAudioQuality();
+
 signals:
     void likesChanged();
     void playlistsChanged();
+    void settingsChanged();
 
 private:
     QString m_path;

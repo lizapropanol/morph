@@ -21,6 +21,7 @@ public slots:
     void importPlaylist(const QString& url);
     void setYandexToken(const QString& token);
     void setSoundCloudClientId(const QString& clientId);
+    void setAudioQuality(const QString& quality);
 
 signals:
     void searchResultsReady(const QString& serviceName, const QVariantList& results);

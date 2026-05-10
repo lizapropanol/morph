@@ -80,3 +80,7 @@ void ServiceManager::setYandexToken(const QString& token) {
 void ServiceManager::setSoundCloudClientId(const QString& clientId) {
     soundcloud->setToken(clientId);
 }
+
+void ServiceManager::setAudioQuality(const QString& quality) {
+    yandex->setAudioQuality(quality);
+}

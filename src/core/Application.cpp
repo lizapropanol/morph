@@ -11,6 +11,8 @@ Application::Application(QObject* parent) : QObject(parent) {
     settings = new SettingsManager(this);
     mpris = new MprisManager(audio, this);
 
+    services->setAudioQuality(settings->getAudioQuality());
+
     engine->rootContext()->setContextProperty("MorphAudio", audio);
     engine->rootContext()->setContextProperty("MorphServices", services);
     engine->rootContext()->setContextProperty("MorphSettings", settings);

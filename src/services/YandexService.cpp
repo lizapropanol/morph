@@ -13,6 +13,10 @@ void YandexService::setToken(const QString& token) {
     m_token = token;
 }
 
+void YandexService::setAudioQuality(const QString& quality) {
+    m_quality = quality;
+}
+
 QVariantList YandexService::parseYandexTracks(const QJsonArray& tracks) {
     QVariantList tracksList;
     for (const QJsonValue& val : tracks) {
@@ -156,7 +160,23 @@ void YandexService::resolveStreamUrl(const QString& trackId) {
         QJsonArray results = doc.object()["result"].toArray();
         if (results.isEmpty()) return;
 
-        QString downloadInfoUrl = results[0].toObject()["downloadInfoUrl"].toString();
+        int targetBitrate = 320;
+        if (m_quality == "low") targetBitrate = 192;
+        else if (m_quality == "high") targetBitrate = 2000;
+        
+        int bestIdx = 0;
+        int minDiff = 1000;
+
+        for (int i = 0; i < results.size(); ++i) {
+            int br = results[i].toObject()["bitrateInKbps"].toInt();
+            int diff = qAbs(br - targetBitrate);
+            if (diff < minDiff) {
+                minDiff = diff;
+                bestIdx = i;
+            }
+        }
+
+        QString downloadInfoUrl = results[bestIdx].toObject()["downloadInfoUrl"].toString();
         fetchDownloadInfo(trackId, QUrl(downloadInfoUrl));
     });
 }

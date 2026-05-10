@@ -156,6 +156,7 @@ QVariantMap SettingsManager::getPlaylists() {
 void SettingsManager::setYandexToken(const QString& token) {
     m_data["yandex_token"] = token;
     save();
+    emit settingsChanged();
 }
 
 QString SettingsManager::getYandexToken() {
@@ -165,6 +166,7 @@ QString SettingsManager::getYandexToken() {
 void SettingsManager::setSoundCloudToken(const QString& token) {
     m_data["soundcloud_token"] = token;
     save();
+    emit settingsChanged();
 }
 
 QString SettingsManager::getSoundCloudToken() {
@@ -174,21 +176,32 @@ QString SettingsManager::getSoundCloudToken() {
 void SettingsManager::addSearchHistory(const QVariantMap& track) {
     QJsonArray history = m_data["history"].toArray();
     QJsonObject trackObj = QJsonObject::fromVariantMap(track);
-    
+
     for (int i = 0; i < history.size(); ++i) {
         if (history[i].toObject()["id"].toString() == trackObj["id"].toString()) {
             history.removeAt(i);
             break;
         }
     }
-    
+
     history.insert(0, trackObj);
     if (history.size() > 20) history.removeLast();
-    
+
     m_data["history"] = history;
     save();
 }
 
 QVariantList SettingsManager::getSearchHistory() {
     return m_data["history"].toArray().toVariantList();
+}
+
+void SettingsManager::setAudioQuality(const QString& quality) {
+    m_data["audio_quality"] = quality;
+    save();
+    emit settingsChanged();
+}
+
+QString SettingsManager::getAudioQuality() {
+    if (!m_data.contains("audio_quality")) return "high";
+    return m_data["audio_quality"].toString();
 }
