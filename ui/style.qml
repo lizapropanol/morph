@@ -379,11 +379,10 @@ ApplicationWindow {
                                                     property var leftTrack: chartsModel.get(index)
                                                     property var rightTrack: (index + 10 < chartsModel.count) ? chartsModel.get(index + 10) : null
                                                 
-                                                ItemDelegate {
-                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; hoverEnabled: true
-                                                    background: Rectangle { color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#252525" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
-                                                    contentItem: RowLayout {
-                                                        spacing: 15
+                                                Rectangle {
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#252525" : (leftChartsMouseArea.containsMouse ? "#222" : "transparent"); radius: 6
+                                                    RowLayout {
+                                                        anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Image { 
                                                             source: leftTrack ? (leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
@@ -394,22 +393,26 @@ ApplicationWindow {
                                                             Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                                             Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
                                                         }
-                                                    }                                                    MouseArea { 
-                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                    }
+                                                    MouseArea { 
+                                                        id: leftChartsMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; acceptedButtons: Qt.LeftButton | Qt.RightButton
                                                         onClicked: if (leftTrack) {
-                                                            libraryModel.clear()
-                                                            for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
-                                                            playTrack(libraryModel.get(index), index)
+                                                            if (mouse.button === Qt.RightButton) { 
+                                                                trackContextMenu.openAt(mouse.x, mouse.y, leftChartsMouseArea, leftTrack)
+                                                            }
+                                                            else {
+                                                                libraryModel.clear()
+                                                                for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
+                                                                playTrack(libraryModel.get(index), index)
+                                                            }
                                                         }
                                                     }
                                                 }
 
-                                                ItemDelegate {
-                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; hoverEnabled: true
-                                                    visible: rightTrack !== null
-                                                    background: Rectangle { color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#252525" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
-                                                    contentItem: RowLayout {
-                                                        spacing: 15
+                                                Rectangle {
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; visible: rightTrack !== null; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#252525" : (rightChartsMouseArea.containsMouse ? "#222" : "transparent"); radius: 6
+                                                    RowLayout {
+                                                        anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Image { 
                                                             source: rightTrack ? (rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
@@ -420,12 +423,18 @@ ApplicationWindow {
                                                             Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                                             Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
                                                         }
-                                                    }                                                    MouseArea { 
-                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                    }
+                                                    MouseArea { 
+                                                        id: rightChartsMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; acceptedButtons: Qt.LeftButton | Qt.RightButton
                                                         onClicked: if (rightTrack) {
-                                                            libraryModel.clear()
-                                                            for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
-                                                            playTrack(libraryModel.get(index + 10), index + 10)
+                                                            if (mouse.button === Qt.RightButton) { 
+                                                                trackContextMenu.openAt(mouse.x, mouse.y, rightChartsMouseArea, rightTrack)
+                                                            }
+                                                            else {
+                                                                libraryModel.clear()
+                                                                for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
+                                                                playTrack(libraryModel.get(index + 10), index + 10)
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -793,6 +802,52 @@ ApplicationWindow {
             color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#252525" : (trackMouseArea.containsMouse ? "#222" : "transparent")
             radius: 6
 
+            MouseArea {
+                id: trackMouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onPressed: {
+                    if (mouse.button === Qt.RightButton) {
+                        var track;
+                        if (currentView === "search") {
+                            track = (searchModel.count > 0) ? searchModel.get(index) : historyModel.get(index)
+                        } else {
+                            track = libraryModel.get(index)
+                        }
+                        trackContextMenu.openAt(mouse.x, mouse.y, trackMouseArea, track)
+                    }
+                }
+                onClicked: {
+                    if (mouse.button === Qt.LeftButton) {
+                        var track; var m;
+                        if (currentView === "search") {
+                            if (searchModel.count > 0) { track = searchModel.get(index); m = searchModel }
+                            else { track = historyModel.get(index); m = historyModel }
+
+                            var tObj = { "id": track.id, "title": track.title, "artist": track.artist, "coverUrl": track.coverUrl, "service": track.service }
+                            MorphSettings.addSearchHistory(tObj)
+
+                            historyModel.clear()
+                            var hist = MorphSettings.getSearchHistory()
+                            for (var i = 0; i < hist.length; i++) historyModel.append(hist[i])
+
+                            var newIdx = index
+                            if (m === historyModel) {
+                                for(var j=0; j<historyModel.count; j++) {
+                                    if(historyModel.get(j).id === tObj.id) { newIdx = j; break }
+                                }
+                            }
+                            playTrack(tObj, newIdx)
+                        } else {
+                            track = libraryModel.get(index)
+                            playTrack(track, index)
+                        }
+                    }
+                }
+            }
+
             RowLayout {
                 anchors.fill: parent
                 anchors.leftMargin: 10
@@ -816,42 +871,9 @@ ApplicationWindow {
                     source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                     MouseArea { 
                         anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service }); cursorShape: Qt.PointingHandCursor 
-                        preventStealing: true
                     }
                 }
             }
-
-            MouseArea {
-                id: trackMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                z: -1
-                onClicked: {
-                    var track; var m;
-                    if (currentView === "search") {
-                        if (searchModel.count > 0) { track = searchModel.get(index); m = searchModel }
-                        else { track = historyModel.get(index); m = historyModel }
-
-                        var tObj = { "id": track.id, "title": track.title, "artist": track.artist, "coverUrl": track.coverUrl, "service": track.service }
-                        MorphSettings.addSearchHistory(tObj)
-
-                        historyModel.clear()
-                        var hist = MorphSettings.getSearchHistory()
-                        for (var i = 0; i < hist.length; i++) historyModel.append(hist[i])
-
-                        var newIdx = index
-                        if (m === historyModel) {
-                            for(var j=0; j<historyModel.count; j++) {
-                                if(historyModel.get(j).id === tObj.id) { newIdx = j; break }
-                            }
-                        }
-                        playTrack(tObj, newIdx)
-                    } else {
-                        track = libraryModel.get(index)
-                        playTrack(track, index)
-                    }
-                }            }
         }
     }
 
@@ -864,6 +886,42 @@ ApplicationWindow {
                 text: model.name
                 onClicked: if(trackToPlaylist) MorphSettings.addToPlaylist(model.name, trackToPlaylist)
             }
+        }
+    }
+
+    property var targetContextTrack: null
+    Popup {
+        id: trackContextMenu
+        parent: Overlay.overlay
+        width: 140; height: 40
+        padding: 0
+        background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333"; border.width: 1 }
+        closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
+        
+        contentItem: Rectangle {
+            anchors.fill: parent; color: "transparent"; radius: 6
+            Rectangle {
+                anchors.fill: parent; anchors.margins: 2; color: copyItemMouse.containsMouse ? "#333" : "transparent"; radius: 4
+                Text { anchors.centerIn: parent; text: "COPY LINK"; color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Bold }
+                MouseArea {
+                    id: copyItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (targetContextTrack && targetContextTrack.webUrl) {
+                            MorphSettings.copyToClipboard(targetContextTrack.webUrl)
+                        } else if (targetContextTrack && targetContextTrack.service === "Yandex") {
+                            MorphSettings.copyToClipboard("https://music.yandex.ru/track/" + targetContextTrack.id)
+                        }
+                        trackContextMenu.close()
+                    }
+                }
+            }
+        }
+        
+        function openAt(mx, my, targetItem, track) {
+            targetContextTrack = track
+            var coords = targetItem.mapToItem(Overlay.overlay, mx, my)
+            x = coords.x; y = coords.y
+            open()
         }
     }
 

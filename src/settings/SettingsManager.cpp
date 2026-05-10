@@ -7,6 +7,10 @@ SettingsManager::SettingsManager(QObject* parent) : QObject(parent) {
     load();
 }
 
+void SettingsManager::copyToClipboard(const QString& text) {
+    QGuiApplication::clipboard()->setText(text);
+}
+
 void SettingsManager::load() {
     QFile file(m_path);
     if (file.open(QIODevice::ReadOnly)) {

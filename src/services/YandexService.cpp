@@ -33,8 +33,12 @@ QVariantList YandexService::parseYandexTracks(const QJsonArray& tracks) {
             track.album = QString::number(albums[0].toObject()["id"].toInt());
             QString coverUri = albums[0].toObject()["coverUri"].toString();
             if (!coverUri.isEmpty()) track.coverUrl = "https://" + coverUri.replace("%%", "400x400");
+            track.webUrl = "https://music.yandex.ru/album/" + track.album + "/track/" + track.id;
         } else if (trackObj.contains("coverUri")) {
             track.coverUrl = "https://" + trackObj["coverUri"].toString().replace("%%", "400x400");
+            track.webUrl = "https://music.yandex.ru/track/" + track.id;
+        } else {
+            track.webUrl = "https://music.yandex.ru/track/" + track.id;
         }
         track.service = "Yandex";
         tracksList.append(track.toVariantMap());

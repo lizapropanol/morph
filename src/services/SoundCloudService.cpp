@@ -45,6 +45,7 @@ void SoundCloudService::search(const QString& query) {
             }
             
             track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
+            track.webUrl = obj["permalink_url"].toString();
             
             QJsonArray transcodings = obj["media"].toObject()["transcodings"].toArray();
             for (const QJsonValue& t : transcodings) {
@@ -171,6 +172,7 @@ void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, cons
                 }
                 
                 track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
+                track.webUrl = obj["permalink_url"].toString();
                 track.service = "SoundCloud";
                 allTracks->append(track.toVariantMap());
             }

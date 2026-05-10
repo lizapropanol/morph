@@ -8,12 +8,16 @@
 #include <QJsonArray>
 #include <QFile>
 
+#include <QClipboard>
+#include <QGuiApplication>
+
 class SettingsManager : public QObject {
     Q_OBJECT
 public:
     explicit SettingsManager(QObject* parent = nullptr);
 
 public slots:
+    void copyToClipboard(const QString& text);
     void saveSession(const QVariantMap& session);
     QVariantMap loadSession();
     
