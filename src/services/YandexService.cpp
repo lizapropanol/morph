@@ -165,7 +165,7 @@ void YandexService::resolveStreamUrl(const QString& trackId) {
         else if (m_quality == "high") targetBitrate = 2000;
         
         int bestIdx = 0;
-        int minDiff = 1000;
+        int minDiff = 10000;
 
         for (int i = 0; i < results.size(); ++i) {
             int br = results[i].toObject()["bitrateInKbps"].toInt();
