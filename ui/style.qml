@@ -121,13 +121,20 @@ ApplicationWindow {
     }
 
     function playTrack(track, index) {
+        var service = track.service || (track.coverUrl && track.coverUrl.indexOf("yandex") !== -1 ? "Yandex" : "SoundCloud")
+        if (currentTrack && currentTrack.id === track.id && currentTrack.service === service) {
+            if (MorphAudio.isPlaying) MorphAudio.pause()
+            else MorphAudio.resume()
+            return
+        }
+
         var cleanTrack = {
             id: track.id,
             title: track.title,
             artist: track.artist,
             album: track.album || "",
             coverUrl: track.coverUrl,
-            service: track.service || (track.coverUrl && track.coverUrl.indexOf("yandex") !== -1 ? "Yandex" : "SoundCloud")
+            service: service
         }
         currentTrack = cleanTrack
         currentTrackIndex = index
