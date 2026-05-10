@@ -282,25 +282,31 @@ ApplicationWindow {
                                     
                                     StackLayout {
                                         Layout.fillWidth: true; Layout.preferredHeight: {
-                                            if (searchModel.count > 0) return searchResultsList.contentHeight
-                                            return historyList.contentHeight + 40
+                                            if (searchModel.count > 0) return searchResultsList.contentHeight + 24
+                                            return historyList.contentHeight + 64
                                         }
                                         currentIndex: searchModel.count > 0 ? 1 : 0
                                         
                                         ColumnLayout {
                                             spacing: 20
                                             Text { text: "RECENT SEARCHES"; color: "#444"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black }
-                                            ListView { 
-                                                id: historyList
-                                                Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
-                                                model: historyModel; delegate: trackDelegate
+                                            Rectangle {
+                                                Layout.fillWidth: true; Layout.preferredHeight: historyList.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true
+                                                ListView { 
+                                                    id: historyList
+                                                    anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true
+                                                    model: historyModel; delegate: trackDelegate
+                                                }
                                             }
                                         }
                                         
-                                        ListView { 
-                                            id: searchResultsList
-                                            Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
-                                            model: searchModel; delegate: trackDelegate
+                                        Rectangle {
+                                            Layout.fillWidth: true; Layout.preferredHeight: searchResultsList.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true
+                                            ListView { 
+                                                id: searchResultsList
+                                                anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true
+                                                model: searchModel; delegate: trackDelegate
+                                            }
                                         }
                                     }
                                 }
@@ -362,18 +368,20 @@ ApplicationWindow {
                                     ColumnLayout {
                                         Layout.fillWidth: true; spacing: 20
                                         Text { text: "CHARTS"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Black }
-                                        ListView {
-                                            id: chartsListView
-                                            Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
-                                            model: chartsModel.count > 0 ? Math.min(10, Math.ceil(chartsModel.count / 2)) : 0
-                                            delegate: RowLayout {
-                                                width: chartsListView.width; height: 54; spacing: 20
-                                                property var leftTrack: chartsModel.get(index)
-                                                property var rightTrack: (index + 10 < chartsModel.count) ? chartsModel.get(index + 10) : null
+                                        Rectangle {
+                                            Layout.fillWidth: true; Layout.preferredHeight: chartsListView.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true
+                                            ListView {
+                                                id: chartsListView
+                                                anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true
+                                                model: chartsModel.count > 0 ? Math.min(10, Math.ceil(chartsModel.count / 2)) : 0
+                                                delegate: RowLayout {
+                                                    width: chartsListView.width; height: 54; spacing: 20
+                                                    property var leftTrack: chartsModel.get(index)
+                                                    property var rightTrack: (index + 10 < chartsModel.count) ? chartsModel.get(index + 10) : null
                                                 
                                                 ItemDelegate {
                                                     Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; hoverEnabled: true
-                                                    background: Rectangle { color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#1a1a1a" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
+                                                    background: Rectangle { color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#252525" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
                                                     contentItem: RowLayout {
                                                         spacing: 15
                                                         Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
@@ -399,7 +407,7 @@ ApplicationWindow {
                                                 ItemDelegate {
                                                     Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; hoverEnabled: true
                                                     visible: rightTrack !== null
-                                                    background: Rectangle { color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#1a1a1a" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
+                                                    background: Rectangle { color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#252525" : (parent.hovered ? "#222" : "transparent"); radius: 6 }
                                                     contentItem: RowLayout {
                                                         spacing: 15
                                                         Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
@@ -426,6 +434,7 @@ ApplicationWindow {
                                             }
                                         }
                                     }
+                                }
                                 }
                             }
                         }
@@ -475,47 +484,50 @@ ApplicationWindow {
                                                     }
                                                 }
                                             }                                            
-                                            GridView {
-                                                id: libraryGridView
-                                                Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
-                                                cellWidth: 160; cellHeight: 200
-                                                model: playlistsModel
-                                                header: Item {
-                                                    width: 160; height: 200
-                                                    Rectangle {
-                                                        anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12
-                                                        ColumnLayout {
-                                                            anchors.fill: parent; anchors.margins: 10; spacing: 8
-                                                            Rectangle {
-                                                                Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
-                                                                Image {
-                                                                    anchors.centerIn: parent
-                                                                    source: "assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
-                                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            Rectangle {
+                                                Layout.fillWidth: true; Layout.preferredHeight: libraryGridView.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true
+                                                GridView {
+                                                    id: libraryGridView
+                                                    anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true
+                                                    cellWidth: 160; cellHeight: 200
+                                                    model: playlistsModel
+                                                    header: Item {
+                                                        width: 160; height: 200
+                                                        Rectangle {
+                                                            anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12; border.color: likedMouseArea.containsMouse ? "white" : "#333"; border.width: 1
+                                                            ColumnLayout {
+                                                                anchors.fill: parent; anchors.margins: 10; spacing: 8
+                                                                Rectangle {
+                                                                    Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
+                                                                    Image {
+                                                                        anchors.centerIn: parent
+                                                                        source: "assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
+                                                                        layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                                    }
                                                                 }
+                                                                Text { text: "LIKED TRACKS"; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
                                                             }
-                                                            Text { text: "LIKED TRACKS"; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
+                                                            MouseArea { id: likedMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: openPlaylist("LIKED") }
                                                         }
-                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: openPlaylist("LIKED") }
                                                     }
-                                                }
-                                                delegate: Item {
-                                                    width: 160; height: 200
-                                                    Rectangle {
-                                                        anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12
-                                                        ColumnLayout {
-                                                            anchors.fill: parent; anchors.margins: 10; spacing: 8
-                                                            Rectangle {
-                                                                Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
-                                                                Image {
-                                                                    anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop
-                                                                    visible: model.coverUrl !== ""; layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 120; height: 120; radius: 8 } }
+                                                    delegate: Item {
+                                                        width: 160; height: 200
+                                                        Rectangle {
+                                                            anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12; border.color: playlistMouseArea.containsMouse ? "white" : "#333"; border.width: 1
+                                                            ColumnLayout {
+                                                                anchors.fill: parent; anchors.margins: 10; spacing: 8
+                                                                Rectangle {
+                                                                    Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
+                                                                    Image {
+                                                                        anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop
+                                                                        visible: model.coverUrl !== ""; layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 120; height: 120; radius: 8 } }
+                                                                    }
+                                                                    Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.pixelSize: 40; visible: model.coverUrl === "" }
                                                                 }
-                                                                Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.pixelSize: 40; visible: model.coverUrl === "" }
+                                                                Text { text: model.name; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
                                                             }
-                                                            Text { text: model.name; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
+                                                            MouseArea { id: playlistMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: openPlaylist(model.name) }
                                                         }
-                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: openPlaylist(model.name) }
                                                     }
                                                 }
                                             }
@@ -576,10 +588,13 @@ ApplicationWindow {
                                                     }
                                                 }
                                             }
-                                            ListView { 
-                                                id: libraryTracksList
-                                                Layout.fillWidth: true; Layout.preferredHeight: contentHeight; interactive: false; clip: true
-                                                model: libraryModel; delegate: trackDelegate
+                                            Rectangle {
+                                                Layout.fillWidth: true; Layout.preferredHeight: libraryTracksList.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true
+                                                ListView { 
+                                                    id: libraryTracksList
+                                                    anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true
+                                                    model: libraryModel; delegate: trackDelegate
+                                                }
                                             }
                                         }
                                     }
@@ -775,7 +790,7 @@ ApplicationWindow {
             id: trackDelegateRoot
             width: ListView.view.width
             height: 54
-            color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#1a1a1a" : (trackMouseArea.containsMouse ? "#222" : "transparent")
+            color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#252525" : (trackMouseArea.containsMouse ? "#222" : "transparent")
             radius: 6
 
             RowLayout {
