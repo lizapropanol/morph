@@ -81,6 +81,7 @@ ApplicationWindow {
 
     function openPlaylist(name) {
         currentPlaylist = name
+        saveLastImport = true
         libraryModel.clear()
         fullPlaylistTracks = []
         loadedTracksCount = 0
@@ -209,6 +210,7 @@ ApplicationWindow {
                             height: 40
                             onClicked: {
                                 currentView = modelData.toLowerCase()
+                                saveLastImport = true
                                 if (currentView === "library") {
                                     librarySubView = "grid"
                                     playlistsModel.clear()
@@ -622,7 +624,7 @@ ApplicationWindow {
                                                 Item { Layout.fillWidth: true }
                                                 
                                                 RowLayout {
-                                                    visible: currentPlaylist !== ""
+                                                    visible: currentPlaylist !== "" && saveLastImport
                                                     spacing: 10
                                                     Button {
                                                         text: "EDIT"
