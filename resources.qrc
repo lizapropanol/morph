@@ -1,6 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>ui/style.qml</file>
+    <file>assets/logo.svg</file>
     <file>assets/heart-outline.svg</file>
     <file>assets/heart.svg</file>
     <file>assets/magnify.svg</file>

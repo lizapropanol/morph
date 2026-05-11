@@ -42,7 +42,7 @@ void PathProvider::ensureConfigExists() {
     }
 
     QStringList assets = {
-        "heart-outline.svg", "heart.svg", "magnify.svg", "pause-circle.svg", 
+        "logo.svg", "heart-outline.svg", "heart.svg", "magnify.svg", "pause-circle.svg", 
         "pause.svg", "play-circle.svg", "play.svg", "plus-box.svg", "plus.svg", 
         "repeat-once.svg", "repeat.svg", "skip-next.svg", "skip-previous.svg", 
         "soundcloud_icon.svg", "yandex_music_icon.svg"
