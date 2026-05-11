@@ -399,7 +399,7 @@ ApplicationWindow {
                                                                 layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 15 } }
                                                             }
                                                             Rectangle {
-                                                                anchors.fill: parent; color: "#aa000000"; visible: mixMouseArea.containsMouse
+                                                                anchors.fill: parent; color: "#aa000000"; visible: mixMouseArea.containsMouse; radius: 15
                                                                 Image {
                                                                     anchors.centerIn: parent; source: "assets/play.svg"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
                                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
