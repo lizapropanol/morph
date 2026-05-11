@@ -96,6 +96,8 @@ class MprisManager : public QObject {
     Q_OBJECT
 public:
     explicit MprisManager(AudioEngine* audio, QObject* parent = nullptr);
+    QString currentTitle() const;
+    QString currentArtist() const;
 
 public slots:
     void updateMetadata(const QVariantMap& track) { m_player->updateMetadata(track); }
@@ -103,6 +105,7 @@ public slots:
 signals:
     void nextRequested();
     void previousRequested();
+    void metadataChanged();
 
 private:
     MprisRootAdaptor* m_root;

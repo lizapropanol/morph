@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QQmlApplicationEngine>
+#include <QSystemTrayIcon>
+#include <QMenu>
 #include "utils/FileWatcher.h"
 #include "audio/AudioEngine.h"
 #include "ServiceManager.h"
@@ -17,14 +19,22 @@ public:
 
 public slots:
     void reload();
+    void toggleWindow();
+    void updateTrayMenu();
 
 private:
+    void setupTray();
+
     QQmlApplicationEngine* engine;
     FileWatcher* watcher;
     AudioEngine* audio;
     ServiceManager* services;
     SettingsManager* settings;
     MprisManager* mpris;
+    QSystemTrayIcon* trayIcon;
+    QMenu* trayMenu;
+    QAction* trackInfoAction;
+    QAction* playPauseAction;
 };
 
 #endif

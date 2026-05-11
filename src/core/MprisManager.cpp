@@ -8,9 +8,19 @@ MprisManager::MprisManager(AudioEngine* audio, QObject* parent) : QObject(parent
 
     connect(m_player, &MprisPlayerAdaptor::nextRequested, this, &MprisManager::nextRequested);
     connect(m_player, &MprisPlayerAdaptor::previousRequested, this, &MprisManager::previousRequested);
+    connect(m_player, &MprisPlayerAdaptor::metadataChanged, this, &MprisManager::metadataChanged);
 
     QDBusConnection::sessionBus().registerService("org.mpris.MediaPlayer2.morph");
     QDBusConnection::sessionBus().registerObject("/org/mpris/MediaPlayer2", this);
+}
+
+QString MprisManager::currentTitle() const {
+    return m_player->Metadata().value("xesam:title").toString();
+}
+
+QString MprisManager::currentArtist() const {
+    QStringList artists = m_player->Metadata().value("xesam:artist").toStringList();
+    return artists.isEmpty() ? "" : artists.first();
 }
 
 MprisPlayerAdaptor::MprisPlayerAdaptor(AudioEngine* audio, QObject* parent) 

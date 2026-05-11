@@ -8,7 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Core Quick Qml Network Multimedia DBus REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Qml Network Multimedia DBus Widgets REQUIRED)
 
 add_executable(morph
     resources.qrc
@@ -35,4 +35,5 @@ target_link_libraries(morph PRIVATE
     Qt5::Network
     Qt5::Multimedia
     Qt5::DBus
+    Qt5::Widgets
 )
