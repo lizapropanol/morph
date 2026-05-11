@@ -65,12 +65,14 @@ To unlock full functionality, you need to provide your authentication tokens in 
 2. Log in to your Yandex account.
 3. Copy the generated token and paste it into the "Yandex Music Token" field in morph's settings.
 
-### SoundCloud Client ID
-1. Open [soundcloud.com](https://soundcloud.com) in your browser.
-2. Open Developer Tools (F12) and go to the Network tab.
-3. Filter by `api-v2` and reload the page.
-4. Click on any API request and look for the `Authorization` header.
-5. Copy the token (excluding the "OAuth " prefix) and paste it into the "SoundCloud Client ID" field in morph.
+### SoundCloud OAuth Token
+1. Log in to your account at [soundcloud.com](https://soundcloud.com).
+2. Open Developer Tools (**F12**) and go to the **Application** tab (Chrome/Edge) or **Storage** tab (Firefox).
+3. In the sidebar, expand **Cookies** and select `https://soundcloud.com`.
+4. Find the cookie named `oauth_token` and copy its value (it starts with `2-`).
+5. Paste this token into the "SoundCloud Client ID" field in morph's settings.
+
+*Note: Using a personal OAuth token is required for personalized features like **Daily Mixes**.*
 
 ---
 
