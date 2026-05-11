@@ -63,6 +63,18 @@ ApplicationWindow {
             MorphServices.resolve(currentTrack.service, currentTrack.id)
             MorphMpris.updateMetadata(currentTrack)
             repeatOne = session.repeatOne || false
+            
+            if (session.queue) {
+                fullPlaylistTracks = session.queue
+                currentPlaylist = session.playlist || ""
+                currentTrackIndex = session.index !== undefined ? session.index : -1
+                saveLastImport = session.saveLastImport !== undefined ? session.saveLastImport : true
+                libraryModel.clear()
+                for (var i = 0; i < fullPlaylistTracks.length; i++) {
+                    libraryModel.append(fullPlaylistTracks[i])
+                }
+                loadedTracksCount = fullPlaylistTracks.length
+            }
         }
     }
 
@@ -71,7 +83,11 @@ ApplicationWindow {
             "track": currentTrack,
             "volume": MorphAudio.volume,
             "position": MorphAudio.position,
-            "repeatOne": repeatOne
+            "repeatOne": repeatOne,
+            "queue": fullPlaylistTracks,
+            "playlist": currentPlaylist,
+            "index": currentTrackIndex,
+            "saveLastImport": saveLastImport
         })
     }
 
