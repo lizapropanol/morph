@@ -383,36 +383,59 @@ ApplicationWindow {
                                         Layout.fillWidth: true; spacing: 20
                                         visible: dailyMixesModel.count > 0
                                         Text { text: "DAILY MIXES"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Black }
-                                        ListView {
-                                            Layout.fillWidth: true; Layout.preferredHeight: 180; orientation: ListView.Horizontal; spacing: 15
-                                            model: dailyMixesModel; clip: true
-                                            delegate: Item {
-                                                width: 140; height: 180
-                                                ColumnLayout {
-                                                    anchors.fill: parent; spacing: 10
-                                                    Rectangle {
-                                                        Layout.preferredWidth: 140; Layout.preferredHeight: 140; radius: 15; color: "#1a1a1a"; clip: true
-                                                        Image {
-                                                            anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop
-                                                            layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 15 } }
-                                                        }
+                                        Item {
+                                            Layout.fillWidth: true; Layout.preferredHeight: 180
+                                            ListView {
+                                                id: dailyMixesListView; anchors.fill: parent; orientation: ListView.Horizontal; spacing: 15
+                                                model: dailyMixesModel; clip: true; boundsBehavior: Flickable.StopAtBounds
+                                                delegate: Item {
+                                                    width: 140; height: 180
+                                                    ColumnLayout {
+                                                        anchors.fill: parent; spacing: 10
                                                         Rectangle {
-                                                            anchors.fill: parent; color: "#aa000000"; visible: mixMouseArea.containsMouse
+                                                            Layout.preferredWidth: 140; Layout.preferredHeight: 140; radius: 15; color: "#1a1a1a"; clip: true
                                                             Image {
-                                                                anchors.centerIn: parent; source: "assets/play.svg"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
-                                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                                anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop
+                                                                layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 15 } }
+                                                            }
+                                                            Rectangle {
+                                                                anchors.fill: parent; color: "#aa000000"; visible: mixMouseArea.containsMouse
+                                                                Image {
+                                                                    anchors.centerIn: parent; source: "assets/play.svg"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
+                                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                                }
+                                                            }
+                                                            MouseArea {
+                                                                id: mixMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
+                                                                onClicked: if (model.permalink_url) {
+                                                                    saveLastImport = false
+                                                                    MorphServices.importPlaylist(model.permalink_url)
+                                                                }
                                                             }
                                                         }
-                                                        MouseArea {
-                                                            id: mixMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
-                                                            onClicked: if (model.permalink_url) {
-                                                                saveLastImport = false
-                                                                MorphServices.importPlaylist(model.permalink_url)
-                                                            }
-                                                        }
+                                                        Text { Layout.fillWidth: true; text: model.name; color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Bold; elide: Text.ElideRight; horizontalAlignment: Text.AlignHCenter }
                                                     }
-                                                    Text { Layout.fillWidth: true; text: model.name; color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Bold; elide: Text.ElideRight; horizontalAlignment: Text.AlignHCenter }
                                                 }
+                                            }
+                                            
+                                            Rectangle {
+                                                anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: 0
+                                                width: 32; height: 32; radius: 16; color: "#cc000000"; visible: !dailyMixesListView.atBeginning
+                                                Image {
+                                                    anchors.centerIn: parent; source: "assets/chevron-left.svg"; width: 16; height: 16
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                }
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: dailyMixesListView.flick(2000, 0) }
+                                            }
+
+                                            Rectangle {
+                                                anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: 0
+                                                width: 32; height: 32; radius: 16; color: "#cc000000"; visible: !dailyMixesListView.atEnd
+                                                Image {
+                                                    anchors.centerIn: parent; source: "assets/chevron-right.svg"; width: 16; height: 16
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                }
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: dailyMixesListView.flick(-2000, 0) }
                                             }
                                         }
                                     }
