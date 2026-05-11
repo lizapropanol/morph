@@ -29,6 +29,7 @@ ApplicationWindow {
     property var fullPlaylistTracks: []
     property int loadedTracksCount: 0
     property bool isRestoringSession: false
+    property bool isRecovering: false
     property var streamUrlCache: ({})
     property real lastKnownPosition: 0
 
@@ -1113,10 +1114,13 @@ ApplicationWindow {
     function onStreamUrlReady(trackId, streamUrl) {
         streamUrlCache[trackId] = streamUrl
         if (currentTrack && currentTrack.id === trackId) {
-            if (isRestoringSession) {
-                MorphAudio.load(streamUrl)
+            if (isRestoringSession || isRecovering) {
+                if (isRestoringSession) MorphAudio.load(streamUrl)
+                else MorphAudio.play(streamUrl)
+                
                 MorphAudio.position = lastKnownPosition
                 isRestoringSession = false
+                isRecovering = false
             } else {
                 MorphAudio.play(streamUrl)
             }
@@ -1192,6 +1196,15 @@ ApplicationWindow {
     Connections {
         target: MorphAudio
         function onFinished() { if (repeatOne) { MorphAudio.position = 0; MorphAudio.resume() } else playNext() }
+        function onError(errorString) {
+            if (currentTrack && currentTrack.service === "SoundCloud") {
+                if (errorString.indexOf("Forbidden") !== -1) {
+                    isRecovering = true
+                    lastKnownPosition = MorphAudio.position
+                    MorphServices.resolve(currentTrack.service, currentTrack.id)
+                }
+            }
+        }
     }
 
     Popup {

@@ -17,6 +17,10 @@ AudioEngine::AudioEngine(QObject* parent) : QObject(parent) {
     connect(player, &QMediaPlayer::mediaStatusChanged, [this](QMediaPlayer::MediaStatus status) {
         if (status == QMediaPlayer::EndOfMedia) emit finished();
     });
+
+    connect(player, QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error), [this](QMediaPlayer::Error error) {
+        emit this->error(player->errorString());
+    });
     
     connect(player, QOverload<>::of(&QMediaPlayer::metaDataChanged), this, &AudioEngine::bitrateChanged);
     

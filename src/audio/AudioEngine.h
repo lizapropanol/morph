@@ -39,6 +39,7 @@ signals:
     void durationChanged();
     void stateChanged();
     void bitrateChanged();
+    void error(const QString& errorString);
     void seeked(qint64 position);
     void finished();
 
