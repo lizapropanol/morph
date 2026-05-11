@@ -28,6 +28,7 @@ ApplicationWindow {
     property bool repeatOne: false
     property var fullPlaylistTracks: []
     property int loadedTracksCount: 0
+    property bool isRestoringSession: false
     property var streamUrlCache: ({})
     property real lastKnownPosition: 0
 
@@ -55,10 +56,11 @@ ApplicationWindow {
         
         var session = MorphSettings.loadSession()
         if (session.track) {
+            isRestoringSession = true
             currentTrack = session.track
             MorphAudio.volume = session.volume || 50
+            lastKnownPosition = session.position || 0
             MorphServices.resolve(currentTrack.service, currentTrack.id)
-            MorphAudio.position = session.position || 0
             MorphMpris.updateMetadata(currentTrack)
             repeatOne = session.repeatOne || false
         }
@@ -1095,9 +1097,15 @@ ApplicationWindow {
     function onStreamUrlReady(trackId, streamUrl) {
         streamUrlCache[trackId] = streamUrl
         if (currentTrack && currentTrack.id === trackId) {
-            MorphAudio.play(streamUrl)
-            if (currentTrackIndex === -1) { 
+            if (isRestoringSession) {
+                MorphAudio.load(streamUrl)
                 MorphAudio.position = lastKnownPosition
+                isRestoringSession = false
+            } else {
+                MorphAudio.play(streamUrl)
+            }
+            
+            if (currentTrackIndex === -1) { 
                 currentTrackIndex = loadedTracksCount // dummy positive index to avoid loop
             }
         }

@@ -29,6 +29,7 @@ public:
 
 public slots:
     void play(const QString& url);
+    void load(const QString& url);
     void pause();
     void resume();
     void stop();

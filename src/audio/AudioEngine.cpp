@@ -49,6 +49,10 @@ void AudioEngine::play(const QString& url) {
     player->play();
 }
 
+void AudioEngine::load(const QString& url) {
+    player->setMedia(QUrl(url));
+}
+
 void AudioEngine::pause() { player->pause(); }
 
 void AudioEngine::resume() { player->play(); }
