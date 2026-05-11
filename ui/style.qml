@@ -156,7 +156,8 @@ ApplicationWindow {
             artist: track.artist,
             album: track.album || "",
             coverUrl: track.coverUrl,
-            service: service
+            service: service,
+            webUrl: track.webUrl || ""
         }
         currentTrack = cleanTrack
         currentTrackIndex = index
@@ -980,7 +981,7 @@ ApplicationWindow {
                             if (searchModel.count > 0) { track = searchModel.get(index); m = searchModel }
                             else { track = historyModel.get(index); m = historyModel }
 
-                            var tObj = { "id": track.id, "title": track.title, "artist": track.artist, "coverUrl": track.coverUrl, "service": track.service }
+                            var tObj = { "id": track.id, "title": track.title, "artist": track.artist, "coverUrl": track.coverUrl, "service": track.service, "webUrl": track.webUrl || "" }
                             MorphSettings.addSearchHistory(tObj)
 
                             historyModel.clear()
@@ -1024,7 +1025,7 @@ ApplicationWindow {
                 Image {
                     source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                     MouseArea { 
-                        anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service }); cursorShape: Qt.PointingHandCursor 
+                        anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service, "album": model.album || "", "webUrl": model.webUrl || "" }); cursorShape: Qt.PointingHandCursor 
                     }
                 }
             }
@@ -1060,10 +1061,12 @@ ApplicationWindow {
                 MouseArea {
                     id: copyItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if (targetContextTrack && targetContextTrack.webUrl) {
+                        if (targetContextTrack && targetContextTrack.webUrl && targetContextTrack.webUrl !== "") {
                             MorphSettings.copyToClipboard(targetContextTrack.webUrl)
                         } else if (targetContextTrack && targetContextTrack.service === "Yandex") {
                             MorphSettings.copyToClipboard("https://music.yandex.ru/track/" + targetContextTrack.id)
+                        } else if (targetContextTrack && targetContextTrack.service === "SoundCloud") {
+                            MorphSettings.copyToClipboard("https://soundcloud.com/tracks/" + targetContextTrack.id)
                         }
                         trackContextMenu.close()
                     }
