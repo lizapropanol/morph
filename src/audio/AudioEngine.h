@@ -21,8 +21,7 @@ public:
     void setVolume(int volume);
 
     qint64 position() const;
-    void setPosition(qint64 position);
-
+    Q_INVOKABLE void setPosition(qint64 position);
     qint64 duration() const;
     bool isPlaying() const;
     int bitrate() const;

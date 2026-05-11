@@ -1191,7 +1191,7 @@ ApplicationWindow {
 
     Connections {
         target: MorphAudio
-        function onFinished() { if (repeatOne) { MorphAudio.setPosition(0); MorphAudio.resume() } else playNext() }
+        function onFinished() { if (repeatOne) { MorphAudio.position = 0; MorphAudio.resume() } else playNext() }
     }
 
     Popup {
