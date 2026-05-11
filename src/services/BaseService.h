@@ -13,6 +13,7 @@ public:
     virtual void resolveStreamUrl(const QString& trackId) = 0;
     virtual void getCharts() = 0;
     virtual void getWave() = 0;
+    virtual void getDailyMixes() = 0;
     virtual void reportPlay(const QString& trackId, const QString& albumId) = 0;
     virtual void importPlaylist(const QString& url) = 0;
 
@@ -21,6 +22,7 @@ signals:
     void streamUrlReady(const QString& trackId, const QString& streamUrl);
     void chartsReady(const QString& serviceName, const QVariantList& tracks);
     void waveReady(const QString& serviceName, const QVariantList& tracks);
+    void dailyMixesReady(const QString& serviceName, const QVariantList& playlists);
     void playlistImported(const QString& name, const QString& coverUrl, const QVariantList& tracks);
     void errorOccurred(const QString& message);
 };

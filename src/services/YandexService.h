@@ -14,6 +14,7 @@ public:
     void resolveStreamUrl(const QString& trackId) override;
     void getCharts() override;
     void getWave() override;
+    void getDailyMixes() override;
     void reportPlay(const QString& trackId, const QString& albumId) override;
     void importPlaylist(const QString& url) override;
 

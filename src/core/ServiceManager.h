@@ -16,6 +16,7 @@ public slots:
     void search(const QString& query, const QString& serviceName = "all");
     void getCharts();
     void getWave();
+    void getDailyMixes();
     void resolve(const QString& serviceName, const QString& trackId);
     void reportPlay(const QString& serviceName, const QString& trackId, const QString& albumId);
     void importPlaylist(const QString& url);
@@ -28,6 +29,7 @@ signals:
     void streamUrlReady(const QString& trackId, const QString& streamUrl);
     void chartsReady(const QString& serviceName, const QVariantList& tracks);
     void waveReady(const QString& serviceName, const QVariantList& tracks);
+    void dailyMixesReady(const QString& serviceName, const QVariantList& playlists);
     void playlistImported(const QString& name, const QString& coverUrl, const QVariantList& tracks);
     void errorOccurred(const QString& message);
 

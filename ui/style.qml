@@ -21,6 +21,7 @@ ApplicationWindow {
     property string oldPlaylistName: ""
     property string librarySubView: "grid"
     property bool isEditingPlaylist: false
+    property bool saveLastImport: true
     property int likesVersion: 0
     property int playlistsVersion: 0
     property int settingsVersion: 0
@@ -48,6 +49,7 @@ ApplicationWindow {
         if (sToken) MorphServices.setSoundCloudClientId(sToken)
         
         MorphServices.getCharts()
+        MorphServices.getDailyMixes()
         var hist = MorphSettings.getSearchHistory()
         for (var i = 0; i < hist.length; i++) historyModel.append(hist[i])
         
@@ -169,6 +171,7 @@ ApplicationWindow {
     ListModel { id: playlistsModel }
     ListModel { id: historyModel }
     ListModel { id: chartsModel }
+    ListModel { id: dailyMixesModel }
 
     Rectangle {
         anchors.fill: parent
@@ -369,6 +372,44 @@ ApplicationWindow {
                                                     } else {
                                                         MorphServices.getWave()
                                                     }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true; spacing: 20
+                                        visible: dailyMixesModel.count > 0
+                                        Text { text: "DAILY MIXES"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Black }
+                                        ListView {
+                                            Layout.fillWidth: true; Layout.preferredHeight: 180; orientation: ListView.Horizontal; spacing: 15
+                                            model: dailyMixesModel; clip: true
+                                            delegate: Item {
+                                                width: 140; height: 180
+                                                ColumnLayout {
+                                                    anchors.fill: parent; spacing: 10
+                                                    Rectangle {
+                                                        Layout.preferredWidth: 140; Layout.preferredHeight: 140; radius: 15; color: "#1a1a1a"; clip: true
+                                                        Image {
+                                                            anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop
+                                                            layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 15 } }
+                                                        }
+                                                        Rectangle {
+                                                            anchors.fill: parent; color: "#aa000000"; visible: mixMouseArea.containsMouse
+                                                            Image {
+                                                                anchors.centerIn: parent; source: "assets/play.svg"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
+                                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                            }
+                                                        }
+                                                        MouseArea {
+                                                            id: mixMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
+                                                            onClicked: if (model.permalink_url) {
+                                                                saveLastImport = false
+                                                                MorphServices.importPlaylist(model.permalink_url)
+                                                            }
+                                                        }
+                                                    }
+                                                    Text { Layout.fillWidth: true; text: model.name; color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Bold; elide: Text.ElideRight; horizontalAlignment: Text.AlignHCenter }
                                                 }
                                             }
                                         }
@@ -1019,6 +1060,12 @@ ApplicationWindow {
             }
             if (libraryModel.count > 0) playTrack(libraryModel.get(0), 0)
         }
+        function onDailyMixesReady(serviceName, results) {
+            if (results.length > 0) dailyMixesModel.clear()
+            for (var i = 0; i < results.length; i++) {
+                dailyMixesModel.append(results[i])
+            }
+        }
     function onStreamUrlReady(trackId, streamUrl) {
         streamUrlCache[trackId] = streamUrl
         if (currentTrack && currentTrack.id === trackId) {
@@ -1030,7 +1077,23 @@ ApplicationWindow {
         }
     }
         function onPlaylistImported(name, coverUrl, tracks) {
-            MorphSettings.createPlaylistWithTracks(name, coverUrl, tracks)
+            if (saveLastImport) {
+                MorphSettings.createPlaylistWithTracks(name, coverUrl, tracks)
+            }
+            
+            currentView = "library"
+            librarySubView = "list"
+            currentPlaylist = name
+            
+            libraryModel.clear()
+            for (var i = 0; i < tracks.length; i++) {
+                libraryModel.append(tracks[i])
+            }
+            
+            if (libraryModel.count > 0) {
+                playTrack(libraryModel.get(0), 0)
+            }
+
             importPlaylistPopup.isBusy = false
             importPlaylistPopup.close()
         }
@@ -1200,6 +1263,7 @@ ApplicationWindow {
                         if (importUrlField.text !== "") {
                             importPlaylistPopup.isBusy = true
                             importPlaylistPopup.errorMsg = ""
+                            saveLastImport = true
                             MorphServices.importPlaylist(importUrlField.text)
                         }
                     }

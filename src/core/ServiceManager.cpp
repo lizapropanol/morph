@@ -17,6 +17,9 @@ ServiceManager::ServiceManager(QObject* parent) : QObject(parent) {
     connect(soundcloud, &BaseService::chartsReady, this, &ServiceManager::chartsReady);
     connect(yandex, &BaseService::waveReady, this, &ServiceManager::waveReady);
     connect(soundcloud, &BaseService::waveReady, this, &ServiceManager::waveReady);
+    
+    connect(yandex, &BaseService::dailyMixesReady, this, &ServiceManager::dailyMixesReady);
+    connect(soundcloud, &BaseService::dailyMixesReady, this, &ServiceManager::dailyMixesReady);
 
     connect(yandex, &BaseService::streamUrlReady, this, &ServiceManager::streamUrlReady);
     connect(soundcloud, &BaseService::streamUrlReady, this, &ServiceManager::streamUrlReady);
@@ -45,6 +48,11 @@ void ServiceManager::getCharts() {
 void ServiceManager::getWave() {
     yandex->getWave();
     soundcloud->getWave();
+}
+
+void ServiceManager::getDailyMixes() {
+    yandex->getDailyMixes();
+    soundcloud->getDailyMixes();
 }
 
 void ServiceManager::resolve(const QString& serviceName, const QString& trackId) {

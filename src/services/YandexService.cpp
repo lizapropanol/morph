@@ -94,6 +94,10 @@ void YandexService::getWave() {
     });
 }
 
+void YandexService::getDailyMixes() {
+    emit dailyMixesReady("Yandex", QVariantList());
+}
+
 void YandexService::importPlaylist(const QString& url) {
     if (m_token.isEmpty()) return;
 
