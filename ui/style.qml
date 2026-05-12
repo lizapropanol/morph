@@ -443,9 +443,11 @@ ApplicationWindow {
                                     RowLayout {
                                         spacing: 12
                                         Rectangle {
+                                            id: greetingDot
                                             width: 8; height: 8; radius: 4
-                                            color: (new Date().getHours() >= 4 && new Date().getHours() < 18) ? "#44ff44" : "#bb66ff"
-                                            layer.enabled: true; layer.effect: DropShadow { transparentBorder: true; radius: 8; samples: 17; color: parent.color }
+                                            property color dotColor: (new Date().getHours() >= 4 && new Date().getHours() < 18) ? "#44ff44" : "#bb66ff"
+                                            color: dotColor
+                                            layer.enabled: true; layer.effect: DropShadow { transparentBorder: true; radius: 8; samples: 17; color: greetingDot.dotColor }
                                         }
                                         Text { 
                                             text: homeContent.getGreeting()
