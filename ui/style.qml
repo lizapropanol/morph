@@ -941,13 +941,13 @@ ApplicationWindow {
                                             onClicked: settingsSubView = "cache"
                                             background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
                                             contentItem: RowLayout {
-                                                anchors.fill: parent; anchors.margins: 15
-                                                Text { text: "Manage Storage"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true }
+                                                anchors.fill: parent; anchors.margins: 15; spacing: 10
+                                                Text { text: "Manage Storage"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
                                                 Text { 
                                                     text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize()))
-                                                    color: "#888"; font.family: "Rubik"; font.pixelSize: 13 
+                                                    color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                 }
-                                                Text { text: "›"; color: "#444"; font.pixelSize: 20 }
+                                                Text { text: "›"; color: "#444"; font.pixelSize: 20; Layout.alignment: Qt.AlignVCenter }
                                             }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                         }
@@ -963,15 +963,30 @@ ApplicationWindow {
                                         Timer { id: successTimer; interval: 2000; onTriggered: cacheContent.showSuccess = false }
 
                                         RowLayout {
-                                            spacing: 15
-                                            Button {
-                                                text: "‹"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
-                                                onClicked: settingsSubView = "main"
-                                                background: Rectangle { color: "transparent" }
-                                                contentItem: Text { text: parent.text; color: "white"; font.pixelSize: 24; horizontalAlignment: Text.AlignHCenter }
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                            Layout.fillWidth: true
+                                            spacing: 0
+                                            
+                                            Item {
+                                                Layout.preferredWidth: headerRow.width
+                                                Layout.preferredHeight: 40
+                                                
+                                                RowLayout {
+                                                    id: headerRow
+                                                    spacing: 15
+                                                    Button {
+                                                        text: "‹"; Layout.preferredWidth: 32; Layout.preferredHeight: 32
+                                                        background: Rectangle { color: "transparent" }
+                                                        contentItem: Text { text: parent.text; color: "white"; font.pixelSize: 24; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                    }
+                                                    Text { text: "STORAGE USAGE"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold; Layout.alignment: Qt.AlignVCenter }
+                                                }
+
+                                                MouseArea { 
+                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                    onClicked: settingsSubView = "main"
+                                                }
                                             }
-                                            Text { text: "STORAGE USAGE"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold }
+                                            Item { Layout.fillWidth: true }
                                         }
 
                                         Rectangle {
@@ -1047,6 +1062,7 @@ ApplicationWindow {
                                         }
 
                                         Button {
+                                            id: clearBtn
                                             Layout.fillWidth: true; Layout.preferredHeight: 50
                                             enabled: cacheContent.clearTracks || cacheContent.clearCovers
                                             onClicked: {
@@ -1056,11 +1072,15 @@ ApplicationWindow {
                                                 cacheContent.showSuccess = true
                                                 successTimer.start()
                                             }
-                                            background: Rectangle { color: parent.enabled ? "white" : "#222"; radius: 10 }
+                                            background: Rectangle { 
+                                                color: clearBtn.enabled ? "#151515" : "#111"
+                                                radius: 10; border.color: clearBtn.enabled ? "#333" : "#222"
+                                            }
                                             contentItem: Text { 
                                                 text: cacheContent.showSuccess ? "CLEARED SUCCESSFULLY!" : "CLEAR SELECTED DATA"
-                                                color: cacheContent.showSuccess ? "#44ff44" : (parent.enabled ? "black" : "#444")
-                                                font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter 
+                                                color: cacheContent.showSuccess ? "#44ff44" : (clearBtn.enabled ? "white" : "#444")
+                                                font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Black
+                                                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                                             }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                         }
