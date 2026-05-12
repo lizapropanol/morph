@@ -518,6 +518,7 @@ ApplicationWindow {
                                                             Image {
                                                                 anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                                 layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 15 } }
+                                                                onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                             }
                                                             Rectangle {
                                                                 anchors.fill: parent; color: "#aa000000"; visible: mixMouseArea.containsMouse; radius: 15
@@ -584,6 +585,7 @@ ApplicationWindow {
                                                         Image { 
                                                             source: leftTrack ? (leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                                            onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
@@ -618,6 +620,7 @@ ApplicationWindow {
                                                         Image { 
                                                             source: rightTrack ? (rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                                            onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
@@ -1140,6 +1143,7 @@ ApplicationWindow {
                     source: model.coverUrl || ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
                     layer.enabled: true
                     layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                    onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                 }
                 ColumnLayout {
                     Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
