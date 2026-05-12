@@ -194,6 +194,78 @@ ApplicationWindow {
     ListModel { id: chartsModel }
     ListModel { id: dailyMixesModel }
 
+    property bool isStartup: true
+    property real revealRadius: 0
+    property real logoScale: 1.0
+
+    Timer {
+        interval: 2200
+        running: true
+        onTriggered: {
+            isStartup = false
+            revealAnimation.start()
+        }
+    }
+
+    ParallelAnimation {
+        id: revealAnimation
+        NumberAnimation {
+            target: window
+            property: "revealRadius"
+            from: 0
+            to: Math.sqrt(Math.pow(window.width, 2) + Math.pow(window.height, 2)) * 1.2
+            duration: 800
+            easing.type: Easing.InExpo
+        }
+        NumberAnimation {
+            target: window
+            property: "logoScale"
+            from: 1.0
+            to: 15.0
+            duration: 800
+            easing.type: Easing.InExpo
+        }
+    }
+
+    Item {
+        id: splashScreen
+        anchors.fill: parent
+        z: 9999
+        visible: isStartup || revealAnimation.running
+
+        Rectangle { id: splashBlack; anchors.fill: parent; color: "black"; visible: false }
+        
+        Item {
+            id: maskSource
+            anchors.fill: parent
+            visible: false
+            Rectangle {
+                width: revealRadius; height: width
+                radius: width / 2
+                color: "white"
+                anchors.centerIn: parent
+            }
+        }
+
+        OpacityMask {
+            anchors.fill: parent
+            source: splashBlack
+            maskSource: maskSource
+            invert: true
+        }
+
+        Image {
+            id: splashLogo
+            anchors.centerIn: parent
+            source: "assets/logo.svg"
+            width: 80; height: 80
+            scale: logoScale
+            smooth: true
+        }
+        
+        MouseArea { anchors.fill: parent; enabled: isStartup }
+    }
+
     Rectangle {
         anchors.fill: parent
         color: "black"
@@ -437,7 +509,7 @@ ApplicationWindow {
                                                         Rectangle {
                                                             anchors.fill: parent; radius: 15; color: "#1a1a1a"; clip: true
                                                             Image {
-                                                                anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop
+                                                                anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                                 layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 15 } }
                                                             }
                                                             Rectangle {
@@ -503,7 +575,7 @@ ApplicationWindow {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Image { 
-                                                            source: leftTrack ? (leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
+                                                            source: leftTrack ? (leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                         }
                                                         ColumnLayout {
@@ -533,7 +605,7 @@ ApplicationWindow {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Image { 
-                                                            source: rightTrack ? (rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
+                                                            source: rightTrack ? (rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                         }
                                                         ColumnLayout {
