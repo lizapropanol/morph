@@ -990,7 +990,7 @@ ApplicationWindow {
                                         }
 
                                         Rectangle {
-                                            Layout.fillWidth: true; Layout.preferredHeight: 120; color: "#151515"; radius: 15; border.color: "#333"
+                                            Layout.fillWidth: true; Layout.preferredHeight: 120; color: "#1a1a1a"; radius: 15; border.color: "#333"
                                             ColumnLayout {
                                                 anchors.fill: parent; anchors.margins: 20; spacing: 15
                                                 RowLayout {
@@ -1073,7 +1073,7 @@ ApplicationWindow {
                                                 successTimer.start()
                                             }
                                             background: Rectangle { 
-                                                color: clearBtn.enabled ? "#151515" : "#111"
+                                                color: clearBtn.enabled ? "#1a1a1a" : "#111"
                                                 radius: 10; border.color: clearBtn.enabled ? "#333" : "#222"
                                             }
                                             contentItem: Text { 
