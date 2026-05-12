@@ -6,6 +6,7 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include "utils/FileWatcher.h"
+#include "utils/CacheManager.h"
 #include "audio/AudioEngine.h"
 #include "ServiceManager.h"
 #include "settings/SettingsManager.h"
@@ -27,6 +28,7 @@ private:
 
     QQmlApplicationEngine* engine;
     FileWatcher* watcher;
+    CacheManager* cache;
     AudioEngine* audio;
     ServiceManager* services;
     SettingsManager* settings;

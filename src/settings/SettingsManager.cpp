@@ -2,7 +2,7 @@
 #include "../utils/PathProvider.h"
 #include <QDir>
 
-SettingsManager::SettingsManager(QObject* parent) : QObject(parent) {
+SettingsManager::SettingsManager(CacheManager* cache, QObject* parent) : QObject(parent), cache(cache) {
     m_path = PathProvider::getDataPath() + "/settings.json";
     load();
 }
@@ -51,7 +51,13 @@ void SettingsManager::saveSession(const QVariantMap& session) {
 }
 
 QVariantMap SettingsManager::loadSession() {
-    return m_data["session"].toObject().toVariantMap();
+    QVariantMap session = m_data["session"].toObject().toVariantMap();
+    if (session.contains("track")) {
+        QVariantMap track = session["track"].toMap();
+        track["coverUrl"] = cache->getCachedCover(track["coverUrl"].toString());
+        session["track"] = track;
+    }
+    return session;
 }
 
 void SettingsManager::toggleLike(const QVariantMap& track) {
@@ -82,7 +88,13 @@ bool SettingsManager::isLiked(const QString& trackId) {
 }
 
 QVariantList SettingsManager::getLikedTracks() {
-    return m_data["likes"].toArray().toVariantList();
+    QVariantList likes = m_data["likes"].toArray().toVariantList();
+    for (int i = 0; i < likes.size(); ++i) {
+        QVariantMap track = likes[i].toMap();
+        track["coverUrl"] = cache->getCachedCover(track["coverUrl"].toString());
+        likes[i] = track;
+    }
+    return likes;
 }
 
 void SettingsManager::createPlaylist(const QString& name, const QString& coverUrl) {
@@ -150,7 +162,21 @@ void SettingsManager::addToPlaylist(const QString& playlistName, const QVariantM
 
 QVariantMap SettingsManager::getPlaylists() {
     if (!m_data.contains("playlists") || !m_data["playlists"].isObject()) return QVariantMap();
-    return m_data["playlists"].toObject().toVariantMap();
+    QVariantMap pls = m_data["playlists"].toObject().toVariantMap();
+    for (auto it = pls.begin(); it != pls.end(); ++it) {
+        QVariantMap pData = it.value().toMap();
+        pData["coverUrl"] = cache->getCachedCover(pData["coverUrl"].toString());
+        
+        QVariantList tracks = pData["tracks"].toList();
+        for (int i = 0; i < tracks.size(); ++i) {
+            QVariantMap t = tracks[i].toMap();
+            t["coverUrl"] = cache->getCachedCover(t["coverUrl"].toString());
+            tracks[i] = t;
+        }
+        pData["tracks"] = tracks;
+        pls[it.key()] = pData;
+    }
+    return pls;
 }
 
 void SettingsManager::setYandexToken(const QString& token) {
@@ -192,7 +218,13 @@ void SettingsManager::addSearchHistory(const QVariantMap& track) {
 }
 
 QVariantList SettingsManager::getSearchHistory() {
-    return m_data["history"].toArray().toVariantList();
+    QVariantList history = m_data["history"].toArray().toVariantList();
+    for (int i = 0; i < history.size(); ++i) {
+        QVariantMap track = history[i].toMap();
+        track["coverUrl"] = cache->getCachedCover(track["coverUrl"].toString());
+        history[i] = track;
+    }
+    return history;
 }
 
 void SettingsManager::setAudioQuality(const QString& quality) {

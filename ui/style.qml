@@ -823,6 +823,10 @@ ApplicationWindow {
                                             id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
                                             color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
                                             background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
+                                            onEditingFinished: {
+                                                MorphSettings.setYandexToken(text)
+                                                MorphServices.setYandexToken(text)
+                                            }
                                         }
                                     }
                                     ColumnLayout {
@@ -832,6 +836,10 @@ ApplicationWindow {
                                             id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
                                             color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
                                             background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
+                                            onEditingFinished: {
+                                                MorphSettings.setSoundCloudToken(text)
+                                                MorphServices.setSoundCloudClientId(text)
+                                            }
                                         }
                                     }
                                     ColumnLayout {
@@ -892,16 +900,26 @@ ApplicationWindow {
                                             }
                                         }
                                     }
-                                    Button {
-                                        text: "SAVE SETTINGS"; Layout.preferredWidth: 150
-                                        onClicked: {
-                                            MorphSettings.setYandexToken(yandexTokenField.text); MorphSettings.setSoundCloudToken(soundcloudTokenField.text)
-                                            MorphServices.setYandexToken(yandexTokenField.text); MorphServices.setSoundCloudClientId(soundcloudTokenField.text)
-                                            MorphServices.setAudioQuality(MorphSettings.getAudioQuality())
+                                    ColumnLayout {
+                                        Layout.fillWidth: true; spacing: 10
+                                        Text { text: "Cache Management"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                        RowLayout {
+                                            spacing: 10
+                                            Button {
+                                                text: "CLEAR TRACKS"; Layout.preferredWidth: 120
+                                                onClicked: MorphCache.clearTrackCache()
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
+                                            }
+                                            Button {
+                                                text: "CLEAR COVERS"; Layout.preferredWidth: 120
+                                                onClicked: MorphCache.clearCoverCache()
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
+                                            }
                                         }
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                        contentItem: Text { text: parent.text; color: "black"; font.family: "Rubik"; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                        background: Rectangle { color: "white"; radius: 6 }
                                     }
                                 }
                             }
@@ -1225,7 +1243,7 @@ ApplicationWindow {
             }
             
             if (currentTrackIndex === -1) { 
-                currentTrackIndex = loadedTracksCount // dummy positive index to avoid loop
+                currentTrackIndex = loadedTracksCount
             }
         }
     }

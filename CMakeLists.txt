@@ -15,6 +15,7 @@ add_executable(morph
     src/main.cpp
     src/core/Application.h src/core/Application.cpp
     src/utils/PathProvider.h src/utils/PathProvider.cpp
+    src/utils/CacheManager.h src/utils/CacheManager.cpp
     src/utils/FileWatcher.h src/utils/FileWatcher.cpp
     src/network/NetworkManager.h src/network/NetworkManager.cpp
     src/services/BaseService.h

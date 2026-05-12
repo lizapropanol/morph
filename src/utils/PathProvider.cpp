@@ -20,6 +20,14 @@ QString PathProvider::getStyleFilePath() {
     return getConfigPath() + "/style.qml";
 }
 
+QString PathProvider::getTrackCachePath() {
+    return getDataPath() + "/cache/tracks";
+}
+
+QString PathProvider::getCoverCachePath() {
+    return getDataPath() + "/cache/covers";
+}
+
 void PathProvider::ensureConfigExists() {
     QString configPath = getConfigPath();
     QString dataPath = getDataPath();
@@ -28,6 +36,8 @@ void PathProvider::ensureConfigExists() {
     QDir().mkpath(configPath);
     QDir().mkpath(dataPath);
     QDir().mkpath(assetsPath);
+    QDir().mkpath(getTrackCachePath());
+    QDir().mkpath(getCoverCachePath());
 
     QString oldSettings = configPath + "/settings.json";
     QString newSettings = dataPath + "/settings.json";

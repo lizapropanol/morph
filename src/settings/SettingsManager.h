@@ -7,6 +7,10 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include "../utils/CacheManager.h"
 
 #include <QClipboard>
 #include <QGuiApplication>
@@ -14,7 +18,7 @@
 class SettingsManager : public QObject {
     Q_OBJECT
 public:
-    explicit SettingsManager(QObject* parent = nullptr);
+    explicit SettingsManager(CacheManager* cache, QObject* parent = nullptr);
 
 public slots:
     void copyToClipboard(const QString& text);
@@ -51,6 +55,7 @@ signals:
 private:
     QString m_path;
     QJsonObject m_data;
+    CacheManager* cache;
     void load();
     void save();
 };

@@ -4,13 +4,14 @@
 #include <QObject>
 #include <QVariantList>
 #include "../network/NetworkManager.h"
+#include "../utils/CacheManager.h"
 #include "../services/YandexService.h"
 #include "../services/SoundCloudService.h"
 
 class ServiceManager : public QObject {
     Q_OBJECT
 public:
-    explicit ServiceManager(QObject* parent = nullptr);
+    explicit ServiceManager(CacheManager* cache, QObject* parent = nullptr);
 
 public slots:
     void search(const QString& query, const QString& serviceName = "all");
@@ -35,6 +36,7 @@ signals:
 
 private:
     NetworkManager* net;
+    CacheManager* cache;
     YandexService* yandex;
     SoundCloudService* soundcloud;
 };

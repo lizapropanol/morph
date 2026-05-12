@@ -8,9 +8,13 @@
 Application::Application(QObject* parent) : QObject(parent) {
     engine = new QQmlApplicationEngine(this);
     watcher = new FileWatcher(PathProvider::getStyleFilePath(), this);
+    
+    NetworkManager* tempNet = new NetworkManager(this);
+    cache = new CacheManager(tempNet, this);
+    
     audio = new AudioEngine(this);
-    services = new ServiceManager(this);
-    settings = new SettingsManager(this);
+    services = new ServiceManager(cache, this);
+    settings = new SettingsManager(cache, this);
     mpris = new MprisManager(audio, this);
 
     services->setAudioQuality(settings->getAudioQuality());
@@ -19,6 +23,7 @@ Application::Application(QObject* parent) : QObject(parent) {
     engine->rootContext()->setContextProperty("MorphServices", services);
     engine->rootContext()->setContextProperty("MorphSettings", settings);
     engine->rootContext()->setContextProperty("MorphMpris", mpris);
+    engine->rootContext()->setContextProperty("MorphCache", cache);
 
     setupTray();
 
@@ -48,6 +53,7 @@ void Application::reload() {
     engine->rootContext()->setContextProperty("MorphServices", services);
     engine->rootContext()->setContextProperty("MorphSettings", settings);
     engine->rootContext()->setContextProperty("MorphMpris", mpris);
+    engine->rootContext()->setContextProperty("MorphCache", cache);
 
     engine->load(QUrl::fromLocalFile(PathProvider::getStyleFilePath()));
 }
