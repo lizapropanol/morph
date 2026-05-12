@@ -597,13 +597,13 @@ ApplicationWindow {
                                                     cellWidth: 160; cellHeight: 200
                                                     model: playlistsModel
                                                     header: Item {
-                                                        width: 160; height: 200
+                                                        width: libraryGridView.width; height: 200
                                                         Rectangle {
                                                             anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12; border.color: likedMouseArea.containsMouse ? "white" : "#333"; border.width: 1
                                                             ColumnLayout {
                                                                 anchors.fill: parent; anchors.margins: 10; spacing: 8
                                                                 Rectangle {
-                                                                    Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
+                                                                    Layout.fillWidth: true; Layout.preferredHeight: 140; color: "#333"; radius: 8
                                                                     Image {
                                                                         anchors.centerIn: parent
                                                                         source: "assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
