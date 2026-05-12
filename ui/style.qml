@@ -165,6 +165,10 @@ ApplicationWindow {
         
         if (streamUrlCache[cleanTrack.id]) {
             MorphAudio.play(streamUrlCache[cleanTrack.id])
+        } else if (MorphCache.isTrackCached(cleanTrack.id)) {
+            var cachedUrl = MorphCache.getTrackUrl(cleanTrack.id)
+            streamUrlCache[cleanTrack.id] = cachedUrl
+            MorphAudio.play(cachedUrl)
         } else {
             MorphServices.resolve(cleanTrack.service, cleanTrack.id)
             MorphAudio.play("")
