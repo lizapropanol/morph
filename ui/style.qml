@@ -1001,19 +1001,19 @@ ApplicationWindow {
                                                         color: "white"; font.family: "Rubik"; font.pixelSize: 15; font.weight: Font.Bold 
                                                     }
                                                 }
-                                                Rectangle {
-                                                    Layout.fillWidth: true; Layout.preferredHeight: 8; color: "#222"; radius: 4
-                                                    RowLayout {
-                                                        anchors.fill: parent; spacing: 0
-                                                        Rectangle { 
-                                                            Layout.preferredWidth: parent.width * (window.cacheVersion, (MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())))
-                                                            height: parent.height; color: "#44ff44"; radius: 4 
-                                                        }
-                                                        Rectangle { 
-                                                            Layout.fillWidth: true
-                                                            height: parent.height; color: "#bb66ff"; radius: 4 
-                                                            visible: MorphCache.getCoverCacheSize() > 0
-                                                        }
+                                                Item {
+                                                    Layout.fillWidth: true; Layout.preferredHeight: 8
+                                                    Rectangle { anchors.fill: parent; color: "#222"; radius: 4 }
+                                                    Rectangle { 
+                                                        id: trackBar
+                                                        height: parent.height; color: "#44ff44"; radius: 4
+                                                        width: parent.width * (window.cacheVersion, (MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())))
+                                                    }
+                                                    Rectangle { 
+                                                        height: parent.height; color: "#bb66ff"; radius: 4 
+                                                        anchors.left: trackBar.right
+                                                        anchors.right: parent.right
+                                                        visible: (window.cacheVersion, MorphCache.getCoverCacheSize() > 0)
                                                     }
                                                 }
                                                 RowLayout {
