@@ -25,6 +25,7 @@ ApplicationWindow {
     property int likesVersion: 0
     property int playlistsVersion: 0
     property int settingsVersion: 0
+    property int cacheVersion: 0
     property bool repeatOne: false
     property var fullPlaylistTracks: []
     property int loadedTracksCount: 0
@@ -581,9 +582,13 @@ ApplicationWindow {
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                         }
                                                         ColumnLayout {
-                                                            Layout.fillWidth: true; spacing: 2
-                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
+                                                            Text { text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                                             Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                        }
+                                                        Rectangle {
+                                                            width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, leftTrack ? MorphCache.isTrackCached(leftTrack.id) : false)
+                                                            Layout.alignment: Qt.AlignVCenter
                                                         }
                                                     }
                                                     MouseArea { 
@@ -611,9 +616,14 @@ ApplicationWindow {
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                         }
                                                         ColumnLayout {
-                                                            Layout.fillWidth: true; spacing: 2
-                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
+                                                            Text { text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                                             Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                        }
+                                                        Rectangle {
+                                                            id: rightCacheDot
+                                                            width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, rightTrack ? MorphCache.isTrackCached(rightTrack.id) : false)
+                                                            Layout.alignment: Qt.AlignVCenter
                                                         }
                                                     }
                                                     MouseArea { 
@@ -636,8 +646,8 @@ ApplicationWindow {
                                         }
                                     }
                                 }
-                                }
                             }
+                        }
                         }
                         
                         Item {
@@ -1128,16 +1138,20 @@ ApplicationWindow {
                     layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                 }
                 ColumnLayout {
-                    Layout.fillWidth: true; spacing: 2
-                    Text { Layout.fillWidth: true; text: model.title || ""; color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                    Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
+                    Text { text: model.title || ""; color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#44ff44" : "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
                         Image { source: getServiceIcon(model.service); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
                         Text { Layout.fillWidth: true; text: model.artist || ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
                     }
                 }
+                Rectangle {
+                    width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
+                    Layout.alignment: Qt.AlignVCenter
+                }
                 Image {
-                    source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                    source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.alignment: Qt.AlignVCenter; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                     MouseArea { 
                         anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service, "album": model.album || "", "webUrl": model.webUrl || "" }); cursorShape: Qt.PointingHandCursor 
                     }
@@ -1308,6 +1322,12 @@ ApplicationWindow {
         target: MorphMpris
         function onNextRequested() { playNext() }
         function onPreviousRequested() { playPrevious() }
+    }
+
+    Connections {
+        target: MorphCache
+        function onTrackCached() { window.cacheVersion++ }
+        function onCoverCached() { window.cacheVersion++ }
     }
 
     Connections {
