@@ -43,6 +43,24 @@ void CacheManager::clearTrackCache() {
     }
 }
 
+qint64 CacheManager::getTrackCacheSize() {
+    qint64 size = 0;
+    QDir dir(PathProvider::getTrackCachePath());
+    for (const QFileInfo& fi : dir.entryInfoList(QDir::Files)) {
+        size += fi.size();
+    }
+    return size;
+}
+
+qint64 CacheManager::getCoverCacheSize() {
+    qint64 size = 0;
+    QDir dir(PathProvider::getCoverCachePath());
+    for (const QFileInfo& fi : dir.entryInfoList(QDir::Files)) {
+        size += fi.size();
+    }
+    return size;
+}
+
 QString CacheManager::getCachedCover(const QString& url) {
     if (url.isEmpty()) return "";
     QString path = PathProvider::getCoverCachePath() + "/" + getHash(url);

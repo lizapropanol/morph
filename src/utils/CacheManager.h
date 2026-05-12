@@ -21,6 +21,9 @@ public:
     void cacheTrack(const QString& trackId, const QString& url);
     Q_INVOKABLE void clearTrackCache();
 
+    Q_INVOKABLE qint64 getTrackCacheSize();
+    Q_INVOKABLE qint64 getCoverCacheSize();
+
     Q_INVOKABLE QString getCachedCover(const QString& url);
     Q_INVOKABLE void cacheCover(const QString& url);
     Q_INVOKABLE void clearCoverCache();

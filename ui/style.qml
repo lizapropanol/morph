@@ -20,6 +20,7 @@ ApplicationWindow {
     property string searchSource: "all"
     property string oldPlaylistName: ""
     property string librarySubView: "grid"
+    property string settingsSubView: "main"
     property bool isEditingPlaylist: false
     property bool saveLastImport: true
     property int likesVersion: 0
@@ -33,6 +34,12 @@ ApplicationWindow {
     property bool isRecovering: false
     property var streamUrlCache: ({})
     property real lastKnownPosition: 0
+
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + " B"
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB"
+        return (bytes / (1024 * 1024)).toFixed(1) + " MB"
+    }
 
     function preResolveNext() {
         var model = currentView === "search" ? (searchModel.count > 0 ? searchModel : historyModel) : libraryModel
@@ -313,6 +320,9 @@ ApplicationWindow {
                                     playlistsModel.clear()
                                     var pls = MorphSettings.getPlaylists()
                                     for (var p in pls) playlistsModel.append({ "name": p, "coverUrl": pls[p].coverUrl || "" })
+                                }
+                                if (currentView === "settings") {
+                                    settingsSubView = "main"
                                 }
                             }
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
@@ -832,112 +842,230 @@ ApplicationWindow {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     anchors.top: parent.top; anchors.topMargin: 35
                                     spacing: 25
-                                    Text { text: "SETTINGS"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold }
+                                StackLayout {
+                                    id: settingsStack
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: settingsSubView === "main" ? settingsMainContent.height : cacheContent.height
+                                    currentIndex: settingsSubView === "main" ? 0 : 1
+
                                     ColumnLayout {
-                                        Layout.fillWidth: true; spacing: 10
-                                        Text { text: "Yandex Music Token"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
-                                        TextField {
-                                            id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
-                                            color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
-                                            background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
-                                            onEditingFinished: {
-                                                MorphSettings.setYandexToken(text)
-                                                MorphServices.setYandexToken(text)
+                                        id: settingsMainContent
+                                        spacing: 25
+                                        Text { text: "SETTINGS"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold }
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 10
+                                            Text { text: "Yandex Music Token"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                            TextField {
+                                                id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
+                                                color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
+                                                background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
+                                                onEditingFinished: {
+                                                    MorphSettings.setYandexToken(text)
+                                                    MorphServices.setYandexToken(text)
+                                                }
                                             }
                                         }
-                                    }
-                                    ColumnLayout {
-                                        Layout.fillWidth: true; spacing: 10
-                                        Text { text: "SoundCloud Client ID"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
-                                        TextField {
-                                            id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
-                                            color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
-                                            background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
-                                            onEditingFinished: {
-                                                MorphSettings.setSoundCloudToken(text)
-                                                MorphServices.setSoundCloudClientId(text)
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 10
+                                            Text { text: "SoundCloud Client ID"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                            TextField {
+                                                id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
+                                                color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
+                                                background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
+                                                onEditingFinished: {
+                                                    MorphSettings.setSoundCloudToken(text)
+                                                    MorphServices.setSoundCloudClientId(text)
+                                                }
                                             }
                                         }
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 10
+                                            Text { text: "Audio Quality"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                            RowLayout {
+                                                spacing: 10
+                                                Button {
+                                                    id: lowQualBtn; text: "192k"; Layout.preferredWidth: 100
+                                                    property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "low")
+                                                    onClicked: {
+                                                        MorphSettings.setAudioQuality("low")
+                                                        MorphServices.setAudioQuality("low")
+                                                        streamUrlCache = ({})
+                                                        if (currentTrack && currentTrack.service === "Yandex") {
+                                                            lastKnownPosition = MorphAudio.position
+                                                            MorphServices.resolve(currentTrack.service, currentTrack.id)
+                                                            currentTrackIndex = -1
+                                                        }
+                                                    }
+                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                    contentItem: Text { text: parent.text; color: lowQualBtn.active ? "black" : "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    background: Rectangle { color: lowQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                }
+                                                Button {
+                                                    id: medQualBtn; text: "320k"; Layout.preferredWidth: 100
+                                                    property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "medium")
+                                                    onClicked: {
+                                                        MorphSettings.setAudioQuality("medium")
+                                                        MorphServices.setAudioQuality("medium")
+                                                        streamUrlCache = ({})
+                                                        if (currentTrack && currentTrack.service === "Yandex") {
+                                                            lastKnownPosition = MorphAudio.position
+                                                            MorphServices.resolve(currentTrack.service, currentTrack.id)
+                                                            currentTrackIndex = -1
+                                                        }
+                                                    }
+                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                    contentItem: Text { text: parent.text; color: medQualBtn.active ? "black" : "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    background: Rectangle { color: medQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                }
+                                                Button {
+                                                    id: highQualBtn; text: "LOSSLESS"; Layout.preferredWidth: 100
+                                                    property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "high")
+                                                    onClicked: {
+                                                        MorphSettings.setAudioQuality("high")
+                                                        MorphServices.setAudioQuality("high")
+                                                        streamUrlCache = ({})
+                                                        if (currentTrack && currentTrack.service === "Yandex") {
+                                                            lastKnownPosition = MorphAudio.position
+                                                            MorphServices.resolve(currentTrack.service, currentTrack.id)
+                                                            currentTrackIndex = -1
+                                                        }
+                                                    }
+                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                    contentItem: Text { text: parent.text; color: highQualBtn.active ? "black" : "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    background: Rectangle { color: highQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                }
+                                            }
+                                        }
+                                        Button {
+                                            Layout.fillWidth: true; Layout.preferredHeight: 50
+                                            onClicked: settingsSubView = "cache"
+                                            background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
+                                            contentItem: RowLayout {
+                                                anchors.fill: parent; anchors.margins: 15
+                                                Text { text: "Manage Storage"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true }
+                                                Text { 
+                                                    text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize()))
+                                                    color: "#888"; font.family: "Rubik"; font.pixelSize: 13 
+                                                }
+                                                Text { text: "›"; color: "#444"; font.pixelSize: 20 }
+                                            }
+                                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                        }
                                     }
+
                                     ColumnLayout {
-                                        Layout.fillWidth: true; spacing: 10
-                                        Text { text: "Audio Quality"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                        id: cacheContent
+                                        spacing: 25
+                                        property bool clearTracks: true
+                                        property bool clearCovers: true
+                                        property bool showSuccess: false
+                                        
+                                        Timer { id: successTimer; interval: 2000; onTriggered: cacheContent.showSuccess = false }
+
                                         RowLayout {
-                                            spacing: 10
+                                            spacing: 15
                                             Button {
-                                                id: lowQualBtn; text: "192k"; Layout.preferredWidth: 100
-                                                property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "low")
-                                                onClicked: {
-                                                    MorphSettings.setAudioQuality("low")
-                                                    MorphServices.setAudioQuality("low")
-                                                    streamUrlCache = ({})
-                                                    if (currentTrack && currentTrack.service === "Yandex") {
-                                                        lastKnownPosition = MorphAudio.position
-                                                        MorphServices.resolve(currentTrack.service, currentTrack.id)
-                                                        currentTrackIndex = -1
-                                                    }
-                                                }
+                                                text: "‹"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
+                                                onClicked: settingsSubView = "main"
+                                                background: Rectangle { color: "transparent" }
+                                                contentItem: Text { text: parent.text; color: "white"; font.pixelSize: 24; horizontalAlignment: Text.AlignHCenter }
                                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                contentItem: Text { text: parent.text; color: lowQualBtn.active ? "black" : "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                                background: Rectangle { color: lowQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
                                             }
-                                            Button {
-                                                id: medQualBtn; text: "320k"; Layout.preferredWidth: 100
-                                                property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "medium")
-                                                onClicked: {
-                                                    MorphSettings.setAudioQuality("medium")
-                                                    MorphServices.setAudioQuality("medium")
-                                                    streamUrlCache = ({})
-                                                    if (currentTrack && currentTrack.service === "Yandex") {
-                                                        lastKnownPosition = MorphAudio.position
-                                                        MorphServices.resolve(currentTrack.service, currentTrack.id)
-                                                        currentTrackIndex = -1
+                                            Text { text: "STORAGE USAGE"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold }
+                                        }
+
+                                        Rectangle {
+                                            Layout.fillWidth: true; Layout.preferredHeight: 120; color: "#151515"; radius: 15; border.color: "#333"
+                                            ColumnLayout {
+                                                anchors.fill: parent; anchors.margins: 20; spacing: 15
+                                                RowLayout {
+                                                    Layout.fillWidth: true
+                                                    Text { text: "Total Cache"; color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.fillWidth: true }
+                                                    Text { 
+                                                        text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize()))
+                                                        color: "white"; font.family: "Rubik"; font.pixelSize: 15; font.weight: Font.Bold 
                                                     }
                                                 }
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                contentItem: Text { text: parent.text; color: medQualBtn.active ? "black" : "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                                background: Rectangle { color: medQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
-                                            }
-                                            Button {
-                                                id: highQualBtn; text: "LOSSLESS"; Layout.preferredWidth: 100
-                                                property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "high")
-                                                onClicked: {
-                                                    MorphSettings.setAudioQuality("high")
-                                                    MorphServices.setAudioQuality("high")
-                                                    streamUrlCache = ({})
-                                                    if (currentTrack && currentTrack.service === "Yandex") {
-                                                        lastKnownPosition = MorphAudio.position
-                                                        MorphServices.resolve(currentTrack.service, currentTrack.id)
-                                                        currentTrackIndex = -1
+                                                Rectangle {
+                                                    Layout.fillWidth: true; Layout.preferredHeight: 8; color: "#222"; radius: 4
+                                                    RowLayout {
+                                                        anchors.fill: parent; spacing: 0
+                                                        Rectangle { 
+                                                            Layout.preferredWidth: parent.width * (window.cacheVersion, (MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())))
+                                                            height: parent.height; color: "#44ff44"; radius: 4 
+                                                        }
+                                                        Rectangle { 
+                                                            Layout.fillWidth: true
+                                                            height: parent.height; color: "#bb66ff"; radius: 4 
+                                                            visible: MorphCache.getCoverCacheSize() > 0
+                                                        }
                                                     }
                                                 }
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                contentItem: Text { text: parent.text; color: highQualBtn.active ? "black" : "white"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                                background: Rectangle { color: highQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                RowLayout {
+                                                    spacing: 15
+                                                    RowLayout {
+                                                        Rectangle { width: 8; height: 8; radius: 4; color: "#44ff44" }
+                                                        Text { text: "Tracks (" + Math.round((window.cacheVersion, MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())) * 100) + "%)"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
+                                                    }
+                                                    RowLayout {
+                                                        Rectangle { width: 8; height: 8; radius: 4; color: "#bb66ff" }
+                                                        Text { text: "Covers (" + Math.round((window.cacheVersion, MorphCache.getCoverCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())) * 100) + "%)"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
+                                                    }
+                                                }
                                             }
                                         }
-                                    }
-                                    ColumnLayout {
-                                        Layout.fillWidth: true; spacing: 10
-                                        Text { text: "Cache Management"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
-                                        RowLayout {
-                                            spacing: 10
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 1
+                                            Text { text: "SELECT DATA TO CLEAR"; color: "#444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Black; Layout.bottomMargin: 10 }
+                                            
                                             Button {
-                                                text: "CLEAR TRACKS"; Layout.preferredWidth: 120
-                                                onClicked: MorphCache.clearTrackCache()
+                                                Layout.fillWidth: true; Layout.preferredHeight: 50
+                                                onClicked: cacheContent.clearTracks = !cacheContent.clearTracks
+                                                background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
+                                                contentItem: RowLayout {
+                                                    anchors.fill: parent; anchors.margins: 15
+                                                    Text { text: "Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                    Text { text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
+                                                    Rectangle { width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"; Text { anchors.centerIn: parent; text: "✓"; color: "black"; visible: cacheContent.clearTracks } }
+                                                }
                                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
                                             }
+                                            
                                             Button {
-                                                text: "CLEAR COVERS"; Layout.preferredWidth: 120
-                                                onClicked: MorphCache.clearCoverCache()
+                                                Layout.fillWidth: true; Layout.preferredHeight: 50
+                                                onClicked: cacheContent.clearCovers = !cacheContent.clearCovers
+                                                background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
+                                                contentItem: RowLayout {
+                                                    anchors.fill: parent; anchors.margins: 15
+                                                    Text { text: "Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                    Text { text: formatSize((window.cacheVersion, MorphCache.getCoverCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
+                                                    Rectangle { width: 20; height: 20; radius: 4; color: cacheContent.clearCovers ? "#bb66ff" : "#333"; Text { anchors.centerIn: parent; text: "✓"; color: "black"; visible: cacheContent.clearCovers } }
+                                                }
                                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                contentItem: Text { text: parent.text; color: "white"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
                                             }
                                         }
+
+                                        Button {
+                                            Layout.fillWidth: true; Layout.preferredHeight: 50
+                                            enabled: cacheContent.clearTracks || cacheContent.clearCovers
+                                            onClicked: {
+                                                if (cacheContent.clearTracks) MorphCache.clearTrackCache()
+                                                if (cacheContent.clearCovers) MorphCache.clearCoverCache()
+                                                window.cacheVersion++
+                                                cacheContent.showSuccess = true
+                                                successTimer.start()
+                                            }
+                                            background: Rectangle { color: parent.enabled ? "white" : "#222"; radius: 10 }
+                                            contentItem: Text { 
+                                                text: cacheContent.showSuccess ? "CLEARED SUCCESSFULLY!" : "CLEAR SELECTED DATA"
+                                                color: cacheContent.showSuccess ? "#44ff44" : (parent.enabled ? "black" : "#444")
+                                                font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter 
+                                            }
+                                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                        }
                                     }
+                                }
                                 }
                             }
                         }
