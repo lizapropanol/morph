@@ -381,7 +381,7 @@ ApplicationWindow {
                                         
                                         TextField {
                                             id: searchField; placeholderText: "SEARCH"; Layout.fillWidth: true; color: "white"; font.family: "Rubik"; font.pixelSize: 14; padding: 12
-                                            background: Rectangle { color: "#151515"; radius: 8; border.color: "#333" }
+                                            background: Rectangle { color: "#1a1a1a"; radius: 8; border.color: "#333" }
                                             onAccepted: { searchModel.clear(); MorphServices.search(text, searchSource) }
                                         }
                                         
@@ -858,7 +858,7 @@ ApplicationWindow {
                                             TextField {
                                                 id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
                                                 color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
-                                                background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
+                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
                                                 onEditingFinished: {
                                                     MorphSettings.setYandexToken(text)
                                                     MorphServices.setYandexToken(text)
@@ -871,7 +871,7 @@ ApplicationWindow {
                                             TextField {
                                                 id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
                                                 color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
-                                                background: Rectangle { color: "#151515"; radius: 6; border.color: "#333" }
+                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
                                                 onEditingFinished: {
                                                     MorphSettings.setSoundCloudToken(text)
                                                     MorphServices.setSoundCloudClientId(text)
