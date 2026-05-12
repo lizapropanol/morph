@@ -696,17 +696,17 @@ ApplicationWindow {
                                                         width: libraryGridView.width; height: 200
                                                         Rectangle {
                                                             anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12; border.color: likedMouseArea.containsMouse ? "white" : "#333"; border.width: 1
-                                                            ColumnLayout {
-                                                                anchors.fill: parent; anchors.margins: 10; spacing: 8
-                                                                Rectangle {
-                                                                    Layout.fillWidth: true; Layout.preferredHeight: 140; color: "#333"; radius: 8
-                                                                    Image {
-                                                                        anchors.centerIn: parent
-                                                                        source: "assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
-                                                                        layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                                                    }
+                                                            Rectangle {
+                                                                anchors.fill: parent; anchors.margins: 10; color: "#333"; radius: 8
+                                                                Image {
+                                                                    anchors.centerIn: parent
+                                                                    source: "assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
+                                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                                 }
-                                                                Text { text: "LIKED TRACKS"; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
+                                                                Text { 
+                                                                    text: "LIKED TRACKS"; color: "white"; font.family: "Rubik"; font.pixelSize: 13; font.weight: Font.Black
+                                                                    anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.margins: 12
+                                                                }
                                                             }
                                                             MouseArea { id: likedMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: openPlaylist("LIKED") }
                                                         }
