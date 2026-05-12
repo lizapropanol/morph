@@ -1330,7 +1330,10 @@ ApplicationWindow {
 
     Connections {
         target: MorphCache
-        function onTrackCached() { window.cacheVersion++ }
+        function onTrackCached(trackId, localPath) { 
+            streamUrlCache[trackId] = localPath
+            window.cacheVersion++ 
+        }
         function onCoverCached() { window.cacheVersion++ }
     }
 
