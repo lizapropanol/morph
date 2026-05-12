@@ -360,6 +360,28 @@ ApplicationWindow {
                                     anchors.top: parent.top; anchors.topMargin: 35
                                     spacing: 35
                                     
+                                    function getGreeting() {
+                                        var hour = new Date().getHours()
+                                        if (hour >= 4 && hour < 12) return "GOOD MORNING"
+                                        if (hour >= 12 && hour < 18) return "GOOD AFTERNOON"
+                                        if (hour >= 18 && hour < 24) return "GOOD EVENING"
+                                        return "GOOD NIGHT"
+                                    }
+
+                                    RowLayout {
+                                        spacing: 12
+                                        Rectangle {
+                                            width: 8; height: 8; radius: 4
+                                            color: (new Date().getHours() >= 4 && new Date().getHours() < 18) ? "#44ff44" : "#bb66ff"
+                                            layer.enabled: true; layer.effect: DropShadow { transparentBorder: true; radius: 8; samples: 17; color: parent.color }
+                                        }
+                                        Text { 
+                                            text: homeContent.getGreeting()
+                                            color: "white"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black
+                                            opacity: 1.0
+                                        }
+                                    }
+
                                     Rectangle {
                                         id: vibeCard
                                         Layout.fillWidth: true; Layout.preferredHeight: 180; radius: 25
