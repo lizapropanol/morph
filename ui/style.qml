@@ -1008,12 +1008,21 @@ ApplicationWindow {
                                                         id: trackBar
                                                         height: parent.height; color: "#44ff44"; radius: 4
                                                         width: parent.width * (window.cacheVersion, (MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())))
+                                                        Rectangle {
+                                                            anchors.right: parent.right; width: 4; height: parent.height; color: "#44ff44"
+                                                            visible: coverBar.visible && parent.width > 4
+                                                        }
                                                     }
                                                     Rectangle { 
+                                                        id: coverBar
                                                         height: parent.height; color: "#bb66ff"; radius: 4 
                                                         anchors.left: trackBar.right
                                                         anchors.right: parent.right
                                                         visible: (window.cacheVersion, MorphCache.getCoverCacheSize() > 0)
+                                                        Rectangle {
+                                                            anchors.left: parent.left; width: 4; height: parent.height; color: "#bb66ff"
+                                                            visible: trackBar.width > 4
+                                                        }
                                                     }
                                                 }
                                                 RowLayout {
