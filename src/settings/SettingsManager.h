@@ -48,6 +48,9 @@ public slots:
     void setAudioQuality(const QString& quality);
     QString getAudioQuality();
 
+    void setCacheLimit(qint64 bytes);
+    qint64 getCacheLimit();
+
 signals:
     void likesChanged();
     void playlistsChanged();

@@ -35,13 +35,17 @@ public:
     Q_INVOKABLE void cacheCover(const QString& url);
     Q_INVOKABLE void clearCoverCache();
 
+    Q_INVOKABLE void setLimit(qint64 bytes);
+
 signals:
     void trackCached(const QString& trackId, const QString& localPath);
     void coverCached(const QString& url, const QString& localPath);
 
 private:
     NetworkManager* net;
+    qint64 m_limit = 0;
     QString getHash(const QString& input);
+    void enforceLimit();
 };
 
 #endif

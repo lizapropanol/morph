@@ -27,6 +27,7 @@ void CacheManager::cacheTrack(const QString& trackId, const QString& url) {
             if (file.open(QIODevice::WriteOnly)) {
                 file.write(reply->readAll());
                 file.close();
+                enforceLimit();
                 emit trackCached(trackId, "file://" + file.fileName());
             }
         }
@@ -121,6 +122,7 @@ void CacheManager::cacheCover(const QString& url) {
             if (file.open(QIODevice::WriteOnly)) {
                 file.write(reply->readAll());
                 file.close();
+                enforceLimit();
                 emit coverCached(url, "file://" + file.fileName());
             }
         }
@@ -133,5 +135,35 @@ void CacheManager::clearCoverCache() {
     dir.setFilter(QDir::Files);
     for (const QString& file : dir.entryList()) {
         dir.remove(file);
+    }
+}
+
+void CacheManager::setLimit(qint64 bytes) {
+    m_limit = bytes;
+    enforceLimit();
+}
+
+void CacheManager::enforceLimit() {
+    if (m_limit <= 0) return;
+
+    qint64 currentSize = getTrackCacheSize() + getCoverCacheSize();
+    if (currentSize <= m_limit) return;
+
+    QFileInfoList allFiles;
+    QDir trackDir(PathProvider::getTrackCachePath());
+    allFiles.append(trackDir.entryInfoList(QDir::Files));
+    QDir coverDir(PathProvider::getCoverCachePath());
+    allFiles.append(coverDir.entryInfoList(QDir::Files));
+
+    std::sort(allFiles.begin(), allFiles.end(), [](const QFileInfo& a, const QFileInfo& b) {
+        return a.lastRead() < b.lastRead();
+    });
+
+    for (const QFileInfo& fi : allFiles) {
+        if (currentSize <= m_limit) break;
+        qint64 sz = fi.size();
+        if (QFile::remove(fi.absoluteFilePath())) {
+            currentSize -= sz;
+        }
     }
 }

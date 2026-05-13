@@ -17,6 +17,10 @@ void SettingsManager::load() {
         m_data = QJsonDocument::fromJson(file.readAll()).object();
         file.close();
 
+        if (m_data.contains("cache_limit")) {
+            cache->setLimit(m_data["cache_limit"].toVariant().toLongLong());
+        }
+
         if (m_data.contains("playlists") && m_data["playlists"].isObject()) {
             QJsonObject playlists = m_data["playlists"].toObject();
             bool changed = false;
@@ -240,4 +244,16 @@ void SettingsManager::setAudioQuality(const QString& quality) {
 QString SettingsManager::getAudioQuality() {
     if (!m_data.contains("audio_quality")) return "high";
     return m_data["audio_quality"].toString();
+}
+
+void SettingsManager::setCacheLimit(qint64 bytes) {
+    m_data["cache_limit"] = QString::number(bytes);
+    cache->setLimit(bytes);
+    save();
+    emit settingsChanged();
+}
+
+qint64 SettingsManager::getCacheLimit() {
+    if (!m_data.contains("cache_limit")) return 0;
+    return m_data["cache_limit"].toVariant().toLongLong();
 }

@@ -1353,6 +1353,48 @@ ApplicationWindow {
                                             }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                         }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 10
+                                            Text { text: "CACHE LIMIT"; color: "#444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Black }
+                                            RowLayout {
+                                                spacing: 8
+                                                Repeater {
+                                                    model: [
+                                                        { label: "100MB", value: 104857600 },
+                                                        { label: "500MB", value: 524288000 },
+                                                        { label: "1GB", value: 1073741824 },
+                                                        { label: "5GB", value: 5368709120 },
+                                                        { label: "NO LIMITS", value: 0 }
+                                                    ]
+                                                    Button {
+                                                        id: limitBtn
+                                                        Layout.fillWidth: true; Layout.preferredHeight: 32
+                                                        property bool active: (window.settingsVersion, MorphSettings.getCacheLimit() === modelData.value)
+                                                        onClicked: {
+                                                            MorphSettings.setCacheLimit(modelData.value)
+                                                            window.cacheVersion++
+                                                            refreshDetailedCache()
+                                                        }
+                                                        background: Rectangle { 
+                                                            color: limitBtn.active ? "white" : "#1a1a1a"
+                                                            radius: 6; border.color: "#333" 
+                                                        }
+                                                        contentItem: Text { 
+                                                            text: modelData.label; color: limitBtn.active ? "black" : "#888"
+                                                            font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold
+                                                            horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter 
+                                                        }
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                    }
+                                                }
+                                            }
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: "If the cache size exceeds this limit, the oldest unused files will be deleted from the device memory."
+                                                color: "#555"; font.family: "Rubik"; font.pixelSize: 11; wrapMode: Text.Wrap
+                                            }
+                                        }
                                     }
                                 }
                                 }
