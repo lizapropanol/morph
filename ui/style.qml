@@ -42,22 +42,29 @@ ApplicationWindow {
         return (bytes / (1024 * 1024)).toFixed(1) + " MB"
     }
 
-    function refreshDetailedCache() {
-        detailedTracksModel.clear()
+    function loadDetailedTracks() {
+        if (detailedTracksModel.count > 0) return
         var tracks = MorphCache.getTrackCacheItems()
         for (var i = 0; i < tracks.length; i++) {
-            var item = tracks[i]
-            item.selected = false
+            var item = tracks[i]; item.selected = false
             detailedTracksModel.append(item)
         }
-        
-        detailedCoversModel.clear()
+    }
+
+    function loadDetailedCovers() {
+        if (detailedCoversModel.count > 0) return
         var covers = MorphCache.getCoverCacheItems()
-        for (var j = 0; j < covers.length; j++) {
-            var cItem = covers[j]
-            cItem.selected = false
-            detailedCoversModel.append(cItem)
+        for (var i = 0; i < covers.length; i++) {
+            var item = covers[i]; item.selected = false
+            detailedCoversModel.append(item)
         }
+    }
+
+    function refreshDetailedCache() {
+        detailedTracksModel.clear()
+        detailedCoversModel.clear()
+        if (tracksExpanded) loadDetailedTracks()
+        if (coversExpanded) loadDetailedCovers()
     }
 
     function preResolveNext() {
@@ -1017,7 +1024,8 @@ ApplicationWindow {
                                         Button {
                                             Layout.fillWidth: true; Layout.preferredHeight: 50
                                             onClicked: {
-                                                refreshDetailedCache()
+                                                detailedTracksModel.clear()
+                                                detailedCoversModel.clear()
                                                 settingsSubView = "cache"
                                                 tracksExpanded = false
                                                 coversExpanded = false
@@ -1160,6 +1168,7 @@ ApplicationWindow {
                                                             onClicked: {
                                                                 if (mouse.x > 60) {
                                                                     tracksExpanded = !tracksExpanded
+                                                                    if (tracksExpanded) loadDetailedTracks()
                                                                 } else {
                                                                     cacheContent.clearTracks = !cacheContent.clearTracks
                                                                     if (!cacheContent.clearTracks) {
@@ -1175,15 +1184,17 @@ ApplicationWindow {
                                                     Item {
                                                         Layout.fillWidth: true
                                                         clip: true
-                                                        Layout.preferredHeight: tracksExpanded ? (detailedTracksModel.count * 40) : 0
+                                                        Layout.preferredHeight: tracksExpanded ? Math.min(detailedTracksModel.count * 40, 400) : 0
                                                         Behavior on Layout.preferredHeight { NumberAnimation { duration: 300; easing.type: Easing.InOutQuad } }
                                                         
-                                                        ColumnLayout {
-                                                            anchors.fill: parent; spacing: 0
-                                                            Repeater {
-                                                                model: detailedTracksModel
-                                                                delegate: Item {
-                                                                    Layout.fillWidth: true; Layout.preferredHeight: 40
+                                                        ListView {
+                                                            anchors.fill: parent
+                                                            model: tracksExpanded ? detailedTracksModel : null
+                                                            clip: true
+                                                            interactive: contentHeight > height
+                                                            ScrollBar.vertical: ScrollBar { visible: parent.interactive }
+                                                            delegate: Item {
+                                                                    width: ListView.view.width; height: 40
                                                                     RowLayout {
                                                                         anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
@@ -1213,7 +1224,6 @@ ApplicationWindow {
                                                                         }
                                                                     }
                                                                 }
-                                                            }
                                                         }
                                                     }
 
@@ -1244,6 +1254,7 @@ ApplicationWindow {
                                                             onClicked: {
                                                                 if (mouse.x > 60) {
                                                                     coversExpanded = !coversExpanded
+                                                                    if (coversExpanded) loadDetailedCovers()
                                                                 } else {
                                                                     cacheContent.clearCovers = !cacheContent.clearCovers
                                                                     if (!cacheContent.clearCovers) {
@@ -1259,15 +1270,17 @@ ApplicationWindow {
                                                     Item {
                                                         Layout.fillWidth: true
                                                         clip: true
-                                                        Layout.preferredHeight: coversExpanded ? (detailedCoversModel.count * 40) : 0
+                                                        Layout.preferredHeight: coversExpanded ? Math.min(detailedCoversModel.count * 40, 400) : 0
                                                         Behavior on Layout.preferredHeight { NumberAnimation { duration: 300; easing.type: Easing.InOutQuad } }
 
-                                                        ColumnLayout {
-                                                            anchors.fill: parent; spacing: 0
-                                                            Repeater {
-                                                                model: detailedCoversModel
-                                                                delegate: Item {
-                                                                    Layout.fillWidth: true; Layout.preferredHeight: 40
+                                                        ListView {
+                                                            anchors.fill: parent
+                                                            model: coversExpanded ? detailedCoversModel : null
+                                                            clip: true
+                                                            interactive: contentHeight > height
+                                                            ScrollBar.vertical: ScrollBar { visible: parent.interactive }
+                                                            delegate: Item {
+                                                                    width: ListView.view.width; height: 40
                                                                     RowLayout {
                                                                         anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
@@ -1297,7 +1310,6 @@ ApplicationWindow {
                                                                         }
                                                                     }
                                                                 }
-                                                            }
                                                         }
                                                     }
                                                 }
