@@ -205,8 +205,7 @@ void SettingsManager::addSearchHistory(const QVariantMap& track) {
 
     for (int i = 0; i < history.size(); ++i) {
         if (history[i].toObject()["id"].toString() == trackObj["id"].toString()) {
-            history.removeAt(i);
-            break;
+            return;
         }
     }
 
@@ -225,6 +224,11 @@ QVariantList SettingsManager::getSearchHistory() {
         history[i] = track;
     }
     return history;
+}
+
+void SettingsManager::clearSearchHistory() {
+    m_data["history"] = QJsonArray();
+    save();
 }
 
 void SettingsManager::setAudioQuality(const QString& quality) {

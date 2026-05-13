@@ -32,6 +32,7 @@ ApplicationWindow {
     property int loadedTracksCount: 0
     property bool isRestoringSession: false
     property bool isRecovering: false
+    property bool isSearching: false
     property var streamUrlCache: ({})
     property real lastKnownPosition: 0
 
@@ -306,6 +307,15 @@ ApplicationWindow {
         radius: 20
         clip: true
 
+        MouseArea {
+            anchors.fill: parent
+            z: -1
+            onPressed: {
+                searchField.focus = false
+                window.contentItem.forceActiveFocus()
+            }
+        }
+
         RowLayout {
             anchors.fill: parent
             spacing: 0
@@ -386,72 +396,118 @@ ApplicationWindow {
                         }
                         
                         Item {
+                            Timer {
+                                id: searchTimer; interval: 600; repeat: false
+                                onTriggered: { if (searchField.text.trim().length > 0) { searchModel.clear(); isSearching = true; MorphServices.search(searchField.text, searchSource) } }
+                            }
                             Flickable {
                                 id: searchFlickable
-                                anchors.fill: parent; contentHeight: searchContent.height + 70; clip: true
+                                anchors.fill: parent; contentHeight: searchContent.height + 100; clip: true
                                 ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onPressed: {
+                                        searchField.focus = false
+                                        window.contentItem.forceActiveFocus()
+                                        mouse.accepted = false
+                                    }
+                                }
 
                                 ColumnLayout {
                                     id: searchContent
-                                    width: searchFlickable.width - 70
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    anchors.top: parent.top; anchors.topMargin: 35
-                                    spacing: 20
+                                    width: searchFlickable.width - 70; anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top; anchors.topMargin: 35; spacing: 30
                                     
-                                    RowLayout {
-                                        Layout.fillWidth: true; spacing: 10
-                                        
-                                        TextField {
-                                            id: searchField; placeholderText: "SEARCH"; Layout.fillWidth: true; color: "white"; font.family: "Rubik"; font.pixelSize: 14; padding: 12
-                                            background: Rectangle { color: "#1a1a1a"; radius: 8; border.color: "#333" }
-                                            onAccepted: { searchModel.clear(); MorphServices.search(text, searchSource) }
+                                    ColumnLayout {
+                                        Layout.fillWidth: true; spacing: 15
+                                        Rectangle {
+                                            Layout.fillWidth: true; Layout.preferredHeight: 52
+                                            color: "#111"; radius: 14; border.color: searchField.activeFocus ? "#44ff44" : "#222"; border.width: 1
+                                            RowLayout {
+                                                anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 16; spacing: 12
+                                                Image {
+                                                    source: "assets/magnify.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: searchField.activeFocus ? "#44ff44" : "#666" }
+                                                }
+                                                TextField {
+                                                    id: searchField; placeholderText: "What do you want to listen to?"; Layout.fillWidth: true; color: "white"
+                                                    font.family: "Rubik"; font.pixelSize: 16; background: null; verticalAlignment: TextInput.AlignVCenter
+                                                    onTextChanged: { if (text.trim() === "") { searchModel.clear(); isSearching = false; searchTimer.stop() } else searchTimer.restart() }
+                                                    onAccepted: { searchTimer.stop(); searchModel.clear(); isSearching = true; MorphServices.search(text, searchSource) }
+                                                }
+                                                Button {
+                                                    id: clearSearchBtn; visible: searchField.text !== ""; Layout.preferredWidth: 28; Layout.preferredHeight: 28; background: null
+                                                    contentItem: Image {
+                                                        source: "assets/close.svg"; sourceSize.width: 18; sourceSize.height: 18; fillMode: Image.PreserveAspectFit
+                                                        opacity: clearSearchBtn.hovered ? 1.0 : 0.5; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                    }
+                                                    onClicked: { searchField.text = ""; searchModel.clear(); isSearching = false }
+                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                }
+                                            }
                                         }
-                                        
                                         RowLayout {
-                                            spacing: 5
+                                            Layout.alignment: Qt.AlignLeft; spacing: 8
                                             Repeater {
                                                 model: ["all", "yandex", "soundcloud"]
-                                                Button {
-                                                    Layout.preferredHeight: 36; Layout.preferredWidth: 80
-                                                    text: modelData.toUpperCase()
-                                                    onClicked: { searchSource = modelData; if(searchField.text !== "") { searchModel.clear(); MorphServices.search(searchField.text, searchSource) } }
-                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: searchSource === modelData ? "black" : "#888"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                    background: Rectangle { color: searchSource === modelData ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                Rectangle {
+                                                    Layout.preferredHeight: 32; Layout.preferredWidth: filterText.width + 24
+                                                    color: searchSource === modelData ? "#44ff44" : "#111"; radius: 16; border.color: searchSource === modelData ? "#44ff44" : "#222"; border.width: 1
+                                                    Text {
+                                                        id: filterText; anchors.centerIn: parent; text: modelData === "all" ? "All" : (modelData === "yandex" ? "Yandex Music" : "SoundCloud")
+                                                        color: searchSource === modelData ? "black" : "#aaa"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Medium
+                                                    }
+                                                    MouseArea {
+                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                        onClicked: { searchSource = modelData; if (searchField.text.trim() !== "") { searchModel.clear(); isSearching = true; MorphServices.search(searchField.text, searchSource) } }
+                                                    }
                                                 }
                                             }
                                         }
                                     }
-                                    
-                                    StackLayout {
-                                        Layout.fillWidth: true; Layout.preferredHeight: {
-                                            if (searchModel.count > 0) return searchResultsList.contentHeight + 24
-                                            return historyList.contentHeight + 64
-                                        }
-                                        currentIndex: searchModel.count > 0 ? 1 : 0
-                                        
-                                        ColumnLayout {
-                                            spacing: 20
-                                            Text { text: "RECENT SEARCHES"; color: "#444"; font.family: "Rubik"; font.pixelSize: 12; font.weight: Font.Black }
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: historyList.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true
-                                                ListView { 
-                                                    id: historyList
-                                                    anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true
-                                                    model: historyModel; delegate: trackDelegate
-                                                }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        visible: !isSearching && searchField.text.trim() === ""
+                                        spacing: 20
+                                        RowLayout {
+                                            id: historyLabelRow; Layout.fillWidth: true
+                                            Text { text: "Recent searches"; color: "white"; font.family: "Rubik"; font.pixelSize: 18; font.weight: Font.Bold; Layout.fillWidth: true }
+                                            Text { 
+                                                text: "Clear all"; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; visible: historyModel.count > 0
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { MorphSettings.clearSearchHistory(); historyModel.clear() } }
                                             }
                                         }
-                                        
+                                        Rectangle {
+                                            Layout.fillWidth: true; Layout.preferredHeight: historyList.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true; visible: historyModel.count > 0
+                                            ListView { id: historyList; anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true; model: historyModel; delegate: trackDelegate }
+                                        }
+                                        Text { text: "Your recent searches will appear here"; color: "#444"; font.family: "Rubik"; font.pixelSize: 14; visible: historyModel.count === 0; Layout.alignment: Qt.AlignHCenter; Layout.topMargin: 40 }
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        visible: searchModel.count > 0
+                                        spacing: 20
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.preferredHeight: searchResultsList.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true
-                                            ListView { 
-                                                id: searchResultsList
-                                                anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true
-                                                model: searchModel; delegate: trackDelegate
-                                            }
+                                            ListView { id: searchResultsList; anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true; model: searchModel; delegate: trackDelegate }
                                         }
                                     }
+
+                                }
+                            }
+
+                            ColumnLayout {
+                                anchors.centerIn: parent
+                                spacing: 20
+                                visible: isSearching && searchModel.count === 0
+                                BusyIndicator { 
+                                    Layout.alignment: Qt.AlignHCenter; running: parent.visible 
+                                }
+                                Text { 
+                                    text: "Searching for tracks..."; color: "#666"; font.family: "Rubik"; font.pixelSize: 14; Layout.alignment: Qt.AlignHCenter 
                                 }
                             }
                         }
@@ -1459,7 +1515,8 @@ ApplicationWindow {
                     if (mouse.button === Qt.RightButton) {
                         var track;
                         if (currentView === "search") {
-                            track = (searchModel.count > 0) ? searchModel.get(index) : historyModel.get(index)
+                            var view = ListView.view
+                            track = view ? view.model.get(index) : (searchModel.count > 0 ? searchModel.get(index) : historyModel.get(index))
                         } else {
                             track = libraryModel.get(index)
                         }
@@ -1470,8 +1527,9 @@ ApplicationWindow {
                     if (mouse.button === Qt.LeftButton) {
                         var track; var m;
                         if (currentView === "search") {
-                            if (searchModel.count > 0) { track = searchModel.get(index); m = searchModel }
-                            else { track = historyModel.get(index); m = historyModel }
+                            var view = ListView.view
+                            m = view ? view.model : (searchModel.count > 0 ? searchModel : historyModel)
+                            track = m.get(index)
 
                             var tObj = { "id": track.id, "title": track.title, "artist": track.artist, "coverUrl": track.coverUrl, "service": track.service, "webUrl": track.webUrl || "" }
                             MorphSettings.addSearchHistory(tObj)
@@ -1480,13 +1538,7 @@ ApplicationWindow {
                             var hist = MorphSettings.getSearchHistory()
                             for (var i = 0; i < hist.length; i++) historyModel.append(hist[i])
 
-                            var newIdx = index
-                            if (m === historyModel) {
-                                for(var j=0; j<historyModel.count; j++) {
-                                    if(historyModel.get(j).id === tObj.id) { newIdx = j; break }
-                                }
-                            }
-                            playTrack(tObj, newIdx)
+                            playTrack(tObj, index)
                         } else {
                             track = libraryModel.get(index)
                             playTrack(track, index)
@@ -1587,9 +1639,15 @@ ApplicationWindow {
     Connections {
         target: MorphServices
         function onSearchResultsReady(serviceName, results) {
+            isSearching = false
             for (var i = 0; i < results.length; i++) {
                 var item = results[i]; item.service = serviceName; searchModel.append(item)
             }
+        }
+        function onErrorOccurred(message) {
+            isSearching = false
+            importPlaylistPopup.isBusy = false
+            importPlaylistPopup.errorMsg = message
         }
         function onChartsReady(serviceName, results) {
             if (results.length > 0) chartsModel.clear()
@@ -1650,10 +1708,6 @@ ApplicationWindow {
 
             importPlaylistPopup.isBusy = false
             importPlaylistPopup.close()
-        }
-        function onErrorOccurred(message) {
-            importPlaylistPopup.isBusy = false
-            importPlaylistPopup.errorMsg = message
         }
     }
     

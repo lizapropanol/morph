@@ -43,6 +43,7 @@ public slots:
 
     void addSearchHistory(const QVariantMap& track);
     QVariantList getSearchHistory();
+    void clearSearchHistory();
 
     void setAudioQuality(const QString& quality);
     QString getAudioQuality();
