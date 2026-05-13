@@ -61,6 +61,17 @@ qint64 CacheManager::getCoverCacheSize() {
     return size;
 }
 
+int CacheManager::getTrackCacheCount() {
+    QDir dir(PathProvider::getTrackCachePath());
+    dir.setNameFilters(QStringList() << "*.mp3");
+    return dir.entryList(QDir::Files).count();
+}
+
+int CacheManager::getCoverCacheCount() {
+    QDir dir(PathProvider::getCoverCachePath());
+    return dir.entryList(QDir::Files).count();
+}
+
 QVariantList CacheManager::getTrackCacheItems() {
     QVariantList items;
     QDir dir(PathProvider::getTrackCachePath());

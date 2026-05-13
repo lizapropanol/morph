@@ -24,6 +24,9 @@ public:
     Q_INVOKABLE qint64 getTrackCacheSize();
     Q_INVOKABLE qint64 getCoverCacheSize();
     
+    Q_INVOKABLE int getTrackCacheCount();
+    Q_INVOKABLE int getCoverCacheCount();
+    
     Q_INVOKABLE QVariantList getTrackCacheItems();
     Q_INVOKABLE QVariantList getCoverCacheItems();
     Q_INVOKABLE void removeCacheFile(const QString& fileName, bool isTrack);

@@ -1089,7 +1089,7 @@ ApplicationWindow {
                                                             }
                                                             Text { text: "Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
                                                             Text { 
-                                                                text: detailedTracksModel.count + " tracks, " + formatSize((window.cacheVersion, MorphCache.getTrackCacheSize()))
+                                                                text: (window.cacheVersion, MorphCache.getTrackCacheCount()) + " tracks, " + formatSize((window.cacheVersion, MorphCache.getTrackCacheSize()))
                                                                 color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                             }
                                                             Image {
@@ -1173,7 +1173,7 @@ ApplicationWindow {
                                                             }
                                                             Text { text: "Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
                                                             Text { 
-                                                                text: detailedCoversModel.count + " covers, " + formatSize((window.cacheVersion, MorphCache.getCoverCacheSize()))
+                                                                text: (window.cacheVersion, MorphCache.getCoverCacheCount()) + " covers, " + formatSize((window.cacheVersion, MorphCache.getCoverCacheSize()))
                                                                 color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                             }
                                                             Image {
