@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/badge/Qt-41CD52?style=for-the-badge&logo=qt&logoColor=white" alt="Qt" />
   <img src="https://img.shields.io/badge/QML-41CD52?style=for-the-badge&logo=qt&logoColor=white" alt="QML" />
   <img src="https://img.shields.io/badge/Platform-Linux-blue?style=for-the-badge" alt="Linux" />
+  <a href="https://www.donationalerts.com/r/lizapropanol"><img src="https://img.shields.io/badge/Donate-DonationAlerts-orange?style=for-the-badge&logo=donate&logoColor=white" alt="Donate" /></a>
 </p>
 
 **morph** is a sleek, modern desktop music player built with C++ and Qt/QML. It integrates seamlessly with **Yandex Music** and **SoundCloud**, providing a unified and aesthetically pleasing interface for your music library, charts, and personalized radio streams.
