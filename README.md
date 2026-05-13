@@ -21,10 +21,16 @@
   - Set custom cover images using external URLs (Imgur, Pinterest, etc.).
   - Easily add tracks from search, charts, or history directly into your playlists.
 - **Search History**: Automatically keeps track of your 20 most recently played tracks from searches for quick access.
+- **Persistent Caching & Offline Support**: Automatically saves played tracks and viewed covers to local storage, enabling full playback without an internet connection.
+- **Advanced Cache Management**: Dedicated storage view with real-time size calculation and granular clearing options for tracks and covers.
 - **Modern UI/UX**:
   - Dark, minimalist aesthetic utilizing smooth gradients and QML animations.
+  - Circular reveal splash screen synchronized with logo expansion.
+  - Time-aware greetings with active service status indicators.
+  - Real-time visual indicators (green dots) for cached offline tracks.
   - Master-Detail navigation flow for intuitive library browsing.
   - Interactive elements with consistent hover states and hand-cursor feedback.
+- **Reactive Settings**: Automatic persistence of authentication tokens and audio preferences upon input.
 - **Lightweight & Fast**: Powered by C++ backend logic for minimal resource usage while delivering a premium Qt Quick interface.
 
 ---
@@ -58,7 +64,7 @@ cmake --build . -j$(nproc)
 
 ## Configuration
 
-To unlock full functionality, you need to provide your authentication tokens in the **Settings** tab.
+To unlock full functionality, you need to provide your authentication tokens in the **Settings** tab. Changes are saved automatically.
 
 ### Yandex Music Token
 1. Use a browser extension like **yandex-music-token** (available for Chrome/Firefox).
@@ -80,9 +86,10 @@ To unlock full functionality, you need to provide your authentication tokens in 
 
 - `src/core/`: Application initialization and service management.
 - `src/services/`: Specific API implementations (`YandexService`, `SoundCloudService`) and base interfaces.
+- `src/utils/`: Cache management, path resolution, and file system utilities.
 - `src/network/`: HTTP wrappers for API communication.
 - `src/settings/`: JSON-based local storage management for playlists, likes, tokens, and history.
-- `src/audio/`: (Optional/In-progress) Audio playback abstractions.
+- `src/audio/`: Low-level audio engine integration.
 - `ui/`: The frontend layer, containing `style.qml` and associated assets.
 
 ---
