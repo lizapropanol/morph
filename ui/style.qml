@@ -1072,7 +1072,7 @@ ApplicationWindow {
                                             Text { text: "SELECT DATA TO CLEAR"; color: "#444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Black; Layout.bottomMargin: 5 }
                                             
                                             Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: contentColumn.height; color: "#1a1a1a"; radius: 10; border.color: "#333"
+                                                Layout.fillWidth: true; Layout.preferredHeight: contentColumn.implicitHeight; color: "#1a1a1a"; radius: 10; border.color: "#333"
                                                 ColumnLayout {
                                                     id: contentColumn
                                                     anchors.left: parent.left; anchors.right: parent.right; spacing: 0
@@ -1114,37 +1114,44 @@ ApplicationWindow {
                                                         }
                                                     }
 
-                                                    ColumnLayout {
-                                                        Layout.fillWidth: true; visible: expandedSection === "tracks"
-                                                        Repeater {
-                                                            model: detailedTracksModel
-                                                            delegate: Item {
-                                                                Layout.fillWidth: true; Layout.preferredHeight: 40
-                                                                RowLayout {
-                                                                    anchors.fill: parent; anchors.leftMargin: 30; anchors.rightMargin: 15
-                                                                    Text { text: model.id; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
-                                                                    Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
-                                                                    Rectangle { 
-                                                                        width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#44ff44" : "#222"
-                                                                        Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                    Item {
+                                                        Layout.fillWidth: true
+                                                        clip: true
+                                                        Layout.preferredHeight: expandedSection === "tracks" ? (detailedTracksModel.count * 40) : 0
+                                                        Behavior on Layout.preferredHeight { NumberAnimation { duration: 300; easing.type: Easing.InOutQuad } }
+                                                        
+                                                        ColumnLayout {
+                                                            anchors.fill: parent; spacing: 0
+                                                            Repeater {
+                                                                model: detailedTracksModel
+                                                                delegate: Item {
+                                                                    Layout.fillWidth: true; Layout.preferredHeight: 40
+                                                                    RowLayout {
+                                                                        anchors.fill: parent; anchors.leftMargin: 30; anchors.rightMargin: 15
+                                                                        Text { text: model.id; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
+                                                                        Rectangle { 
+                                                                            width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#44ff44" : "#222"
+                                                                            Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                        }
                                                                     }
-                                                                }
-                                                                MouseArea { 
-                                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                                    onClicked: {
-                                                                        if (cacheContent.clearTracks) {
-                                                                            cacheContent.clearTracks = false
-                                                                            for (var i = 0; i < detailedTracksModel.count; i++) {
-                                                                                detailedTracksModel.setProperty(i, "selected", true)
+                                                                    MouseArea { 
+                                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                                        onClicked: {
+                                                                            if (cacheContent.clearTracks) {
+                                                                                cacheContent.clearTracks = false
+                                                                                for (var i = 0; i < detailedTracksModel.count; i++) {
+                                                                                    detailedTracksModel.setProperty(i, "selected", true)
+                                                                                }
+                                                                                model.selected = false
+                                                                            } else {
+                                                                                model.selected = !model.selected
+                                                                                var all = true
+                                                                                for (var j = 0; j < detailedTracksModel.count; j++) {
+                                                                                    if (!detailedTracksModel.get(j).selected) { all = false; break }
+                                                                                }
+                                                                                if (all) cacheContent.clearTracks = true
                                                                             }
-                                                                            model.selected = false
-                                                                        } else {
-                                                                            model.selected = !model.selected
-                                                                            var all = true
-                                                                            for (var j = 0; j < detailedTracksModel.count; j++) {
-                                                                                if (!detailedTracksModel.get(j).selected) { all = false; break }
-                                                                            }
-                                                                            if (all) cacheContent.clearTracks = true
                                                                         }
                                                                     }
                                                                 }
@@ -1191,37 +1198,44 @@ ApplicationWindow {
                                                         }
                                                     }
 
-                                                    ColumnLayout {
-                                                        Layout.fillWidth: true; visible: expandedSection === "covers"
-                                                        Repeater {
-                                                            model: detailedCoversModel
-                                                            delegate: Item {
-                                                                Layout.fillWidth: true; Layout.preferredHeight: 40
-                                                                RowLayout {
-                                                                    anchors.fill: parent; anchors.leftMargin: 30; anchors.rightMargin: 15
-                                                                    Text { text: model.name; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
-                                                                    Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
-                                                                    Rectangle { 
-                                                                        width: 16; height: 16; radius: 4; color: (cacheContent.clearCovers || model.selected) ? "#bb66ff" : "#222"
-                                                                        Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearCovers || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                    Item {
+                                                        Layout.fillWidth: true
+                                                        clip: true
+                                                        Layout.preferredHeight: expandedSection === "covers" ? (detailedCoversModel.count * 40) : 0
+                                                        Behavior on Layout.preferredHeight { NumberAnimation { duration: 300; easing.type: Easing.InOutQuad } }
+
+                                                        ColumnLayout {
+                                                            anchors.fill: parent; spacing: 0
+                                                            Repeater {
+                                                                model: detailedCoversModel
+                                                                delegate: Item {
+                                                                    Layout.fillWidth: true; Layout.preferredHeight: 40
+                                                                    RowLayout {
+                                                                        anchors.fill: parent; anchors.leftMargin: 30; anchors.rightMargin: 15
+                                                                        Text { text: model.name; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
+                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
+                                                                        Rectangle { 
+                                                                            width: 16; height: 16; radius: 4; color: (cacheContent.clearCovers || model.selected) ? "#bb66ff" : "#222"
+                                                                            Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearCovers || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                        }
                                                                     }
-                                                                }
-                                                                MouseArea { 
-                                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                                    onClicked: {
-                                                                        if (cacheContent.clearCovers) {
-                                                                            cacheContent.clearCovers = false
-                                                                            for (var i = 0; i < detailedCoversModel.count; i++) {
-                                                                                detailedCoversModel.setProperty(i, "selected", true)
+                                                                    MouseArea { 
+                                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                                        onClicked: {
+                                                                            if (cacheContent.clearCovers) {
+                                                                                cacheContent.clearCovers = false
+                                                                                for (var i = 0; i < detailedCoversModel.count; i++) {
+                                                                                    detailedCoversModel.setProperty(i, "selected", true)
+                                                                                }
+                                                                                model.selected = false
+                                                                            } else {
+                                                                                model.selected = !model.selected
+                                                                                var all = true
+                                                                                for (var j = 0; j < detailedCoversModel.count; j++) {
+                                                                                    if (!detailedCoversModel.get(j).selected) { all = false; break }
+                                                                                }
+                                                                                if (all) cacheContent.clearCovers = true
                                                                             }
-                                                                            model.selected = false
-                                                                        } else {
-                                                                            model.selected = !model.selected
-                                                                            var all = true
-                                                                            for (var j = 0; j < detailedCoversModel.count; j++) {
-                                                                                if (!detailedCoversModel.get(j).selected) { all = false; break }
-                                                                            }
-                                                                            if (all) cacheContent.clearCovers = true
                                                                         }
                                                                     }
                                                                 }
