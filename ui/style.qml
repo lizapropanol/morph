@@ -1034,42 +1034,47 @@ ApplicationWindow {
                                             Layout.fillWidth: true; spacing: 1
                                             Text { text: "SELECT DATA TO CLEAR"; color: "#444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Black; Layout.bottomMargin: 10 }
                                             
-                                            Button {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 50
-                                                onClicked: cacheContent.clearTracks = !cacheContent.clearTracks
-                                                background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
-                                                contentItem: RowLayout {
-                                                    anchors.fill: parent; anchors.margins: 15
-                                                    Text { text: "Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
-                                                    Text { text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
-                                                    Rectangle { 
-                                                        width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"
-                                                        Image {
-                                                            anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks
-                                                            layer.enabled: true; layer.effect: ColorOverlay { color: "black" }
+                                            Rectangle {
+                                                Layout.fillWidth: true; Layout.preferredHeight: 101; color: "#1a1a1a"; radius: 10; border.color: "#333"
+                                                ColumnLayout {
+                                                    anchors.fill: parent; spacing: 0
+                                                    
+                                                    Item {
+                                                        Layout.fillWidth: true; Layout.preferredHeight: 50
+                                                        RowLayout {
+                                                            anchors.fill: parent; anchors.margins: 15
+                                                            Text { text: "Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                            Text { text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
+                                                            Rectangle { 
+                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"
+                                                                Image {
+                                                                    anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks
+                                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "black" }
+                                                                }
+                                                            }
                                                         }
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: cacheContent.clearTracks = !cacheContent.clearTracks }
+                                                    }
+
+                                                    Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: "#333"; Layout.leftMargin: 15; Layout.rightMargin: 15 }
+
+                                                    Item {
+                                                        Layout.fillWidth: true; Layout.preferredHeight: 50
+                                                        RowLayout {
+                                                            anchors.fill: parent; anchors.margins: 15
+                                                            Text { text: "Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                            Text { text: formatSize((window.cacheVersion, MorphCache.getCoverCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
+                                                            Rectangle { 
+                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearCovers ? "#bb66ff" : "#333"
+                                                                Image {
+                                                                    anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers
+                                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "black" }
+                                                                }
+                                                            }
+                                                        }
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: cacheContent.clearCovers = !cacheContent.clearCovers }
                                                     }
                                                 }
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                            }
-                                            
-                                            Button {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 50
-                                                onClicked: cacheContent.clearCovers = !cacheContent.clearCovers
-                                                background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
-                                                contentItem: RowLayout {
-                                                    anchors.fill: parent; anchors.margins: 15
-                                                    Text { text: "Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
-                                                    Text { text: formatSize((window.cacheVersion, MorphCache.getCoverCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
-                                                    Rectangle { 
-                                                        width: 20; height: 20; radius: 4; color: cacheContent.clearCovers ? "#bb66ff" : "#333"
-                                                        Image {
-                                                            anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers
-                                                            layer.enabled: true; layer.effect: ColorOverlay { color: "black" }
-                                                        }
-                                                    }
-                                                }
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                             }
                                         }
 
