@@ -61,6 +61,37 @@ qint64 CacheManager::getCoverCacheSize() {
     return size;
 }
 
+QVariantList CacheManager::getTrackCacheItems() {
+    QVariantList items;
+    QDir dir(PathProvider::getTrackCachePath());
+    dir.setNameFilters(QStringList() << "*.mp3");
+    for (const QFileInfo& fi : dir.entryInfoList(QDir::Files)) {
+        QVariantMap item;
+        item["name"] = fi.fileName();
+        item["size"] = fi.size();
+        item["id"] = fi.baseName();
+        items.append(item);
+    }
+    return items;
+}
+
+QVariantList CacheManager::getCoverCacheItems() {
+    QVariantList items;
+    QDir dir(PathProvider::getCoverCachePath());
+    for (const QFileInfo& fi : dir.entryInfoList(QDir::Files)) {
+        QVariantMap item;
+        item["name"] = fi.fileName();
+        item["size"] = fi.size();
+        items.append(item);
+    }
+    return items;
+}
+
+void CacheManager::removeCacheFile(const QString& fileName, bool isTrack) {
+    QString path = (isTrack ? PathProvider::getTrackCachePath() : PathProvider::getCoverCachePath()) + "/" + fileName;
+    QFile::remove(path);
+}
+
 QString CacheManager::getCachedCover(const QString& url) {
     if (url.isEmpty()) return "";
     QString path = PathProvider::getCoverCachePath() + "/" + getHash(url);

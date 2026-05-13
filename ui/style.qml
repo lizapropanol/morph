@@ -41,6 +41,24 @@ ApplicationWindow {
         return (bytes / (1024 * 1024)).toFixed(1) + " MB"
     }
 
+    function refreshDetailedCache() {
+        detailedTracksModel.clear()
+        var tracks = MorphCache.getTrackCacheItems()
+        for (var i = 0; i < tracks.length; i++) {
+            var item = tracks[i]
+            item.selected = false
+            detailedTracksModel.append(item)
+        }
+        
+        detailedCoversModel.clear()
+        var covers = MorphCache.getCoverCacheItems()
+        for (var j = 0; j < covers.length; j++) {
+            var cItem = covers[j]
+            cItem.selected = false
+            detailedCoversModel.append(cItem)
+        }
+    }
+
     function preResolveNext() {
         var model = currentView === "search" ? (searchModel.count > 0 ? searchModel : historyModel) : libraryModel
         if (currentTrackIndex + 1 < model.count) {
@@ -205,8 +223,11 @@ ApplicationWindow {
     ListModel { id: historyModel }
     ListModel { id: chartsModel }
     ListModel { id: dailyMixesModel }
+    ListModel { id: detailedTracksModel }
+    ListModel { id: detailedCoversModel }
 
     property bool isStartup: true
+    property string expandedSection: ""
     property real revealRadius: 0
     property real logoScale: 1.0
 
@@ -938,7 +959,11 @@ ApplicationWindow {
                                         }
                                         Button {
                                             Layout.fillWidth: true; Layout.preferredHeight: 50
-                                            onClicked: settingsSubView = "cache"
+                                            onClicked: {
+                                                refreshDetailedCache()
+                                                settingsSubView = "cache"
+                                                expandedSection = ""
+                                            }
                                             background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
                                             contentItem: RowLayout {
                                                 anchors.fill: parent; anchors.margins: 15; spacing: 10
@@ -947,7 +972,10 @@ ApplicationWindow {
                                                     text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize()))
                                                     color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                 }
-                                                Text { text: "›"; color: "#444"; font.pixelSize: 20; Layout.alignment: Qt.AlignVCenter }
+                                                Image {
+                                                    source: "assets/chevron-right.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16; Layout.alignment: Qt.AlignVCenter
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
+                                                }
                                             }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                         }
@@ -1040,13 +1068,14 @@ ApplicationWindow {
                                         }
 
                                         ColumnLayout {
-                                            Layout.fillWidth: true; spacing: 1
-                                            Text { text: "SELECT DATA TO CLEAR"; color: "#444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Black; Layout.bottomMargin: 10 }
+                                            Layout.fillWidth: true; spacing: 5
+                                            Text { text: "SELECT DATA TO CLEAR"; color: "#444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Black; Layout.bottomMargin: 5 }
                                             
                                             Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 101; color: "#1a1a1a"; radius: 10; border.color: "#333"
+                                                Layout.fillWidth: true; Layout.preferredHeight: contentColumn.height; color: "#1a1a1a"; radius: 10; border.color: "#333"
                                                 ColumnLayout {
-                                                    anchors.fill: parent; spacing: 0
+                                                    id: contentColumn
+                                                    anchors.left: parent.left; anchors.right: parent.right; spacing: 0
                                                     
                                                     Item {
                                                         Layout.fillWidth: true; Layout.preferredHeight: 50
@@ -1056,13 +1085,68 @@ ApplicationWindow {
                                                             Text { text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
                                                             Rectangle { 
                                                                 width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"
-                                                                Image {
-                                                                    anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks
-                                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "black" }
+                                                                Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                            }
+                                                            Image {
+                                                                source: "assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
+                                                                rotation: expandedSection === "tracks" ? 180 : 0
+                                                                layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
+                                                                Behavior on rotation { NumberAnimation { duration: 200 } }
+                                                            }
+                                                        }
+                                                        MouseArea { 
+                                                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                            onClicked: {
+                                                                if (mouse.x < parent.width - 60) {
+                                                                    expandedSection = expandedSection === "tracks" ? "" : "tracks"
+                                                                } else {
+                                                                    cacheContent.clearTracks = !cacheContent.clearTracks
+                                                                    if (!cacheContent.clearTracks) {
+                                                                        for (var i = 0; i < detailedTracksModel.count; i++) {
+                                                                            detailedTracksModel.setProperty(i, "selected", false)
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
                                                         }
-                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: cacheContent.clearTracks = !cacheContent.clearTracks }
+                                                    }
+
+                                                    ColumnLayout {
+                                                        Layout.fillWidth: true; visible: expandedSection === "tracks"
+                                                        Repeater {
+                                                            model: detailedTracksModel
+                                                            delegate: Item {
+                                                                Layout.fillWidth: true; Layout.preferredHeight: 40
+                                                                RowLayout {
+                                                                    anchors.fill: parent; anchors.leftMargin: 30; anchors.rightMargin: 15
+                                                                    Text { text: model.id; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                                                                    Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
+                                                                    Rectangle { 
+                                                                        width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#44ff44" : "#222"
+                                                                        Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                    }
+                                                                }
+                                                                MouseArea { 
+                                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                                    onClicked: {
+                                                                        if (cacheContent.clearTracks) {
+                                                                            cacheContent.clearTracks = false
+                                                                            for (var i = 0; i < detailedTracksModel.count; i++) {
+                                                                                detailedTracksModel.setProperty(i, "selected", true)
+                                                                            }
+                                                                            model.selected = false
+                                                                        } else {
+                                                                            model.selected = !model.selected
+                                                                            var all = true
+                                                                            for (var j = 0; j < detailedTracksModel.count; j++) {
+                                                                                if (!detailedTracksModel.get(j).selected) { all = false; break }
+                                                                            }
+                                                                            if (all) cacheContent.clearTracks = true
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
                                                     }
 
                                                     Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: "#333"; Layout.leftMargin: 15; Layout.rightMargin: 15 }
@@ -1075,13 +1159,68 @@ ApplicationWindow {
                                                             Text { text: formatSize((window.cacheVersion, MorphCache.getCoverCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
                                                             Rectangle { 
                                                                 width: 20; height: 20; radius: 4; color: cacheContent.clearCovers ? "#bb66ff" : "#333"
-                                                                Image {
-                                                                    anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers
-                                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "black" }
+                                                                Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                            }
+                                                            Image {
+                                                                source: "assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
+                                                                rotation: expandedSection === "covers" ? 180 : 0
+                                                                layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
+                                                                Behavior on rotation { NumberAnimation { duration: 200 } }
+                                                            }
+                                                        }
+                                                        MouseArea { 
+                                                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                            onClicked: {
+                                                                if (mouse.x < parent.width - 60) {
+                                                                    expandedSection = expandedSection === "covers" ? "" : "covers"
+                                                                } else {
+                                                                    cacheContent.clearCovers = !cacheContent.clearCovers
+                                                                    if (!cacheContent.clearCovers) {
+                                                                        for (var i = 0; i < detailedCoversModel.count; i++) {
+                                                                            detailedCoversModel.setProperty(i, "selected", false)
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
                                                         }
-                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: cacheContent.clearCovers = !cacheContent.clearCovers }
+                                                    }
+
+                                                    ColumnLayout {
+                                                        Layout.fillWidth: true; visible: expandedSection === "covers"
+                                                        Repeater {
+                                                            model: detailedCoversModel
+                                                            delegate: Item {
+                                                                Layout.fillWidth: true; Layout.preferredHeight: 40
+                                                                RowLayout {
+                                                                    anchors.fill: parent; anchors.leftMargin: 30; anchors.rightMargin: 15
+                                                                    Text { text: model.name; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
+                                                                    Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
+                                                                    Rectangle { 
+                                                                        width: 16; height: 16; radius: 4; color: (cacheContent.clearCovers || model.selected) ? "#bb66ff" : "#222"
+                                                                        Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearCovers || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                    }
+                                                                }
+                                                                MouseArea { 
+                                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                                    onClicked: {
+                                                                        if (cacheContent.clearCovers) {
+                                                                            cacheContent.clearCovers = false
+                                                                            for (var i = 0; i < detailedCoversModel.count; i++) {
+                                                                                detailedCoversModel.setProperty(i, "selected", true)
+                                                                            }
+                                                                            model.selected = false
+                                                                        } else {
+                                                                            model.selected = !model.selected
+                                                                            var all = true
+                                                                            for (var j = 0; j < detailedCoversModel.count; j++) {
+                                                                                if (!detailedCoversModel.get(j).selected) { all = false; break }
+                                                                            }
+                                                                            if (all) cacheContent.clearCovers = true
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
@@ -1090,13 +1229,39 @@ ApplicationWindow {
                                         Button {
                                             id: clearBtn
                                             Layout.fillWidth: true; Layout.preferredHeight: 50
-                                            enabled: cacheContent.clearTracks || cacheContent.clearCovers
+                                            enabled: cacheContent.clearTracks || cacheContent.clearCovers || (function(){
+                                                for(var i=0; i<detailedTracksModel.count; i++) if(detailedTracksModel.get(i).selected) return true
+                                                for(var j=0; j<detailedCoversModel.count; j++) if(detailedCoversModel.get(j).selected) return true
+                                                return false
+                                            })()
                                             onClicked: {
-                                                if (cacheContent.clearTracks) MorphCache.clearTrackCache()
-                                                if (cacheContent.clearCovers) MorphCache.clearCoverCache()
-                                                window.cacheVersion++
-                                                cacheContent.showSuccess = true
-                                                successTimer.start()
+                                                var anyCleared = false
+                                                if (cacheContent.clearTracks) { MorphCache.clearTrackCache(); anyCleared = true }
+                                                else {
+                                                    for(var i=detailedTracksModel.count-1; i>=0; i--) {
+                                                        if(detailedTracksModel.get(i).selected) {
+                                                            MorphCache.removeCacheFile(detailedTracksModel.get(i).name, true)
+                                                            anyCleared = true
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                if (cacheContent.clearCovers) { MorphCache.clearCoverCache(); anyCleared = true }
+                                                else {
+                                                    for(var j=detailedCoversModel.count-1; j>=0; j--) {
+                                                        if(detailedCoversModel.get(j).selected) {
+                                                            MorphCache.removeCacheFile(detailedCoversModel.get(j).name, false)
+                                                            anyCleared = true
+                                                        }
+                                                    }
+                                                }
+
+                                                if (anyCleared) {
+                                                    window.cacheVersion++
+                                                    refreshDetailedCache()
+                                                    cacheContent.showSuccess = true
+                                                    successTimer.start()
+                                                }
                                             }
                                             background: Rectangle { 
                                                 color: clearBtn.enabled ? "#1a1a1a" : "#111"
