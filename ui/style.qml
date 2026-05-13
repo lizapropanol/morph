@@ -1080,15 +1080,15 @@ ApplicationWindow {
                                                     Item {
                                                         Layout.fillWidth: true; Layout.preferredHeight: 50
                                                         RowLayout {
-                                                            anchors.fill: parent; anchors.margins: 15
-                                                            Text { text: "Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                            anchors.fill: parent; anchors.margins: 15; spacing: 15
+                                                            Rectangle { 
+                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"; Layout.alignment: Qt.AlignVCenter
+                                                                Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                            }
+                                                            Text { text: "Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
                                                             Text { 
                                                                 text: detailedTracksModel.count + " tracks, " + formatSize((window.cacheVersion, MorphCache.getTrackCacheSize()))
-                                                                color: "#888"; font.family: "Rubik"; font.pixelSize: 13 
-                                                            }
-                                                            Rectangle { 
-                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"
-                                                                Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                             }
                                                             Image {
                                                                 source: "assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
@@ -1100,7 +1100,7 @@ ApplicationWindow {
                                                         MouseArea { 
                                                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                                             onClicked: {
-                                                                if (mouse.x < parent.width - 60) {
+                                                                if (mouse.x > 60) {
                                                                     expandedSection = expandedSection === "tracks" ? "" : "tracks"
                                                                 } else {
                                                                     cacheContent.clearTracks = !cacheContent.clearTracks
@@ -1127,13 +1127,13 @@ ApplicationWindow {
                                                                 delegate: Item {
                                                                     Layout.fillWidth: true; Layout.preferredHeight: 40
                                                                     RowLayout {
-                                                                        anchors.fill: parent; anchors.leftMargin: 30; anchors.rightMargin: 15
-                                                                        Text { text: model.id; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
-                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
+                                                                        anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
                                                                             width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#44ff44" : "#222"
                                                                             Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                                         }
+                                                                        Text { text: model.id; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
                                                                     }
                                                                     MouseArea { 
                                                                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -1164,15 +1164,15 @@ ApplicationWindow {
                                                     Item {
                                                         Layout.fillWidth: true; Layout.preferredHeight: 50
                                                         RowLayout {
-                                                            anchors.fill: parent; anchors.margins: 15
-                                                            Text { text: "Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                            anchors.fill: parent; anchors.margins: 15; spacing: 15
+                                                            Rectangle { 
+                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearCovers ? "#bb66ff" : "#333"; Layout.alignment: Qt.AlignVCenter
+                                                                Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                            }
+                                                            Text { text: "Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
                                                             Text { 
                                                                 text: detailedCoversModel.count + " covers, " + formatSize((window.cacheVersion, MorphCache.getCoverCacheSize()))
-                                                                color: "#888"; font.family: "Rubik"; font.pixelSize: 13 
-                                                            }
-                                                            Rectangle { 
-                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearCovers ? "#bb66ff" : "#333"
-                                                                Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                             }
                                                             Image {
                                                                 source: "assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
@@ -1184,7 +1184,7 @@ ApplicationWindow {
                                                         MouseArea { 
                                                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                                             onClicked: {
-                                                                if (mouse.x < parent.width - 60) {
+                                                                if (mouse.x > 60) {
                                                                     expandedSection = expandedSection === "covers" ? "" : "covers"
                                                                 } else {
                                                                     cacheContent.clearCovers = !cacheContent.clearCovers
@@ -1211,13 +1211,13 @@ ApplicationWindow {
                                                                 delegate: Item {
                                                                     Layout.fillWidth: true; Layout.preferredHeight: 40
                                                                     RowLayout {
-                                                                        anchors.fill: parent; anchors.leftMargin: 30; anchors.rightMargin: 15
-                                                                        Text { text: model.name; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
-                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
+                                                                        anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
                                                                             width: 16; height: 16; radius: 4; color: (cacheContent.clearCovers || model.selected) ? "#bb66ff" : "#222"
                                                                             Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearCovers || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                                         }
+                                                                        Text { text: model.name; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
+                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
                                                                     }
                                                                     MouseArea { 
                                                                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
