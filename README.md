@@ -100,3 +100,7 @@ To unlock full functionality, you need to provide your authentication tokens in 
 ## License
 
 This project is open-source. Please see the `LICENSE` file in the root directory for more details.
+
+---
+
+<p align="center">Developed with ❤️ by <a href="https://github.com/lizapropanol">lizapropanol</a></p>
