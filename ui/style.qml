@@ -227,7 +227,8 @@ ApplicationWindow {
     ListModel { id: detailedCoversModel }
 
     property bool isStartup: true
-    property string expandedSection: ""
+    property bool tracksExpanded: false
+    property bool coversExpanded: false
     property real revealRadius: 0
     property real logoScale: 1.0
 
@@ -962,7 +963,8 @@ ApplicationWindow {
                                             onClicked: {
                                                 refreshDetailedCache()
                                                 settingsSubView = "cache"
-                                                expandedSection = ""
+                                                tracksExpanded = false
+                                                coversExpanded = false
                                             }
                                             background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
                                             contentItem: RowLayout {
@@ -1092,7 +1094,7 @@ ApplicationWindow {
                                                             }
                                                             Image {
                                                                 source: "assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
-                                                                rotation: expandedSection === "tracks" ? 180 : 0
+                                                                rotation: tracksExpanded ? 180 : 0
                                                                 layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
                                                                 Behavior on rotation { NumberAnimation { duration: 200 } }
                                                             }
@@ -1101,7 +1103,7 @@ ApplicationWindow {
                                                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                                             onClicked: {
                                                                 if (mouse.x > 60) {
-                                                                    expandedSection = expandedSection === "tracks" ? "" : "tracks"
+                                                                    tracksExpanded = !tracksExpanded
                                                                 } else {
                                                                     cacheContent.clearTracks = !cacheContent.clearTracks
                                                                     if (!cacheContent.clearTracks) {
@@ -1117,7 +1119,7 @@ ApplicationWindow {
                                                     Item {
                                                         Layout.fillWidth: true
                                                         clip: true
-                                                        Layout.preferredHeight: expandedSection === "tracks" ? (detailedTracksModel.count * 40) : 0
+                                                        Layout.preferredHeight: tracksExpanded ? (detailedTracksModel.count * 40) : 0
                                                         Behavior on Layout.preferredHeight { NumberAnimation { duration: 300; easing.type: Easing.InOutQuad } }
                                                         
                                                         ColumnLayout {
@@ -1176,7 +1178,7 @@ ApplicationWindow {
                                                             }
                                                             Image {
                                                                 source: "assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
-                                                                rotation: expandedSection === "covers" ? 180 : 0
+                                                                rotation: coversExpanded ? 180 : 0
                                                                 layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
                                                                 Behavior on rotation { NumberAnimation { duration: 200 } }
                                                             }
@@ -1185,7 +1187,7 @@ ApplicationWindow {
                                                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                                             onClicked: {
                                                                 if (mouse.x > 60) {
-                                                                    expandedSection = expandedSection === "covers" ? "" : "covers"
+                                                                    coversExpanded = !coversExpanded
                                                                 } else {
                                                                     cacheContent.clearCovers = !cacheContent.clearCovers
                                                                     if (!cacheContent.clearCovers) {
@@ -1201,7 +1203,7 @@ ApplicationWindow {
                                                     Item {
                                                         Layout.fillWidth: true
                                                         clip: true
-                                                        Layout.preferredHeight: expandedSection === "covers" ? (detailedCoversModel.count * 40) : 0
+                                                        Layout.preferredHeight: coversExpanded ? (detailedCoversModel.count * 40) : 0
                                                         Behavior on Layout.preferredHeight { NumberAnimation { duration: 300; easing.type: Easing.InOutQuad } }
 
                                                         ColumnLayout {
