@@ -1082,7 +1082,10 @@ ApplicationWindow {
                                                         RowLayout {
                                                             anchors.fill: parent; anchors.margins: 15
                                                             Text { text: "Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
-                                                            Text { text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
+                                                            Text { 
+                                                                text: detailedTracksModel.count + " tracks, " + formatSize((window.cacheVersion, MorphCache.getTrackCacheSize()))
+                                                                color: "#888"; font.family: "Rubik"; font.pixelSize: 13 
+                                                            }
                                                             Rectangle { 
                                                                 width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"
                                                                 Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
@@ -1156,7 +1159,10 @@ ApplicationWindow {
                                                         RowLayout {
                                                             anchors.fill: parent; anchors.margins: 15
                                                             Text { text: "Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
-                                                            Text { text: formatSize((window.cacheVersion, MorphCache.getCoverCacheSize())); color: "#888"; font.family: "Rubik"; font.pixelSize: 13 }
+                                                            Text { 
+                                                                text: detailedCoversModel.count + " covers, " + formatSize((window.cacheVersion, MorphCache.getCoverCacheSize()))
+                                                                color: "#888"; font.family: "Rubik"; font.pixelSize: 13 
+                                                            }
                                                             Rectangle { 
                                                                 width: 20; height: 20; radius: 4; color: cacheContent.clearCovers ? "#bb66ff" : "#333"
                                                                 Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
