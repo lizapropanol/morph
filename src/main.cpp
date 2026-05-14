@@ -6,8 +6,13 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     
-    QFontDatabase::addApplicationFont(":/assets/fonts/Rubik.ttf");
-    QFontDatabase::addApplicationFont(":/assets/fonts/Rubik-Italic.ttf");
+    int fontId = QFontDatabase::addApplicationFont(":/assets/fonts/NimbusSans.otf");
+    if (fontId != -1) {
+        QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
+        QFont nimbus(family);
+        app.setFont(nimbus);
+    }
+    QFontDatabase::addApplicationFont(":/assets/fonts/NimbusSans-Bold.otf");
     
     PathProvider::ensureConfigExists();
     
