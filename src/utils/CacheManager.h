@@ -37,6 +37,9 @@ public:
 
     Q_INVOKABLE void setLimit(qint64 bytes);
 
+    void setSaveTracks(bool save);
+    void setSaveCovers(bool save);
+
 signals:
     void trackCached(const QString& trackId, const QString& localPath);
     void coverCached(const QString& url, const QString& localPath);
@@ -44,6 +47,8 @@ signals:
 private:
     NetworkManager* net;
     qint64 m_limit = 0;
+    bool m_saveTracks = true;
+    bool m_saveCovers = true;
     QString getHash(const QString& input);
     void enforceLimit();
 };

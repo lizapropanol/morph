@@ -51,6 +51,11 @@ public slots:
     void setCacheLimit(qint64 bytes);
     qint64 getCacheLimit();
 
+    void setSaveTrackCache(bool save);
+    bool getSaveTrackCache();
+    void setSaveCoverCache(bool save);
+    bool getSaveCoverCache();
+
 signals:
     void likesChanged();
     void playlistsChanged();

@@ -1382,6 +1382,59 @@ ApplicationWindow {
 
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 10
+                                            Text { text: "CACHE SETTINGS"; color: "#444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Black }
+                                            
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                Text { text: "Save Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                Switch {
+                                                    id: saveTrackSwitch
+                                                    checked: (window.settingsVersion, MorphSettings.getSaveTrackCache())
+                                                    onToggled: {
+                                                        MorphSettings.setSaveTrackCache(checked)
+                                                        window.cacheVersion++
+                                                        refreshDetailedCache()
+                                                    }
+                                                    indicator: Rectangle {
+                                                        implicitWidth: 36; implicitHeight: 20; radius: 10
+                                                        color: saveTrackSwitch.checked ? "#44ff44" : "#222"
+                                                        Behavior on color { ColorAnimation { duration: 150 } }
+                                                        Rectangle {
+                                                            x: saveTrackSwitch.checked ? parent.width - width - 2 : 2; y: 2
+                                                            width: 16; height: 16; radius: 8; color: "white"
+                                                            Behavior on x { NumberAnimation { duration: 150 } }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                Text { text: "Save Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                Switch {
+                                                    id: saveCoverSwitch
+                                                    checked: (window.settingsVersion, MorphSettings.getSaveCoverCache())
+                                                    onToggled: {
+                                                        MorphSettings.setSaveCoverCache(checked)
+                                                        window.cacheVersion++
+                                                        refreshDetailedCache()
+                                                    }
+                                                    indicator: Rectangle {
+                                                        implicitWidth: 36; implicitHeight: 20; radius: 10
+                                                        color: saveCoverSwitch.checked ? "#bb66ff" : "#222"
+                                                        Behavior on color { ColorAnimation { duration: 150 } }
+                                                        Rectangle {
+                                                            x: saveCoverSwitch.checked ? parent.width - width - 2 : 2; y: 2
+                                                            width: 16; height: 16; radius: 8; color: "white"
+                                                            Behavior on x { NumberAnimation { duration: 150 } }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 10
                                             Text { text: "CACHE LIMIT"; color: "#444"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Black }
                                             RowLayout {
                                                 spacing: 8

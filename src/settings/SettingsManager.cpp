@@ -21,6 +21,13 @@ void SettingsManager::load() {
             cache->setLimit(m_data["cache_limit"].toVariant().toLongLong());
         }
 
+        if (m_data.contains("save_track_cache")) {
+            cache->setSaveTracks(m_data["save_track_cache"].toBool());
+        }
+        if (m_data.contains("save_cover_cache")) {
+            cache->setSaveCovers(m_data["save_cover_cache"].toBool());
+        }
+
         if (m_data.contains("playlists") && m_data["playlists"].isObject()) {
             QJsonObject playlists = m_data["playlists"].toObject();
             bool changed = false;
@@ -256,4 +263,28 @@ void SettingsManager::setCacheLimit(qint64 bytes) {
 qint64 SettingsManager::getCacheLimit() {
     if (!m_data.contains("cache_limit")) return 0;
     return m_data["cache_limit"].toVariant().toLongLong();
+}
+
+void SettingsManager::setSaveTrackCache(bool save) {
+    m_data["save_track_cache"] = save;
+    cache->setSaveTracks(save);
+    this->save();
+    emit settingsChanged();
+}
+
+bool SettingsManager::getSaveTrackCache() {
+    if (!m_data.contains("save_track_cache")) return true;
+    return m_data["save_track_cache"].toBool();
+}
+
+void SettingsManager::setSaveCoverCache(bool save) {
+    m_data["save_cover_cache"] = save;
+    cache->setSaveCovers(save);
+    this->save();
+    emit settingsChanged();
+}
+
+bool SettingsManager::getSaveCoverCache() {
+    if (!m_data.contains("save_cover_cache")) return true;
+    return m_data["save_cover_cache"].toBool();
 }

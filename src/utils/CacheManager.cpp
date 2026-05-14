@@ -19,7 +19,7 @@ QString CacheManager::getTrackUrl(const QString& trackId) {
 }
 
 void CacheManager::cacheTrack(const QString& trackId, const QString& url) {
-    if (isTrackCached(trackId) || url.isEmpty() || url.startsWith("file://")) return;
+    if (!m_saveTracks || isTrackCached(trackId) || url.isEmpty() || url.startsWith("file://")) return;
 
     net->get(QUrl(url), "", [this, trackId](QNetworkReply* reply) {
         if (reply->error() == QNetworkReply::NoError) {
@@ -112,7 +112,7 @@ QString CacheManager::getCachedCover(const QString& url) {
 }
 
 void CacheManager::cacheCover(const QString& url) {
-    if (url.isEmpty() || url.startsWith("file://")) return;
+    if (!m_saveCovers || url.isEmpty() || url.startsWith("file://")) return;
     QString path = PathProvider::getCoverCachePath() + "/" + getHash(url);
     if (QFile::exists(path)) return;
 
@@ -141,6 +141,14 @@ void CacheManager::clearCoverCache() {
 void CacheManager::setLimit(qint64 bytes) {
     m_limit = bytes;
     enforceLimit();
+}
+
+void CacheManager::setSaveTracks(bool save) {
+    m_saveTracks = save;
+}
+
+void CacheManager::setSaveCovers(bool save) {
+    m_saveCovers = save;
 }
 
 void CacheManager::enforceLimit() {
