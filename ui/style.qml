@@ -1059,6 +1059,11 @@ ApplicationWindow {
                                             contentItem: RowLayout {
                                                 anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
                                                 anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
+                                                Image {
+                                                    source: "assets/harddisk.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20; Layout.alignment: Qt.AlignVCenter
+                                                    sourceSize.width: 40; sourceSize.height: 40
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                }
                                                 Text { text: "Manage Storage"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
                                                 Text { 
                                                     text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize()))
@@ -1079,6 +1084,11 @@ ApplicationWindow {
                                             contentItem: RowLayout {
                                                 anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
                                                 anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
+                                                Image {
+                                                    source: "assets/discord.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20; Layout.alignment: Qt.AlignVCenter
+                                                    sourceSize.width: 40; sourceSize.height: 40
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                }
                                                 Text { text: "Discord RPC"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
                                                 Switch {
                                                     id: discordRpcSwitch; Layout.alignment: Qt.AlignVCenter; Layout.preferredHeight: 20; padding: 0
