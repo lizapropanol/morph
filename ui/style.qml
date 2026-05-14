@@ -1080,29 +1080,15 @@ ApplicationWindow {
                                         Timer { id: clearCoversTimer; interval: 350; onTriggered: detailedCoversModel.clear() }
 
                                         RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 0
-                                            
-                                            Item {
-                                                Layout.preferredWidth: headerRow.width
-                                                Layout.preferredHeight: 40
-                                                
-                                                RowLayout {
-                                                    id: headerRow
-                                                    spacing: 15
-                                                    Button {
-                                                        text: "‹"; Layout.preferredWidth: 32; Layout.preferredHeight: 32
-                                                        background: Rectangle { color: "transparent" }
-                                                        contentItem: Text { text: parent.text; color: "white"; font.pixelSize: 24; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                    }
-                                                    Text { text: "STORAGE USAGE"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold; Layout.alignment: Qt.AlignVCenter }
-                                                }
-
-                                                MouseArea { 
-                                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                    onClicked: settingsSubView = "main"
-                                                }
+                                            Layout.fillWidth: true; spacing: 15
+                                            Button {
+                                                text: "← BACK"
+                                                onClicked: settingsSubView = "main"
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                contentItem: Text { text: parent.text; color: "#888"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Bold }
+                                                background: Item {}
                                             }
+                                            Text { text: "STORAGE USAGE"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold; Layout.alignment: Qt.AlignVCenter }
                                             Item { Layout.fillWidth: true }
                                         }
 
