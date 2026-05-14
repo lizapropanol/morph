@@ -2,6 +2,9 @@
 #include "../utils/PathProvider.h"
 #include "../utils/CryptoUtils.h"
 #include <QDir>
+#include <QSysInfo>
+#include <QGuiApplication>
+#include <QClipboard>
 
 SettingsManager::SettingsManager(CacheManager* cache, QObject* parent) : QObject(parent), cache(cache) {
     m_path = PathProvider::getDataPath() + "/settings.json";
@@ -267,4 +270,22 @@ void SettingsManager::setDiscordRpcEnabled(bool enabled) {
 bool SettingsManager::getDiscordRpcEnabled() {
     if (!m_data.contains("discord_rpc")) return true;
     return m_data["discord_rpc"].toBool();
+}
+
+QVariantMap SettingsManager::getAboutInfo() {
+    QVariantMap info;
+    info["version"] = "0.1.0";
+    info["build_date"] = QString(__DATE__);
+    info["build_time"] = QString(__TIME__);
+    info["qt_version"] = QString(QT_VERSION_STR);
+    info["os_name"] = QSysInfo::prettyProductName();
+    info["os_version"] = QSysInfo::productVersion();
+    info["kernel"] = QSysInfo::kernelVersion();
+    info["arch"] = QSysInfo::currentCpuArchitecture();
+    
+    QString buildNum = QString(__DATE__).replace(" ", "");
+    buildNum += QString(__TIME__).replace(":", "");
+    info["build_number"] = buildNum;
+    
+    return info;
 }

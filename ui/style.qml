@@ -1122,6 +1122,59 @@ ApplicationWindow {
                                             }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                         }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 15
+
+                                            Rectangle {                                                Layout.fillWidth: true; Layout.preferredHeight: aboutLayout.height + 30
+                                                color: "#1a1a1a"; radius: 10; border.color: "#333"
+                                                
+                                                ColumnLayout {
+                                                    id: aboutLayout
+                                                    anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top
+                                                    anchors.margins: 15; spacing: 10
+                                                    
+                                                    RowLayout {
+                                                        spacing: 12
+                                                        Image {
+                                                            source: "assets/information.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20
+                                                            sourceSize.width: 40; sourceSize.height: 40
+                                                            layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                        }
+                                                        ColumnLayout {
+                                                            spacing: 2
+                                                            Text { text: "morph"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold }
+                                                            Text { text: "Version " + MorphSettings.getAboutInfo().version; color: "#888"; font.family: "Rubik"; font.pixelSize: 12 }
+                                                        }
+                                                    }
+                                                    
+                                                    Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: "#222" }
+                                                    
+                                                    GridLayout {
+                                                        columns: 2; rowSpacing: 8; columnSpacing: 20
+                                                        Layout.fillWidth: true
+                                                        
+                                                        Text { text: "Build Number"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: MorphSettings.getAboutInfo().build_number; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        
+                                                        Text { text: "Build Date"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: MorphSettings.getAboutInfo().build_date + " " + MorphSettings.getAboutInfo().build_time; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        
+                                                        Text { text: "Qt Version"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: MorphSettings.getAboutInfo().qt_version; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        
+                                                        Text { text: "OS"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: MorphSettings.getAboutInfo().os_name; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        
+                                                        Text { text: "Kernel"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: MorphSettings.getAboutInfo().kernel; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        
+                                                        Text { text: "Architecture"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: MorphSettings.getAboutInfo().arch; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
 
                                     ColumnLayout {

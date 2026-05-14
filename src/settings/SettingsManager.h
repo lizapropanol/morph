@@ -59,6 +59,8 @@ public slots:
     void setDiscordRpcEnabled(bool enabled);
     bool getDiscordRpcEnabled();
 
+    Q_INVOKABLE QVariantMap getAboutInfo();
+
 signals:
     void likesChanged();
     void playlistsChanged();
