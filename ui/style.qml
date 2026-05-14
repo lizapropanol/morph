@@ -1146,6 +1146,38 @@ ApplicationWindow {
                                                             Text { text: "morph"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold }
                                                             Text { text: "Version " + MorphSettings.getAboutInfo().version; color: "#888"; font.family: "Rubik"; font.pixelSize: 12 }
                                                         }
+                                                        Item { Layout.fillWidth: true }
+                                                        RowLayout {
+                                                            spacing: 8; Layout.alignment: Qt.AlignVCenter
+                                                            Button {
+                                                                Layout.preferredWidth: 28; Layout.preferredHeight: 28
+                                                                padding: 0
+                                                                background: Rectangle { color: "#222"; radius: 6; border.color: "#333" }
+                                                                onClicked: Qt.openUrlExternally("https://github.com/lizapropanol/morph")
+                                                                contentItem: Item {
+                                                                    Image {
+                                                                        source: "assets/github.svg"; anchors.centerIn: parent; width: 16; height: 16
+                                                                        sourceSize.width: 32; sourceSize.height: 32
+                                                                        layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                                    }
+                                                                }
+                                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                            }
+                                                            Button {
+                                                                Layout.preferredWidth: 28; Layout.preferredHeight: 28
+                                                                padding: 0
+                                                                background: Rectangle { color: "#222"; radius: 6; border.color: "#333" }
+                                                                onClicked: Qt.openUrlExternally("https://t.me/lizapropanol")
+                                                                contentItem: Item {
+                                                                    Image {
+                                                                        source: "assets/telegram.svg"; anchors.centerIn: parent; width: 16; height: 16
+                                                                        sourceSize.width: 32; sourceSize.height: 32
+                                                                        layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                                    }
+                                                                }
+                                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                            }
+                                                        }
                                                     }
                                                     
                                                     Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: "#222" }
