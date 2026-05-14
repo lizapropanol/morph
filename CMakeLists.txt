@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(morph VERSION 0.1.0 LANGUAGES CXX)
 
+if(UNIX AND NOT APPLE AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "..." FORCE)
+endif()
+
 if(EXISTS "${CMAKE_SOURCE_DIR}/build_number.txt")
     file(READ "${CMAKE_SOURCE_DIR}/build_number.txt" BUILD_NUMBER)
     string(STRIP "${BUILD_NUMBER}" BUILD_NUMBER)
