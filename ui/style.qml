@@ -1187,22 +1187,40 @@ ApplicationWindow {
                                                         Layout.fillWidth: true
                                                         
                                                         Text { text: "Build Number"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
-                                                        Text { text: MorphSettings.getAboutInfo().build_number; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        Text { 
+                                                            text: MorphSettings.getAboutInfo().build_number; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11
+                                                            Layout.fillWidth: true; horizontalAlignment: Text.AlignRight 
+                                                        }
                                                         
                                                         Text { text: "Build Date"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
-                                                        Text { text: MorphSettings.getAboutInfo().build_date + " " + MorphSettings.getAboutInfo().build_time; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        Text { 
+                                                            text: MorphSettings.getAboutInfo().build_date + " " + MorphSettings.getAboutInfo().build_time; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11
+                                                            Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
+                                                        }
                                                         
                                                         Text { text: "Qt Version"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
-                                                        Text { text: MorphSettings.getAboutInfo().qt_version; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        Text { 
+                                                            text: MorphSettings.getAboutInfo().qt_version; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11
+                                                            Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
+                                                        }
                                                         
                                                         Text { text: "OS"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
-                                                        Text { text: MorphSettings.getAboutInfo().os_name; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        Text { 
+                                                            text: MorphSettings.getAboutInfo().os_name; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11
+                                                            Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
+                                                        }
                                                         
                                                         Text { text: "Kernel"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
-                                                        Text { text: MorphSettings.getAboutInfo().kernel; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        Text { 
+                                                            text: MorphSettings.getAboutInfo().kernel; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11
+                                                            Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
+                                                        }
                                                         
                                                         Text { text: "Architecture"; color: "#666"; font.family: "Rubik"; font.pixelSize: 11; font.weight: Font.Medium }
-                                                        Text { text: MorphSettings.getAboutInfo().arch; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11; Layout.alignment: Qt.AlignRight }
+                                                        Text { 
+                                                            text: MorphSettings.getAboutInfo().arch; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 11
+                                                            Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
+                                                        }
                                                     }
                                                 }
                                             }
