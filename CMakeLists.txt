@@ -53,3 +53,5 @@ target_link_libraries(morph PRIVATE
     Qt5::DBus
     Qt5::Widgets
 )
+
+include(Packaging.cmake)

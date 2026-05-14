@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=morph
+Exec=morph
+Icon=morph
+Type=Application
+Categories=AudioVideo;Audio;Player;
+Comment=Modern music player for Yandex Music and SoundCloud
+Terminal=false

@@ -1,0 +1,17 @@
+install(TARGETS morph DESTINATION bin)
+install(FILES morph.desktop DESTINATION share/applications)
+install(FILES assets/logo.svg DESTINATION share/icons/hicolor/scalable/apps RENAME morph.svg)
+
+set(CPACK_PACKAGE_NAME "morph")
+set(CPACK_PACKAGE_VENDOR "lizapropanol")
+set(CPACK_PACKAGE_CONTACT "https://github.com/lizapropanol/morph")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Modern music player for Yandex Music and SoundCloud")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "lizapropanol")
+set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "qml-module-qtquick2, qml-module-qtquick-layouts, qml-module-qtquick-controls2, qml-module-qtquick-window2, qml-module-qtmultimedia, libqt5multimedia5-plugins")
+set(CPACK_GENERATOR "DEB")
+
+include(CPack)
