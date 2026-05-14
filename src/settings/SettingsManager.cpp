@@ -256,3 +256,14 @@ bool SettingsManager::getSaveCoverCache() {
     if (!m_data.contains("save_cover_cache")) return true;
     return m_data["save_cover_cache"].toBool();
 }
+
+void SettingsManager::setDiscordRpcEnabled(bool enabled) {
+    m_data["discord_rpc"] = enabled;
+    save();
+    emit settingsChanged();
+}
+
+bool SettingsManager::getDiscordRpcEnabled() {
+    if (!m_data.contains("discord_rpc")) return true;
+    return m_data["discord_rpc"].toBool();
+}

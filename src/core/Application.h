@@ -11,6 +11,7 @@
 #include "ServiceManager.h"
 #include "settings/SettingsManager.h"
 #include "MprisManager.h"
+#include "utils/DiscordManager.h"
 
 class Application : public QObject {
     Q_OBJECT
@@ -33,6 +34,7 @@ private:
     ServiceManager* services;
     SettingsManager* settings;
     MprisManager* mpris;
+    DiscordManager* discord;
     QSystemTrayIcon* trayIcon;
     QMenu* trayMenu;
     QAction* trackInfoAction;

@@ -56,6 +56,9 @@ public slots:
     void setSaveCoverCache(bool save);
     bool getSaveCoverCache();
 
+    void setDiscordRpcEnabled(bool enabled);
+    bool getDiscordRpcEnabled();
+
 signals:
     void likesChanged();
     void playlistsChanged();

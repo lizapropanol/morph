@@ -97,6 +97,7 @@ ApplicationWindow {
             lastKnownPosition = session.position || 0
             MorphServices.resolve(currentTrack.service, currentTrack.id)
             MorphMpris.updateMetadata(currentTrack)
+            MorphDiscord.updateMetadata(currentTrack)
             repeatOne = session.repeatOne || false
             
             if (session.queue) {
@@ -222,6 +223,7 @@ ApplicationWindow {
 
         MorphServices.reportPlay(cleanTrack.service, cleanTrack.id, cleanTrack.album)
         MorphMpris.updateMetadata(cleanTrack)
+        MorphDiscord.updateMetadata(cleanTrack)
         preResolveNext()
     }
 
@@ -396,7 +398,9 @@ ApplicationWindow {
                             background: Item {}
                         }
                     }
+
                     Item { Layout.fillHeight: true }
+
                 }
             }
 
@@ -1062,6 +1066,32 @@ ApplicationWindow {
                                                 Image {
                                                     source: "assets/chevron-right.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16; Layout.alignment: Qt.AlignVCenter
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
+                                                }
+                                            }
+                                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                        }
+
+                                        Button {
+                                            Layout.fillWidth: true; Layout.preferredHeight: 50
+                                            onClicked: MorphSettings.setDiscordRpcEnabled(!MorphSettings.getDiscordRpcEnabled())
+                                            background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
+                                            contentItem: RowLayout {
+                                                anchors.fill: parent; anchors.margins: 15; spacing: 10
+                                                Text { text: "Discord RPC"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
+                                                Switch {
+                                                    id: discordRpcSwitch
+                                                    checked: (window.settingsVersion, MorphSettings.getDiscordRpcEnabled())
+                                                    onToggled: MorphSettings.setDiscordRpcEnabled(checked)
+                                                    indicator: Rectangle {
+                                                        implicitWidth: 36; implicitHeight: 20; radius: 10
+                                                        color: discordRpcSwitch.checked ? "#5865f2" : "#222"
+                                                        Behavior on color { ColorAnimation { duration: 150 } }
+                                                        Rectangle {
+                                                            x: discordRpcSwitch.checked ? parent.width - width - 2 : 2; y: 2
+                                                            width: 16; height: 16; radius: 8; color: "white"
+                                                            Behavior on x { NumberAnimation { duration: 150 } }
+                                                        }
+                                                    }
                                                 }
                                             }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }

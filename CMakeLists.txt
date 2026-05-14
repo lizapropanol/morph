@@ -25,6 +25,7 @@ add_executable(morph
     src/core/ServiceManager.h src/core/ServiceManager.cpp
     src/settings/SettingsManager.h src/settings/SettingsManager.cpp
     src/core/MprisManager.h src/core/MprisManager.cpp
+    src/utils/DiscordManager.h src/utils/DiscordManager.cpp
 )
 
 target_include_directories(morph PRIVATE src)
