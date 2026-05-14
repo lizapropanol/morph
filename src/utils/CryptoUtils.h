@@ -10,7 +10,7 @@ public:
     static QString decrypt(const QString& text);
 
 private:
-    static const QByteArray m_key;
+    static QByteArray getSystemKey();
 };
 
 #endif
