@@ -106,7 +106,9 @@ ApplicationWindow {
                 saveLastImport = session.saveLastImport !== undefined ? session.saveLastImport : true
                 libraryModel.clear()
                 for (var i = 0; i < fullPlaylistTracks.length; i++) {
-                    libraryModel.append(fullPlaylistTracks[i])
+                    var item = fullPlaylistTracks[i]
+                    if (item.durationMs === undefined) item.durationMs = 0
+                    libraryModel.append(item)
                 }
                 loadedTracksCount = fullPlaylistTracks.length
             }
@@ -144,9 +146,11 @@ ApplicationWindow {
             for(var i = likes.length - 1; i >= 0; i--) {
                 var item = likes[i]
                 if (!item.service) item.service = "Yandex"
+                if (item.durationMs === undefined) item.durationMs = 0
                 fullPlaylistTracks.push(item)
             }
-        } else {
+        }
+ else {
             var pls = MorphSettings.getPlaylists()
             var pData = pls[name]
             if (pData) {
@@ -158,6 +162,7 @@ ApplicationWindow {
                         else if (t.coverUrl && t.coverUrl.indexOf("sndcdn") !== -1) t.service = "SoundCloud"
                         else t.service = "Yandex"
                     }
+                    if (t.durationMs === undefined) t.durationMs = 0
                     fullPlaylistTracks.push(t)
                 }
             }
@@ -191,7 +196,8 @@ ApplicationWindow {
             album: track.album || "",
             coverUrl: track.coverUrl,
             service: service,
-            webUrl: track.webUrl || ""
+            webUrl: track.webUrl || "",
+            durationMs: track.durationMs || 0
         }
         currentTrack = cleanTrack
         currentTrackIndex = index
@@ -232,11 +238,18 @@ ApplicationWindow {
         }
     }
 
-    ListModel { id: searchModel }
-    ListModel { id: libraryModel }
+    function forceRole(model) {
+        if (model.count === 0) {
+            model.append({ "id": "", "title": "", "artist": "", "coverUrl": "", "service": "", "webUrl": "", "durationMs": 0 })
+            model.clear()
+        }
+    }
+
+    ListModel { id: searchModel; Component.onCompleted: forceRole(this) }
+    ListModel { id: libraryModel; Component.onCompleted: forceRole(this) }
     ListModel { id: playlistsModel }
-    ListModel { id: historyModel }
-    ListModel { id: chartsModel }
+    ListModel { id: historyModel; Component.onCompleted: forceRole(this) }
+    ListModel { id: chartsModel; Component.onCompleted: forceRole(this) }
     ListModel { id: dailyMixesModel }
     ListModel { id: detailedTracksModel }
     ListModel { id: detailedCoversModel }
@@ -1699,7 +1712,7 @@ ApplicationWindow {
                             m = view ? view.model : (searchModel.count > 0 ? searchModel : historyModel)
                             track = m.get(index)
 
-                            var tObj = { "id": track.id, "title": track.title, "artist": track.artist, "coverUrl": track.coverUrl, "service": track.service, "webUrl": track.webUrl || "" }
+                            var tObj = { "id": track.id, "title": track.title, "artist": track.artist, "coverUrl": track.coverUrl, "service": track.service, "webUrl": track.webUrl || "", "durationMs": track.durationMs || 0 }
                             MorphSettings.addSearchHistory(tObj)
 
                             historyModel.clear()
@@ -1735,6 +1748,11 @@ ApplicationWindow {
                         Text { Layout.fillWidth: true; text: model.artist || ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
                     }
                 }
+                Text {
+                    text: formatTime(model.durationMs || 0)
+                    color: "#666"; font.family: "Rubik"; font.pixelSize: 12; visible: (model.durationMs || 0) > 0
+                    Layout.alignment: Qt.AlignVCenter
+                }
                 Rectangle {
                     width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
                     Layout.alignment: Qt.AlignVCenter
@@ -1742,7 +1760,7 @@ ApplicationWindow {
                 Image {
                     source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.alignment: Qt.AlignVCenter; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                     MouseArea { 
-                        anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service, "album": model.album || "", "webUrl": model.webUrl || "" }); cursorShape: Qt.PointingHandCursor 
+                        anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service, "album": model.album || "", "webUrl": model.webUrl || "", "durationMs": model.durationMs || 0 }); cursorShape: Qt.PointingHandCursor 
                     }
                 }
             }
@@ -1809,7 +1827,10 @@ ApplicationWindow {
         function onSearchResultsReady(serviceName, results) {
             isSearching = false
             for (var i = 0; i < results.length; i++) {
-                var item = results[i]; item.service = serviceName; searchModel.append(item)
+                var item = results[i]
+                item.service = serviceName
+                if (item.durationMs === undefined) item.durationMs = 0
+                searchModel.append(item)
             }
         }
         function onErrorOccurred(message) {
@@ -1820,14 +1841,20 @@ ApplicationWindow {
         function onChartsReady(serviceName, results) {
             if (results.length > 0) chartsModel.clear()
             for (var i = 0; i < results.length; i++) {
-                var item = results[i]; item.service = serviceName; chartsModel.append(item)
+                var item = results[i]
+                item.service = serviceName
+                if (item.durationMs === undefined) item.durationMs = 0
+                chartsModel.append(item)
             }
         }
         function onWaveReady(serviceName, results) {
             currentPlaylist = "MY_VIBE"
             libraryModel.clear()
             for (var i = 0; i < results.length; i++) {
-                var item = results[i]; item.service = serviceName; libraryModel.append(item)
+                var item = results[i]
+                item.service = serviceName
+                if (item.durationMs === undefined) item.durationMs = 0
+                libraryModel.append(item)
             }
             if (libraryModel.count > 0) playTrack(libraryModel.get(0), 0)
         }
@@ -1867,7 +1894,9 @@ ApplicationWindow {
             
             libraryModel.clear()
             for (var i = 0; i < tracks.length; i++) {
-                libraryModel.append(tracks[i])
+                var item = tracks[i]
+                if (item.durationMs === undefined) item.durationMs = 0
+                libraryModel.append(item)
             }
             
             if (libraryModel.count > 0) {
@@ -1887,7 +1916,11 @@ ApplicationWindow {
             if (currentView === "library" && currentPlaylist === "") {
                 libraryModel.clear()
                 var likes = MorphSettings.getLikedTracks()
-                for(var i = likes.length - 1; i >= 0; i--) libraryModel.append(likes[i])
+                for(var i = likes.length - 1; i >= 0; i--) {
+                    var item = likes[i]
+                    if (item.durationMs === undefined) item.durationMs = 0
+                    libraryModel.append(item)
+                }
             }
         }
         function onPlaylistsChanged() {
@@ -1902,7 +1935,11 @@ ApplicationWindow {
                     var pData = pls[currentPlaylist]
                     if (pData) {
                         var tracks = pData.tracks || (Array.isArray(pData) ? pData : [])
-                        for (var i = 0; i < tracks.length; i++) libraryModel.append(tracks[i])
+                        for (var i = 0; i < tracks.length; i++) {
+                            var item = tracks[i]
+                            if (item.durationMs === undefined) item.durationMs = 0
+                            libraryModel.append(item)
+                        }
                     }
                 }
             }

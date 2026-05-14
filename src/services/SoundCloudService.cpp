@@ -41,6 +41,7 @@ void SoundCloudService::search(const QString& query) {
             TrackData track;
             track.id = QString::number(obj["id"].toInt());
             track.title = obj["title"].toString();
+            track.durationMs = obj["duration"].toVariant().toLongLong();
             
             QJsonObject pub = obj["publisher_metadata"].toObject();
             if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {
@@ -262,6 +263,7 @@ void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, cons
                 TrackData track;
                 track.id = obj["id"].toVariant().toString();
                 track.title = obj["title"].toString();
+                track.durationMs = obj["duration"].toVariant().toLongLong();
                 
                 QJsonObject pub = obj["publisher_metadata"].toObject();
                 if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {

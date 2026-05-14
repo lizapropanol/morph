@@ -56,8 +56,7 @@ cd morph
 mkdir build && cd build
 
 # Configure and build
-cmake ..
-cmake --build . -j$(nproc)
+make
 
 # Run the application
 ./morph

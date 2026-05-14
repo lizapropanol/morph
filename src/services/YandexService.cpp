@@ -20,12 +20,21 @@ void YandexService::setAudioQuality(const QString& quality) {
 QVariantList YandexService::parseYandexTracks(const QJsonArray& tracks) {
     QVariantList tracksList;
     for (const QJsonValue& val : tracks) {
-        QJsonObject trackObj = val.isObject() && val.toObject().contains("track") ? val.toObject()["track"].toObject() : val.toObject();
+        QJsonObject wrapper = val.toObject();
+        QJsonObject trackObj = wrapper.contains("track") ? wrapper["track"].toObject() : wrapper;
         if (trackObj.isEmpty()) continue;
         
         TrackData track;
         track.id = trackObj["id"].toVariant().toString();
         track.title = trackObj["title"].toString();
+        
+        if (trackObj.contains("durationMs")) {
+            track.durationMs = trackObj["durationMs"].toVariant().toLongLong();
+        } else if (wrapper.contains("durationMs")) {
+            track.durationMs = wrapper["durationMs"].toVariant().toLongLong();
+        } else if (trackObj.contains("duration")) {
+            track.durationMs = trackObj["duration"].toVariant().toLongLong() * 1000;
+        }
         
         QJsonArray artists = trackObj["artists"].toArray();
         QStringList artistNames;

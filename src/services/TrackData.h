@@ -13,6 +13,7 @@ struct TrackData {
     QString streamUrl;
     QString service;
     QString webUrl;
+    qint64 durationMs = 0;
 
     QVariantMap toVariantMap() const {
         QVariantMap map;
@@ -24,6 +25,7 @@ struct TrackData {
         map["streamUrl"] = streamUrl;
         map["service"] = service;
         map["webUrl"] = webUrl;
+        map["durationMs"] = durationMs;
         return map;
     }
 };
