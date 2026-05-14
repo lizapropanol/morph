@@ -1055,6 +1055,8 @@ ApplicationWindow {
                                         property bool showSuccess: false
                                         
                                         Timer { id: successTimer; interval: 2000; onTriggered: cacheContent.showSuccess = false }
+                                        Timer { id: clearTracksTimer; interval: 350; onTriggered: detailedTracksModel.clear() }
+                                        Timer { id: clearCoversTimer; interval: 350; onTriggered: detailedCoversModel.clear() }
 
                                         RowLayout {
                                             Layout.fillWidth: true
@@ -1167,8 +1169,14 @@ ApplicationWindow {
                                                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                                             onClicked: {
                                                                 if (mouse.x > 60) {
-                                                                    tracksExpanded = !tracksExpanded
-                                                                    if (tracksExpanded) loadDetailedTracks()
+                                                                    if (tracksExpanded) {
+                                                                        tracksExpanded = false
+                                                                        clearTracksTimer.start()
+                                                                    } else {
+                                                                        clearTracksTimer.stop()
+                                                                        loadDetailedTracks()
+                                                                        tracksExpanded = true
+                                                                    }
                                                                 } else {
                                                                     cacheContent.clearTracks = !cacheContent.clearTracks
                                                                     if (!cacheContent.clearTracks) {
@@ -1189,7 +1197,7 @@ ApplicationWindow {
                                                         
                                                         ListView {
                                                             anchors.fill: parent
-                                                            model: tracksExpanded ? detailedTracksModel : null
+                                                            model: detailedTracksModel
                                                             clip: true
                                                             interactive: contentHeight > height
                                                             ScrollBar.vertical: ScrollBar { visible: parent.interactive }
@@ -1253,8 +1261,14 @@ ApplicationWindow {
                                                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                                                             onClicked: {
                                                                 if (mouse.x > 60) {
-                                                                    coversExpanded = !coversExpanded
-                                                                    if (coversExpanded) loadDetailedCovers()
+                                                                    if (coversExpanded) {
+                                                                        coversExpanded = false
+                                                                        clearCoversTimer.start()
+                                                                    } else {
+                                                                        clearCoversTimer.stop()
+                                                                        loadDetailedCovers()
+                                                                        coversExpanded = true
+                                                                    }
                                                                 } else {
                                                                     cacheContent.clearCovers = !cacheContent.clearCovers
                                                                     if (!cacheContent.clearCovers) {
@@ -1275,7 +1289,7 @@ ApplicationWindow {
 
                                                         ListView {
                                                             anchors.fill: parent
-                                                            model: coversExpanded ? detailedCoversModel : null
+                                                            model: detailedCoversModel
                                                             clip: true
                                                             interactive: contentHeight > height
                                                             ScrollBar.vertical: ScrollBar { visible: parent.interactive }
