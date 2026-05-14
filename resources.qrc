@@ -29,5 +29,7 @@
     <file>assets/telegram.svg</file>
     <file>assets/information.svg</file>
     <file>assets/harddisk.svg</file>
+    <file>assets/fonts/Rubik.ttf</file>
+    <file>assets/fonts/Rubik-Italic.ttf</file>
 </qresource>
 </RCC>
