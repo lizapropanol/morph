@@ -9,12 +9,22 @@ DiscordManager::DiscordManager(AudioEngine* audio, SettingsManager* settings, QO
     m_reconnectTimer = new QTimer(this);
     m_reconnectTimer->setInterval(5000);
 
+    m_seekTimer = new QTimer(this);
+    m_seekTimer->setInterval(1000);
+    m_seekTimer->setSingleShot(true);
+
     connect(m_socket, &QLocalSocket::connected, this, &DiscordManager::onConnected);
     connect(m_socket, &QLocalSocket::disconnected, this, &DiscordManager::onDisconnected);
     connect(m_reconnectTimer, &QTimer::timeout, this, &DiscordManager::connectToDiscord);
+    connect(m_seekTimer, &QTimer::timeout, this, &DiscordManager::seekUpdate);
     
     connect(m_audio, &AudioEngine::stateChanged, this, &DiscordManager::updatePresence);
     connect(m_audio, &AudioEngine::durationChanged, this, &DiscordManager::updatePresence);
+    connect(m_audio, &AudioEngine::seeked, this, [this]() {
+        if (!m_seekTimer->isActive()) {
+            m_seekTimer->start();
+        }
+    });
     connect(m_settings, &SettingsManager::settingsChanged, this, &DiscordManager::onSettingsChanged);
 
     connectToDiscord();
@@ -90,8 +100,18 @@ void DiscordManager::updatePresence() {
 
     QJsonObject assets;
     QString service = m_currentTrack["service"].toString().toLower();
-    assets["large_image"] = service == "soundcloud" ? "soundcloud" : "yandex";
-    assets["large_text"] = m_currentTrack["service"].toString();
+    QString coverUrl = m_currentTrack["coverUrl"].toString();
+    
+    if (!coverUrl.isEmpty()) {
+        assets["large_image"] = coverUrl;
+        assets["large_text"] = m_currentTrack["service"].toString();
+        assets["small_image"] = service == "soundcloud" ? "soundcloud" : "yandex";
+        assets["small_text"] = m_currentTrack["title"].toString();
+    } else {
+        assets["large_image"] = service == "soundcloud" ? "soundcloud" : "yandex";
+        assets["large_text"] = m_currentTrack["service"].toString();
+    }
+    
     activity["assets"] = assets;
 
     if (m_audio->isPlaying()) {
@@ -151,6 +171,10 @@ QString DiscordManager::getIpcPath() {
     if (QFile::exists(flatpakPath)) return flatpakPath;
 
     return "";
+}
+
+void DiscordManager::seekUpdate() {
+    updatePresence();
 }
 
 void DiscordManager::onSettingsChanged() {

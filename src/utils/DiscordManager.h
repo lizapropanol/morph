@@ -25,6 +25,7 @@ private slots:
     void onDisconnected();
     void updatePresence();
     void onSettingsChanged();
+    void seekUpdate();
 
 private:
     void sendPayload(int op, const QJsonObject& payload);
@@ -34,6 +35,7 @@ private:
     SettingsManager* m_settings;
     QLocalSocket* m_socket;
     QTimer* m_reconnectTimer;
+    QTimer* m_seekTimer;
     QVariantMap m_currentTrack;
     QString m_clientId = "1504308070342459413";
 };
