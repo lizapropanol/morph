@@ -14,6 +14,7 @@ DiscordManager::DiscordManager(AudioEngine* audio, SettingsManager* settings, QO
     connect(m_reconnectTimer, &QTimer::timeout, this, &DiscordManager::connectToDiscord);
     
     connect(m_audio, &AudioEngine::stateChanged, this, &DiscordManager::updatePresence);
+    connect(m_settings, &SettingsManager::settingsChanged, this, &DiscordManager::onSettingsChanged);
 
     connectToDiscord();
 }
@@ -53,7 +54,7 @@ void DiscordManager::onConnected() {
     handshake["v"] = 1;
     handshake["client_id"] = m_clientId;
     sendPayload(0, handshake);
-    updatePresence();
+    QTimer::singleShot(500, this, &DiscordManager::updatePresence);
 }
 
 void DiscordManager::onDisconnected() {
@@ -140,4 +141,27 @@ QString DiscordManager::getIpcPath() {
     if (QFile::exists(flatpakPath)) return flatpakPath;
 
     return "";
+}
+
+void DiscordManager::onSettingsChanged() {
+    if (m_settings->getDiscordRpcEnabled()) {
+        m_reconnectTimer->start();
+        if (m_socket->state() == QLocalSocket::ConnectedState) {
+            updatePresence();
+        } else {
+            if (m_socket->state() != QLocalSocket::UnconnectedState) {
+                m_socket->abort();
+            }
+            connectToDiscord();
+        }
+    } else {
+        m_reconnectTimer->stop();
+        if (m_socket->state() == QLocalSocket::ConnectedState) {
+            updatePresence();
+            m_socket->flush();
+            m_socket->disconnectFromServer();
+        } else {
+            m_socket->abort();
+        }
+    }
 }

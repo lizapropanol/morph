@@ -24,6 +24,7 @@ private slots:
     void onConnected();
     void onDisconnected();
     void updatePresence();
+    void onSettingsChanged();
 
 private:
     void sendPayload(int op, const QJsonObject& payload);
