@@ -1537,14 +1537,21 @@ ApplicationWindow {
                                 }
 
                                 Text {
+                                    id: currentTimeLabel
                                     opacity: progressHoverArea.containsMouse ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: 150 } }
                                     text: formatTime(MorphAudio.position)
                                     color: "white"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold
-                                    y: -12; x: (progressSlider.visualPosition * parent.width) - (width / 2)
+                                    y: -12
+                                    x: {
+                                        var desiredX = (progressSlider.visualPosition * parent.width) - (width / 2)
+                                        var maxX = progressSlider.width - durationLabel.width - width - 10
+                                        return Math.max(0, Math.min(desiredX, maxX))
+                                    }
                                 }
 
                                 Text {
+                                    id: durationLabel
                                     opacity: progressHoverArea.containsMouse ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: 150 } }
                                     text: formatTime(MorphAudio.duration)
