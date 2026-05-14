@@ -53,9 +53,12 @@ void PathProvider::ensureConfigExists() {
 
     QStringList assets = {
         "logo.svg", "heart-outline.svg", "heart.svg", "magnify.svg", "pause-circle.svg",
-        "chevron-left.svg", "chevron-right.svg",
-        "pause.svg", "play-circle.svg", "play.svg", "plus-box.svg", "plus.svg",        "repeat-once.svg", "repeat.svg", "skip-next.svg", "skip-previous.svg", 
-        "soundcloud_icon.svg", "yandex_music_icon.svg"
+        "chevron-left.svg", "chevron-right.svg", "chevron-down.svg", "chevron-up.svg",
+        "pause.svg", "play-circle.svg", "play.svg", "plus-box.svg", "plus.svg",
+        "repeat-once.svg", "repeat.svg", "skip-next.svg", "skip-previous.svg", 
+        "soundcloud_icon.svg", "yandex_music_icon.svg", "discord.svg", "github.svg",
+        "telegram.svg", "information.svg", "harddisk.svg", "check.svg", "check-all.svg",
+        "close.svg", "morph.png"
     };
 
     for (const QString& asset : assets) {

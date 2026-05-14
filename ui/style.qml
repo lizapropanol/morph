@@ -130,8 +130,8 @@ ApplicationWindow {
     }
 
     function getServiceIcon(serviceName) {
-        if (serviceName === "Yandex") return "assets/yandex_music_icon.svg"
-        if (serviceName === "SoundCloud") return "assets/soundcloud_icon.svg"
+        if (serviceName === "Yandex") return "qrc:/assets/yandex_music_icon.svg"
+        if (serviceName === "SoundCloud") return "qrc:/assets/soundcloud_icon.svg"
         return ""
     }
 
@@ -321,7 +321,7 @@ ApplicationWindow {
         Image {
             id: splashLogo
             anchors.centerIn: parent
-            source: "assets/logo.svg"
+            source: "qrc:/assets/logo.svg"
             width: 80; height: 80
             scale: logoScale
             smooth: true
@@ -458,7 +458,7 @@ ApplicationWindow {
                                             RowLayout {
                                                 anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 16; spacing: 12
                                                 Image {
-                                                    source: "assets/magnify.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20
+                                                    source: "qrc:/assets/magnify.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: searchField.activeFocus ? "#44ff44" : "#666" }
                                                 }
                                                 TextField {
@@ -470,7 +470,7 @@ ApplicationWindow {
                                                 Button {
                                                     id: clearSearchBtn; visible: searchField.text !== ""; Layout.preferredWidth: 28; Layout.preferredHeight: 28; background: null
                                                     contentItem: Image {
-                                                        source: "assets/close.svg"; sourceSize.width: 18; sourceSize.height: 18; fillMode: Image.PreserveAspectFit
+                                                        source: "qrc:/assets/close.svg"; sourceSize.width: 18; sourceSize.height: 18; fillMode: Image.PreserveAspectFit
                                                         opacity: clearSearchBtn.hovered ? 1.0 : 0.5; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                     }
                                                     onClicked: { searchField.text = ""; searchModel.clear(); isSearching = false }
@@ -602,7 +602,7 @@ ApplicationWindow {
                                             width: 64; height: 64; radius: 32; color: "#333"
                                             Image {
                                                 anchors.centerIn: parent; 
-                                                source: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "assets/pause.svg" : "assets/play.svg"
+                                                source: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "qrc:/assets/pause.svg" : "qrc:/assets/play.svg"
                                                 Layout.preferredWidth: 32; Layout.preferredHeight: 32
                                                 layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                             }
@@ -642,7 +642,7 @@ ApplicationWindow {
                                                             Rectangle {
                                                                 anchors.fill: parent; color: "#aa000000"; visible: mixMouseArea.containsMouse; radius: 15
                                                                 Image {
-                                                                    anchors.centerIn: parent; source: "assets/play.svg"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
+                                                                    anchors.centerIn: parent; source: "qrc:/assets/play.svg"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
                                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                                 }
                                                             }
@@ -662,7 +662,7 @@ ApplicationWindow {
                                                     width: 32; height: 32; radius: 16; color: "#cc000000"
                                                     visible: dailyMixesListView.contentWidth > dailyMixesListView.width && dailyMixesListView.contentX > 10
                                                     Image {
-                                                        anchors.centerIn: parent; source: "assets/chevron-left.svg"; width: 16; height: 16
+                                                        anchors.centerIn: parent; source: "qrc:/assets/chevron-left.svg"; width: 16; height: 16
                                                         layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                     }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: dailyMixesListView.flick(2000, 0) }
@@ -673,7 +673,7 @@ ApplicationWindow {
                                                     width: 32; height: 32; radius: 16; color: "#cc000000"
                                                     visible: dailyMixesListView.contentWidth > dailyMixesListView.width && dailyMixesListView.contentX < dailyMixesListView.contentWidth - dailyMixesListView.width - 10
                                                     Image {
-                                                        anchors.centerIn: parent; source: "assets/chevron-right.svg"; width: 16; height: 16
+                                                        anchors.centerIn: parent; source: "qrc:/assets/chevron-right.svg"; width: 16; height: 16
                                                         layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                     }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: dailyMixesListView.flick(-2000, 0) }
@@ -836,7 +836,7 @@ ApplicationWindow {
                                                                 anchors.fill: parent; anchors.margins: 10; color: "#333"; radius: 8
                                                                 Image {
                                                                     anchors.centerIn: parent
-                                                                    source: "assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
+                                                                    source: "qrc:/assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
                                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                                 }
                                                                 Text { 
@@ -967,7 +967,7 @@ ApplicationWindow {
                                             RowLayout {
                                                 spacing: 8
                                                 Image {
-                                                    source: "assets/yandex_music_icon.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
+                                                    source: "qrc:/assets/yandex_music_icon.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
                                                     sourceSize.width: 32; sourceSize.height: 32
                                                 }
                                                 Text { text: "Yandex Music Token"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
@@ -987,7 +987,7 @@ ApplicationWindow {
                                             RowLayout {
                                                 spacing: 8
                                                 Image {
-                                                    source: "assets/soundcloud_icon.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
+                                                    source: "qrc:/assets/soundcloud_icon.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
                                                     sourceSize.width: 32; sourceSize.height: 32
                                                 }
                                                 Text { text: "SoundCloud Client ID"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
@@ -1074,7 +1074,7 @@ ApplicationWindow {
                                                 anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
                                                 anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
                                                 Image {
-                                                    source: "assets/harddisk.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20; Layout.alignment: Qt.AlignVCenter
+                                                    source: "qrc:/assets/harddisk.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20; Layout.alignment: Qt.AlignVCenter
                                                     sourceSize.width: 40; sourceSize.height: 40
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                 }
@@ -1084,7 +1084,7 @@ ApplicationWindow {
                                                     color: "#888"; font.family: "Rubik"; font.pixelSize: 13; verticalAlignment: Text.AlignVCenter
                                                 }
                                                 Image {
-                                                    source: "assets/chevron-right.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16; Layout.alignment: Qt.AlignVCenter
+                                                    source: "qrc:/assets/chevron-right.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16; Layout.alignment: Qt.AlignVCenter
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
                                                 }
                                             }
@@ -1099,7 +1099,7 @@ ApplicationWindow {
                                                 anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
                                                 anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
                                                 Image {
-                                                    source: "assets/discord.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20; Layout.alignment: Qt.AlignVCenter
+                                                    source: "qrc:/assets/discord.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20; Layout.alignment: Qt.AlignVCenter
                                                     sourceSize.width: 40; sourceSize.height: 40
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                 }
@@ -1137,7 +1137,7 @@ ApplicationWindow {
                                                     RowLayout {
                                                         spacing: 12
                                                         Image {
-                                                            source: "assets/information.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20
+                                                            source: "qrc:/assets/information.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20
                                                             sourceSize.width: 40; sourceSize.height: 40
                                                             layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                         }
@@ -1156,7 +1156,7 @@ ApplicationWindow {
                                                                 onClicked: Qt.openUrlExternally("https://github.com/lizapropanol/morph")
                                                                 contentItem: Item {
                                                                     Image {
-                                                                        source: "assets/github.svg"; anchors.centerIn: parent; width: 16; height: 16
+                                                                        source: "qrc:/assets/github.svg"; anchors.centerIn: parent; width: 16; height: 16
                                                                         sourceSize.width: 32; sourceSize.height: 32
                                                                         layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                                     }
@@ -1170,7 +1170,7 @@ ApplicationWindow {
                                                                 onClicked: Qt.openUrlExternally("https://t.me/lizapropanol")
                                                                 contentItem: Item {
                                                                     Image {
-                                                                        source: "assets/telegram.svg"; anchors.centerIn: parent; width: 16; height: 16
+                                                                        source: "qrc:/assets/telegram.svg"; anchors.centerIn: parent; width: 16; height: 16
                                                                         sourceSize.width: 32; sourceSize.height: 32
                                                                         layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                                     }
@@ -1317,7 +1317,7 @@ ApplicationWindow {
                                                             anchors.fill: parent; anchors.margins: 15; spacing: 15
                                                             Rectangle { 
                                                                 width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"; Layout.alignment: Qt.AlignVCenter
-                                                                Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                             }
                                                             Text { text: "Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
                                                             Text { 
@@ -1325,7 +1325,7 @@ ApplicationWindow {
                                                                 color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                             }
                                                             Image {
-                                                                source: "assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
+                                                                source: "qrc:/assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
                                                                 rotation: tracksExpanded ? 180 : 0
                                                                 layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
                                                                 Behavior on rotation { NumberAnimation { duration: 200 } }
@@ -1373,7 +1373,7 @@ ApplicationWindow {
                                                                         anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
                                                                             width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#44ff44" : "#222"
-                                                                            Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                            Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                                         }
                                                                         Text { text: model.id; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
                                                                         Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
@@ -1409,7 +1409,7 @@ ApplicationWindow {
                                                             anchors.fill: parent; anchors.margins: 15; spacing: 15
                                                             Rectangle { 
                                                                 width: 20; height: 20; radius: 4; color: cacheContent.clearCovers ? "#bb66ff" : "#333"; Layout.alignment: Qt.AlignVCenter
-                                                                Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                             }
                                                             Text { text: "Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
                                                             Text { 
@@ -1417,7 +1417,7 @@ ApplicationWindow {
                                                                 color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                             }
                                                             Image {
-                                                                source: "assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
+                                                                source: "qrc:/assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
                                                                 rotation: coversExpanded ? 180 : 0
                                                                 layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
                                                                 Behavior on rotation { NumberAnimation { duration: 200 } }
@@ -1465,7 +1465,7 @@ ApplicationWindow {
                                                                         anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
                                                                             width: 16; height: 16; radius: 4; color: (cacheContent.clearCovers || model.selected) ? "#bb66ff" : "#222"
-                                                                            Image { anchors.centerIn: parent; source: "assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearCovers || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
+                                                                            Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearCovers || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                                         }
                                                                         Text { text: model.name; color: "#aaa"; font.family: "Rubik"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
                                                                         Text { text: formatSize(model.size); color: "#666"; font.family: "Rubik"; font.pixelSize: 11 }
@@ -1756,23 +1756,23 @@ ApplicationWindow {
                                         id: playbackControls
                                         anchors.centerIn: parent; spacing: 25
                                         Image {
-                                            source: repeatOne ? "assets/repeat-once.svg" : "assets/repeat.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            source: repeatOne ? "qrc:/assets/repeat-once.svg" : "qrc:/assets/repeat.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                             MouseArea { anchors.fill: parent; onClicked: repeatOne = !repeatOne; cursorShape: Qt.PointingHandCursor }
                                         }
                                         Image {
-                                            source: "assets/skip-previous.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            source: "qrc:/assets/skip-previous.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                             MouseArea { anchors.fill: parent; onClicked: playPrevious(); cursorShape: Qt.PointingHandCursor }
                                         }
                                         Image {
-                                            source: MorphAudio.isPlaying ? "assets/pause-circle.svg" : "assets/play-circle.svg"; Layout.preferredWidth: 50; Layout.preferredHeight: 50; sourceSize: Qt.size(128, 128); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            source: MorphAudio.isPlaying ? "qrc:/assets/pause-circle.svg" : "qrc:/assets/play-circle.svg"; Layout.preferredWidth: 50; Layout.preferredHeight: 50; sourceSize: Qt.size(128, 128); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                             MouseArea { anchors.fill: parent; onClicked: MorphAudio.isPlaying ? MorphAudio.pause() : MorphAudio.resume(); cursorShape: Qt.PointingHandCursor }
                                         }
                                         Image {
-                                            source: "assets/skip-next.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            source: "qrc:/assets/skip-next.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                             MouseArea { anchors.fill: parent; onClicked: playNext(); cursorShape: Qt.PointingHandCursor }
                                         }
                                         Image {
-                                            source: (window.likesVersion, currentTrack && MorphSettings.isLiked(currentTrack.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            source: (window.likesVersion, currentTrack && MorphSettings.isLiked(currentTrack.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                             MouseArea { anchors.fill: parent; onClicked: if(currentTrack) MorphSettings.toggleLike(currentTrack); cursorShape: Qt.PointingHandCursor }
                                         }
                                     }
@@ -1908,7 +1908,7 @@ ApplicationWindow {
                         horizontalAlignment: Text.AlignRight
                     }
                     Image {
-                        source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                        source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                         MouseArea { 
                             anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service, "album": model.album || "", "webUrl": model.webUrl || "", "durationMs": model.durationMs || 0 }); cursorShape: Qt.PointingHandCursor 
                         }
