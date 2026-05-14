@@ -964,7 +964,14 @@ ApplicationWindow {
                                         Text { text: "SETTINGS"; color: "white"; font.family: "Rubik"; font.pixelSize: 16; font.weight: Font.Bold }
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 10
-                                            Text { text: "Yandex Music Token"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                            RowLayout {
+                                                spacing: 8
+                                                Image {
+                                                    source: "assets/yandex_music_icon.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
+                                                    sourceSize.width: 32; sourceSize.height: 32
+                                                }
+                                                Text { text: "Yandex Music Token"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                            }
                                             TextField {
                                                 id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
                                                 color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
@@ -977,7 +984,14 @@ ApplicationWindow {
                                         }
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 10
-                                            Text { text: "SoundCloud Client ID"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                            RowLayout {
+                                                spacing: 8
+                                                Image {
+                                                    source: "assets/soundcloud_icon.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
+                                                    sourceSize.width: 32; sourceSize.height: 32
+                                                }
+                                                Text { text: "SoundCloud Client ID"; color: "#888"; font.family: "Rubik"; font.pixelSize: 11 }
+                                            }
                                             TextField {
                                                 id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
                                                 color: "white"; font.family: "Rubik"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
