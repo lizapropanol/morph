@@ -1537,14 +1537,16 @@ ApplicationWindow {
                                 }
 
                                 Text {
-                                    visible: progressHoverArea.containsMouse
+                                    opacity: progressHoverArea.containsMouse ? 1 : 0
+                                    Behavior on opacity { NumberAnimation { duration: 150 } }
                                     text: formatTime(MorphAudio.position)
                                     color: "white"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold
                                     y: -12; x: (progressSlider.visualPosition * parent.width) - (width / 2)
                                 }
 
                                 Text {
-                                    visible: progressHoverArea.containsMouse
+                                    opacity: progressHoverArea.containsMouse ? 1 : 0
+                                    Behavior on opacity { NumberAnimation { duration: 150 } }
                                     text: formatTime(MorphAudio.duration)
                                     color: "#666"; font.family: "Rubik"; font.pixelSize: 10; font.weight: Font.Bold
                                     anchors.right: parent.right; y: -12
