@@ -1,5 +1,6 @@
 #include "SettingsManager.h"
 #include "../utils/PathProvider.h"
+#include "../utils/CryptoUtils.h"
 #include <QDir>
 
 SettingsManager::SettingsManager(CacheManager* cache, QObject* parent) : QObject(parent), cache(cache) {
@@ -165,23 +166,23 @@ QVariantMap SettingsManager::getPlaylists() {
 }
 
 void SettingsManager::setYandexToken(const QString& token) {
-    m_data["yandex_token"] = token;
+    m_data["yandex_token"] = CryptoUtils::encrypt(token);
     save();
     emit settingsChanged();
 }
 
 QString SettingsManager::getYandexToken() {
-    return m_data["yandex_token"].toString();
+    return CryptoUtils::decrypt(m_data["yandex_token"].toString());
 }
 
 void SettingsManager::setSoundCloudToken(const QString& token) {
-    m_data["soundcloud_token"] = token;
+    m_data["soundcloud_token"] = CryptoUtils::encrypt(token);
     save();
     emit settingsChanged();
 }
 
 QString SettingsManager::getSoundCloudToken() {
-    return m_data["soundcloud_token"].toString();
+    return CryptoUtils::decrypt(m_data["soundcloud_token"].toString());
 }
 
 void SettingsManager::addSearchHistory(const QVariantMap& track) {

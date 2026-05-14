@@ -17,6 +17,7 @@ add_executable(morph
     src/utils/PathProvider.h src/utils/PathProvider.cpp
     src/utils/CacheManager.h src/utils/CacheManager.cpp
     src/utils/FileWatcher.h src/utils/FileWatcher.cpp
+    src/utils/CryptoUtils.h src/utils/CryptoUtils.cpp
     src/network/NetworkManager.h src/network/NetworkManager.cpp
     src/services/BaseService.h
     src/services/YandexService.h src/services/YandexService.cpp
