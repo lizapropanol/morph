@@ -1748,19 +1748,25 @@ ApplicationWindow {
                         Text { Layout.fillWidth: true; text: model.artist || ""; color: "#888"; font.family: "Rubik"; font.pixelSize: 12; elide: Text.ElideRight }
                     }
                 }
-                Text {
-                    text: formatTime(model.durationMs || 0)
-                    color: "#666"; font.family: "Rubik"; font.pixelSize: 12; visible: (model.durationMs || 0) > 0
+                RowLayout {
+                    spacing: 6
                     Layout.alignment: Qt.AlignVCenter
-                }
-                Rectangle {
-                    width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
-                    Layout.alignment: Qt.AlignVCenter
-                }
-                Image {
-                    source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.alignment: Qt.AlignVCenter; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                    MouseArea { 
-                        anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service, "album": model.album || "", "webUrl": model.webUrl || "", "durationMs": model.durationMs || 0 }); cursorShape: Qt.PointingHandCursor 
+                    
+                    Rectangle {
+                        width: 6; height: 6; radius: 3; color: "#44ff44"
+                        visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
+                    }
+                    Text {
+                        text: formatTime(model.durationMs || 0)
+                        color: "#666"; font.family: "Rubik"; font.pixelSize: 12; visible: (model.durationMs || 0) > 0
+                        Layout.preferredWidth: 35
+                        horizontalAlignment: Text.AlignRight
+                    }
+                    Image {
+                        source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "assets/heart.svg" : "assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                        MouseArea { 
+                            anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service, "album": model.album || "", "webUrl": model.webUrl || "", "durationMs": model.durationMs || 0 }); cursorShape: Qt.PointingHandCursor 
+                        }
                     }
                 }
             }
