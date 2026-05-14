@@ -196,8 +196,15 @@ ApplicationWindow {
         currentTrack = cleanTrack
         currentTrackIndex = index
         
-        if (streamUrlCache[cleanTrack.id]) {
-            MorphAudio.play(streamUrlCache[cleanTrack.id])
+        var streamUrl = streamUrlCache[cleanTrack.id]
+        if (streamUrl) {
+            if (streamUrl.startsWith("file://") && !MorphCache.isTrackCached(cleanTrack.id)) {
+                delete streamUrlCache[cleanTrack.id]
+                MorphServices.resolve(cleanTrack.service, cleanTrack.id)
+                MorphAudio.play("")
+            } else {
+                MorphAudio.play(streamUrl)
+            }
         } else if (MorphCache.isTrackCached(cleanTrack.id)) {
             var cachedUrl = MorphCache.getTrackUrl(cleanTrack.id)
             streamUrlCache[cleanTrack.id] = cachedUrl
@@ -611,7 +618,7 @@ ApplicationWindow {
                                                         Rectangle {
                                                             anchors.fill: parent; radius: 15; color: "#1a1a1a"; clip: true
                                                             Image {
-                                                                anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop; asynchronous: true
+                                                                anchors.fill: parent; source: MorphCache.getCachedCover(model.coverUrl || ""); fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                                 layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 15 } }
                                                                 onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                             }
@@ -678,7 +685,7 @@ ApplicationWindow {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Image { 
-                                                            source: leftTrack ? (leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
+                                                            source: leftTrack ? MorphCache.getCachedCover(leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                             onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                         }
@@ -713,7 +720,7 @@ ApplicationWindow {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Image { 
-                                                            source: rightTrack ? (rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
+                                                            source: rightTrack ? MorphCache.getCachedCover(rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                             onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                         }
@@ -832,7 +839,7 @@ ApplicationWindow {
                                                                 Rectangle {
                                                                     Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
                                                                     Image {
-                                                                        anchors.fill: parent; source: model.coverUrl || ""; fillMode: Image.PreserveAspectCrop
+                                                                        anchors.fill: parent; source: MorphCache.getCachedCover(model.coverUrl || ""); fillMode: Image.PreserveAspectCrop
                                                                         visible: model.coverUrl !== ""; layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 120; height: 120; radius: 8 } }
                                                                     }
                                                                     Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.pixelSize: 40; visible: model.coverUrl === "" }
@@ -863,7 +870,8 @@ ApplicationWindow {
                                                     source: {
                                                         if (currentPlaylist === "") return ""
                                                         var pls = MorphSettings.getPlaylists()
-                                                        return (pls[currentPlaylist] && pls[currentPlaylist].coverUrl) ? pls[currentPlaylist].coverUrl : ""
+                                                        var url = (pls[currentPlaylist] && pls[currentPlaylist].coverUrl) ? pls[currentPlaylist].coverUrl : ""
+                                                        return MorphCache.getCachedCover(url)
                                                     }
                                                     visible: currentPlaylist !== "" && source.toString() !== ""
                                                     Layout.preferredWidth: visible ? 40 : 0; Layout.preferredHeight: 40; fillMode: Image.PreserveAspectCrop
@@ -1340,13 +1348,35 @@ ApplicationWindow {
                                             })()
                                             onClicked: {
                                                 var anyCleared = false
-                                                if (cacheContent.clearTracks) { MorphCache.clearTrackCache(); anyCleared = true }
-                                                else {
+                                                var currentTrackDeleted = false
+                                                
+                                                if (cacheContent.clearTracks) { 
+                                                    MorphCache.clearTrackCache()
+                                                    anyCleared = true
+                                                    currentTrackDeleted = true
+                                                    for (var key in streamUrlCache) {
+                                                        if (streamUrlCache[key].toString().startsWith("file://")) {
+                                                            delete streamUrlCache[key]
+                                                        }
+                                                    }
+                                                } else {
                                                     for(var i=detailedTracksModel.count-1; i>=0; i--) {
                                                         if(detailedTracksModel.get(i).selected) {
+                                                            var tid = detailedTracksModel.get(i).id
+                                                            if (currentTrack && tid === currentTrack.id) currentTrackDeleted = true
+                                                            delete streamUrlCache[tid]
                                                             MorphCache.removeCacheFile(detailedTracksModel.get(i).name, true)
                                                             anyCleared = true
                                                         }
+                                                    }
+                                                }
+                                                
+                                                if (currentTrackDeleted && currentTrack) {
+                                                    delete streamUrlCache[currentTrack.id]
+                                                    if (MorphAudio.isPlaying) {
+                                                        lastKnownPosition = MorphAudio.position
+                                                        isRecovering = true
+                                                        MorphServices.resolve(currentTrack.service, currentTrack.id)
                                                     }
                                                 }
                                                 
@@ -1538,7 +1568,7 @@ ApplicationWindow {
                                         anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
                                         width: Math.min(parent.width, 350); spacing: 15; visible: currentTrack !== null
                                         Image { 
-                                            source: currentTrack ? currentTrack.coverUrl : ""; Layout.preferredWidth: 48; Layout.preferredHeight: 48; fillMode: Image.PreserveAspectCrop
+                                            source: currentTrack ? MorphCache.getCachedCover(currentTrack.coverUrl) : ""; Layout.preferredWidth: 48; Layout.preferredHeight: 48; fillMode: Image.PreserveAspectCrop
                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 48; height: 48; radius: 10 } }
                                         }
                                         Column {
@@ -1674,7 +1704,7 @@ ApplicationWindow {
                 anchors.rightMargin: 10
                 spacing: 15
                 Image { 
-                    source: model.coverUrl || ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
+                    source: MorphCache.getCachedCover(model.coverUrl || ""); Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop 
                     layer.enabled: true
                     layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                     onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)

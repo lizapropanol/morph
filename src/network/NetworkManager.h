@@ -10,6 +10,7 @@ class NetworkManager : public QObject {
 public:
     explicit NetworkManager(QObject* parent = nullptr);
     void get(const QUrl& url, const QString& token, std::function<void(QNetworkReply*)> callback);
+    void rawGet(const QUrl& url, std::function<void(QNetworkReply*)> callback);
     void post(const QUrl& url, const QByteArray& data, const QString& token, std::function<void(QNetworkReply*)> callback);
 
 private:

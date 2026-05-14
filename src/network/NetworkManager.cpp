@@ -24,6 +24,20 @@ void NetworkManager::get(const QUrl& url, const QString& token, std::function<vo
     });
 }
 
+void NetworkManager::rawGet(const QUrl& url, std::function<void(QNetworkReply*)> callback) {
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::UserAgentHeader, "Yandex-Music-Desktop/5.92.1");
+    request.setRawHeader("X-Yandex-Music-Client", "WindowsDesktop/5.92.1");
+    request.setRawHeader("X-Retpath-Y", "https://music.yandex.ru/");
+    request.setRawHeader("Accept", "*/*");
+    
+    QNetworkReply* reply = manager->get(request);
+    connect(reply, &QNetworkReply::finished, [reply, callback]() {
+        callback(reply);
+        reply->deleteLater();
+    });
+}
+
 void NetworkManager::post(const QUrl& url, const QByteArray& data, const QString& token, std::function<void(QNetworkReply*)> callback) {
     QNetworkRequest request(url);
     

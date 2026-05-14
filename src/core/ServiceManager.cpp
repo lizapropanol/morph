@@ -10,8 +10,6 @@ ServiceManager::ServiceManager(CacheManager* cache, QObject* parent) : QObject(p
             QVariantMap track = results[i].toMap();
             QString coverUrl = track["coverUrl"].toString();
             if (!coverUrl.isEmpty()) {
-                track["coverUrl"] = this->cache->getCachedCover(coverUrl);
-                results[i] = track;
                 this->cache->cacheCover(coverUrl);
             }
         }
@@ -49,8 +47,6 @@ ServiceManager::ServiceManager(CacheManager* cache, QObject* parent) : QObject(p
             QVariantMap pl = playlists[i].toMap();
             QString coverUrl = pl["coverUrl"].toString();
             if (!coverUrl.isEmpty()) {
-                pl["coverUrl"] = this->cache->getCachedCover(coverUrl);
-                playlists[i] = pl;
                 this->cache->cacheCover(coverUrl);
             }
         }
@@ -61,8 +57,6 @@ ServiceManager::ServiceManager(CacheManager* cache, QObject* parent) : QObject(p
             QVariantMap pl = playlists[i].toMap();
             QString coverUrl = pl["coverUrl"].toString();
             if (!coverUrl.isEmpty()) {
-                pl["coverUrl"] = this->cache->getCachedCover(coverUrl);
-                playlists[i] = pl;
                 this->cache->cacheCover(coverUrl);
             }
         }
@@ -80,18 +74,14 @@ ServiceManager::ServiceManager(CacheManager* cache, QObject* parent) : QObject(p
 
     connect(yandex, &BaseService::playlistImported, [this, processTracks](const QString& name, QString coverUrl, QVariantList tracks) {
         if (!coverUrl.isEmpty()) {
-            QString original = coverUrl;
-            coverUrl = this->cache->getCachedCover(original);
-            this->cache->cacheCover(original);
+            this->cache->cacheCover(coverUrl);
         }
         processTracks(tracks);
         emit playlistImported(name, coverUrl, tracks);
     });
     connect(soundcloud, &BaseService::playlistImported, [this, processTracks](const QString& name, QString coverUrl, QVariantList tracks) {
         if (!coverUrl.isEmpty()) {
-            QString original = coverUrl;
-            coverUrl = this->cache->getCachedCover(original);
-            this->cache->cacheCover(original);
+            this->cache->cacheCover(coverUrl);
         }
         processTracks(tracks);
         emit playlistImported(name, coverUrl, tracks);

@@ -51,6 +51,8 @@ private:
     bool m_saveCovers = true;
     QString getHash(const QString& input);
     void enforceLimit();
+    void performTrackDownload(const QString& trackId, const QUrl& url, int redirectionDepth = 0);
+    void performCoverDownload(const QString& url, const QString& path, const QUrl& targetUrl, int redirectionDepth = 0);
 };
 
 #endif

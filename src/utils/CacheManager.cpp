@@ -11,7 +11,9 @@ bool CacheManager::isTrackCached(const QString& trackId) {
 }
 
 QString CacheManager::getTrackPath(const QString& trackId) {
-    return PathProvider::getTrackCachePath() + "/" + trackId + ".mp3";
+    QString safeId = trackId;
+    safeId.replace("/", "_").replace(":", "_").replace("?", "_").replace("*", "_");
+    return PathProvider::getTrackCachePath() + "/" + safeId + ".mp3";
 }
 
 QString CacheManager::getTrackUrl(const QString& trackId) {
@@ -20,8 +22,21 @@ QString CacheManager::getTrackUrl(const QString& trackId) {
 
 void CacheManager::cacheTrack(const QString& trackId, const QString& url) {
     if (!m_saveTracks || isTrackCached(trackId) || url.isEmpty() || url.startsWith("file://")) return;
+    performTrackDownload(trackId, QUrl(url));
+}
 
-    net->get(QUrl(url), "", [this, trackId](QNetworkReply* reply) {
+void CacheManager::performTrackDownload(const QString& trackId, const QUrl& url, int redirectionDepth) {
+    if (redirectionDepth > 5) return;
+
+    net->rawGet(url, [this, trackId, url, redirectionDepth](QNetworkReply* reply) {
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (statusCode == 301 || statusCode == 302) {
+            QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            if (redirectUrl.isRelative()) redirectUrl = url.resolved(redirectUrl);
+            performTrackDownload(trackId, redirectUrl, redirectionDepth + 1);
+            return;
+        }
+
         if (reply->error() == QNetworkReply::NoError) {
             QFile file(getTrackPath(trackId));
             if (file.open(QIODevice::WriteOnly)) {
@@ -31,7 +46,6 @@ void CacheManager::cacheTrack(const QString& trackId, const QString& url) {
                 emit trackCached(trackId, "file://" + file.fileName());
             }
         }
-        reply->deleteLater();
     });
 }
 
@@ -106,6 +120,10 @@ void CacheManager::removeCacheFile(const QString& fileName, bool isTrack) {
 
 QString CacheManager::getCachedCover(const QString& url) {
     if (url.isEmpty()) return "";
+    if (url.startsWith("file://")) {
+        if (QFile::exists(url.mid(7))) return url;
+        return "";
+    }
     QString path = PathProvider::getCoverCachePath() + "/" + getHash(url);
     if (QFile::exists(path)) return "file://" + path;
     return url;
@@ -115,8 +133,21 @@ void CacheManager::cacheCover(const QString& url) {
     if (!m_saveCovers || url.isEmpty() || url.startsWith("file://")) return;
     QString path = PathProvider::getCoverCachePath() + "/" + getHash(url);
     if (QFile::exists(path)) return;
+    performCoverDownload(url, path, QUrl(url));
+}
 
-    net->get(QUrl(url), "", [this, url, path](QNetworkReply* reply) {
+void CacheManager::performCoverDownload(const QString& url, const QString& path, const QUrl& targetUrl, int redirectionDepth) {
+    if (redirectionDepth > 5) return;
+
+    net->rawGet(targetUrl, [this, url, path, targetUrl, redirectionDepth](QNetworkReply* reply) {
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (statusCode == 301 || statusCode == 302) {
+            QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            if (redirectUrl.isRelative()) redirectUrl = targetUrl.resolved(redirectUrl);
+            performCoverDownload(url, path, redirectUrl, redirectionDepth + 1);
+            return;
+        }
+
         if (reply->error() == QNetworkReply::NoError) {
             QFile file(path);
             if (file.open(QIODevice::WriteOnly)) {
@@ -126,7 +157,6 @@ void CacheManager::cacheCover(const QString& url) {
                 emit coverCached(url, "file://" + file.fileName());
             }
         }
-        reply->deleteLater();
     });
 }
 
