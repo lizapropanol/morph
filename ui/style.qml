@@ -1057,11 +1057,12 @@ ApplicationWindow {
                                             }
                                             background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
                                             contentItem: RowLayout {
-                                                anchors.fill: parent; anchors.margins: 15; spacing: 10
-                                                Text { text: "Manage Storage"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
+                                                anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
+                                                Text { text: "Manage Storage"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
                                                 Text { 
                                                     text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize()))
-                                                    color: "#888"; font.family: "Rubik"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
+                                                    color: "#888"; font.family: "Rubik"; font.pixelSize: 13; verticalAlignment: Text.AlignVCenter
                                                 }
                                                 Image {
                                                     source: "assets/chevron-right.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16; Layout.alignment: Qt.AlignVCenter
@@ -1076,10 +1077,11 @@ ApplicationWindow {
                                             onClicked: MorphSettings.setDiscordRpcEnabled(!MorphSettings.getDiscordRpcEnabled())
                                             background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
                                             contentItem: RowLayout {
-                                                anchors.fill: parent; anchors.margins: 15; spacing: 10
+                                                anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
                                                 Text { text: "Discord RPC"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
                                                 Switch {
-                                                    id: discordRpcSwitch
+                                                    id: discordRpcSwitch; Layout.alignment: Qt.AlignVCenter; Layout.preferredHeight: 20; padding: 0
                                                     checked: (window.settingsVersion, MorphSettings.getDiscordRpcEnabled())
                                                     onToggled: MorphSettings.setDiscordRpcEnabled(checked)
                                                     indicator: Rectangle {
@@ -1447,7 +1449,7 @@ ApplicationWindow {
                                                 Layout.fillWidth: true
                                                 Text { text: "Save Track Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
                                                 Switch {
-                                                    id: saveTrackSwitch
+                                                    id: saveTrackSwitch; Layout.alignment: Qt.AlignVCenter; Layout.preferredHeight: 20; padding: 0
                                                     checked: (window.settingsVersion, MorphSettings.getSaveTrackCache())
                                                     onToggled: {
                                                         MorphSettings.setSaveTrackCache(checked)
@@ -1471,7 +1473,7 @@ ApplicationWindow {
                                                 Layout.fillWidth: true
                                                 Text { text: "Save Cover Cache"; color: "white"; font.family: "Rubik"; font.pixelSize: 14; Layout.fillWidth: true }
                                                 Switch {
-                                                    id: saveCoverSwitch
+                                                    id: saveCoverSwitch; Layout.alignment: Qt.AlignVCenter; Layout.preferredHeight: 20; padding: 0
                                                     checked: (window.settingsVersion, MorphSettings.getSaveCoverCache())
                                                     onToggled: {
                                                         MorphSettings.setSaveCoverCache(checked)
