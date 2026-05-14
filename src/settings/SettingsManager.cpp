@@ -274,7 +274,11 @@ bool SettingsManager::getDiscordRpcEnabled() {
 
 QVariantMap SettingsManager::getAboutInfo() {
     QVariantMap info;
-    info["version"] = "0.1.0";
+#ifdef MORPH_VERSION
+    info["version"] = QString(MORPH_VERSION);
+#else
+    info["version"] = "unknown";
+#endif
     info["build_date"] = QString(__DATE__);
     info["build_time"] = QString(__TIME__);
     info["qt_version"] = QString(QT_VERSION_STR);
