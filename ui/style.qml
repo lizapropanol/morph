@@ -1628,8 +1628,16 @@ ApplicationWindow {
                                         spacing: window.width > 700 ? 12 : 8
                                         
                                         Rectangle {
-                                            visible: MorphAudio.bitrate > 0 && window.width > 900
-                                            width: bitrateText.width + 10; height: 16; radius: 4; color: "#1a1a1a"
+                                            id: bitrateRect
+                                            property bool shouldShow: MorphAudio.bitrate > 0 && window.width > 900
+                                            opacity: shouldShow ? 1 : 0
+                                            visible: opacity > 0
+                                            Behavior on opacity { NumberAnimation { duration: 150 } }
+                                            
+                                            Layout.preferredWidth: shouldShow ? (bitrateText.width + 10) : 0
+                                            Behavior on Layout.preferredWidth { NumberAnimation { duration: 150 } }
+                                            
+                                            height: 16; radius: 4; color: "#1a1a1a"; clip: true
                                             Text {
                                                 id: bitrateText; anchors.centerIn: parent
                                                 text: MorphAudio.bitrate + " kbps"
