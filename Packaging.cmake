@@ -1,6 +1,8 @@
 install(TARGETS morph DESTINATION bin)
 install(FILES morph.desktop DESTINATION share/applications)
 install(FILES assets/logo.svg DESTINATION share/icons/hicolor/scalable/apps RENAME morph.svg)
+install(FILES assets/morph.png DESTINATION share/icons/hicolor/128x128/apps)
+install(FILES assets/morph.png DESTINATION share/pixmaps)
 
 set(CPACK_PACKAGE_NAME "morph")
 set(CPACK_PACKAGE_VENDOR "lizapropanol")
