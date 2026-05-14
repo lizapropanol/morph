@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.16)
 project(morph VERSION 0.1 LANGUAGES CXX)
 
+if(EXISTS "${CMAKE_SOURCE_DIR}/build_number.txt")
+    file(READ "${CMAKE_SOURCE_DIR}/build_number.txt" BUILD_NUMBER)
+    string(STRIP "${BUILD_NUMBER}" BUILD_NUMBER)
+    math(EXPR BUILD_NUMBER "${BUILD_NUMBER} + 1")
+else()
+    set(BUILD_NUMBER "1")
+endif()
+file(WRITE "${CMAKE_SOURCE_DIR}/build_number.txt" "${BUILD_NUMBER}")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -30,6 +39,7 @@ add_executable(morph
 )
 
 target_include_directories(morph PRIVATE src)
+target_compile_definitions(morph PRIVATE MORPH_BUILD_NUMBER="${BUILD_NUMBER}")
 
 target_link_libraries(morph PRIVATE
     Qt5::Core

@@ -283,9 +283,11 @@ QVariantMap SettingsManager::getAboutInfo() {
     info["kernel"] = QSysInfo::kernelVersion();
     info["arch"] = QSysInfo::currentCpuArchitecture();
     
-    QString buildNum = QString(__DATE__).replace(" ", "");
-    buildNum += QString(__TIME__).replace(":", "");
-    info["build_number"] = buildNum;
+#ifdef MORPH_BUILD_NUMBER
+    info["build_number"] = QString(MORPH_BUILD_NUMBER);
+#else
+    info["build_number"] = "unknown";
+#endif
     
     return info;
 }
