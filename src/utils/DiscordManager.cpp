@@ -14,6 +14,7 @@ DiscordManager::DiscordManager(AudioEngine* audio, SettingsManager* settings, QO
     connect(m_reconnectTimer, &QTimer::timeout, this, &DiscordManager::connectToDiscord);
     
     connect(m_audio, &AudioEngine::stateChanged, this, &DiscordManager::updatePresence);
+    connect(m_audio, &AudioEngine::durationChanged, this, &DiscordManager::updatePresence);
     connect(m_settings, &SettingsManager::settingsChanged, this, &DiscordManager::onSettingsChanged);
 
     connectToDiscord();
@@ -96,8 +97,17 @@ void DiscordManager::updatePresence() {
     if (m_audio->isPlaying()) {
         QJsonObject timestamps;
         qint64 now = QDateTime::currentSecsSinceEpoch();
-        qint64 start = now - (m_audio->position() / 1000);
-        timestamps["start"] = start;
+        qint64 pos = m_audio->position() / 1000;
+        qint64 dur = m_audio->duration() / 1000;
+
+        if (dur <= 0 && m_currentTrack.contains("durationMs")) {
+            dur = m_currentTrack["durationMs"].toLongLong() / 1000;
+        }
+        
+        timestamps["start"] = now - pos;
+        if (dur > 0) {
+            timestamps["end"] = now + (dur - pos);
+        }
         activity["timestamps"] = timestamps;
     }
 
