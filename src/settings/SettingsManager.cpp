@@ -81,7 +81,7 @@ void SettingsManager::toggleLike(const QVariantMap& track) {
         }
     }
     if (!found) {
-        likes.append(QJsonObject::fromVariantMap(track));
+        likes.insert(0, QJsonObject::fromVariantMap(track));
     }
     m_data["likes"] = likes;
     save();
@@ -155,7 +155,7 @@ void SettingsManager::addToPlaylist(const QString& playlistName, const QVariantM
     QJsonObject playlists = m_data["playlists"].toObject();
     QJsonObject playlistData = playlists[playlistName].toObject();
     QJsonArray tracks = playlistData["tracks"].toArray();
-    tracks.append(QJsonObject::fromVariantMap(track));
+    tracks.insert(0, QJsonObject::fromVariantMap(track));
     playlistData["tracks"] = tracks;
     playlists[playlistName] = playlistData;
     m_data["playlists"] = playlists;
