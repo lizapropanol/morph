@@ -29,7 +29,6 @@
     <file>assets/telegram.svg</file>
     <file>assets/information.svg</file>
     <file>assets/harddisk.svg</file>
-    <file>assets/fonts/NimbusSans.otf</file>
-    <file>assets/fonts/NimbusSans-Bold.otf</file>
+    <file>assets/fonts/SFProText-Bold.ttf</file>
 </qresource>
 </RCC>

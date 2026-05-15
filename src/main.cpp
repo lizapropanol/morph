@@ -6,13 +6,11 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     
-    int fontId = QFontDatabase::addApplicationFont(":/assets/fonts/NimbusSans.otf");
+    int fontId = QFontDatabase::addApplicationFont(":/assets/fonts/SFProText-Bold.ttf");
     if (fontId != -1) {
         QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
-        QFont nimbus(family);
-        app.setFont(nimbus);
+        app.setFont(QFont(family));
     }
-    QFontDatabase::addApplicationFont(":/assets/fonts/NimbusSans-Bold.otf");
     
     PathProvider::ensureConfigExists();
     

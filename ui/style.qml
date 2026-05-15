@@ -13,6 +13,8 @@ ApplicationWindow {
     title: "morph"
     color: "black"
 
+    FontLoader { id: mainFont; source: "qrc:/assets/fonts/SFProText-Bold.ttf" }
+
     property var currentTrack: null
     property int currentTrackIndex: -1
     property string currentView: "home"
@@ -362,7 +364,7 @@ ApplicationWindow {
                     Text { 
                         text: "MORPH"
                         color: "white"
-                        font.family: "Nimbus Sans"
+                        font.family: mainFont.name
                         font.pixelSize: 20
                         font.weight: Font.Black
                         Layout.bottomMargin: 25
@@ -390,7 +392,7 @@ ApplicationWindow {
                             contentItem: Text {
                                 text: modelData
                                 color: currentView === modelData.toLowerCase() ? "white" : "#444"
-                                font.family: "Nimbus Sans"
+                                font.family: mainFont.name
                                 font.pixelSize: 15
                                 font.weight: currentView === modelData.toLowerCase() ? Font.Medium : Font.Normal
                                 verticalAlignment: Text.AlignVCenter
@@ -463,7 +465,7 @@ ApplicationWindow {
                                                 }
                                                 TextField {
                                                     id: searchField; placeholderText: "What do you want to listen to?"; Layout.fillWidth: true; color: "white"
-                                                    font.family: "Nimbus Sans"; font.pixelSize: 16; background: null; verticalAlignment: TextInput.AlignVCenter
+                                                    font.family: mainFont.name; font.pixelSize: 16; background: null; verticalAlignment: TextInput.AlignVCenter
                                                     onTextChanged: { if (text.trim() === "") { searchModel.clear(); isSearching = false; searchTimer.stop() } else searchTimer.restart() }
                                                     onAccepted: { searchTimer.stop(); searchModel.clear(); isSearching = true; MorphServices.search(text, searchSource) }
                                                 }
@@ -487,7 +489,7 @@ ApplicationWindow {
                                                     color: searchSource === modelData ? "#44ff44" : "#111"; radius: 16; border.color: searchSource === modelData ? "#44ff44" : "#222"; border.width: 1
                                                     Text {
                                                         id: filterText; anchors.centerIn: parent; text: modelData === "all" ? "All" : (modelData === "yandex" ? "Yandex Music" : "SoundCloud")
-                                                        color: searchSource === modelData ? "black" : "#aaa"; font.family: "Nimbus Sans"; font.pixelSize: 12; font.weight: Font.Medium
+                                                        color: searchSource === modelData ? "black" : "#aaa"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Medium
                                                     }
                                                     MouseArea {
                                                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -504,9 +506,9 @@ ApplicationWindow {
                                         spacing: 20
                                         RowLayout {
                                             id: historyLabelRow; Layout.fillWidth: true
-                                            Text { text: "Recent searches"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 18; font.weight: Font.Bold; Layout.fillWidth: true }
+                                            Text { text: "Recent searches"; color: "white"; font.family: mainFont.name; font.pixelSize: 18; font.weight: Font.Bold; Layout.fillWidth: true }
                                             Text { 
-                                                text: "Clear all"; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 12; visible: historyModel.count > 0
+                                                text: "Clear all"; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; visible: historyModel.count > 0
                                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { MorphSettings.clearSearchHistory(); historyModel.clear() } }
                                             }
                                         }
@@ -514,7 +516,7 @@ ApplicationWindow {
                                             Layout.fillWidth: true; Layout.preferredHeight: historyList.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true; visible: historyModel.count > 0
                                             ListView { id: historyList; anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true; model: historyModel; delegate: trackDelegate }
                                         }
-                                        Text { text: "Your recent searches will appear here"; color: "#444"; font.family: "Nimbus Sans"; font.pixelSize: 14; visible: historyModel.count === 0; Layout.alignment: Qt.AlignHCenter; Layout.topMargin: 40 }
+                                        Text { text: "Your recent searches will appear here"; color: "#444"; font.family: mainFont.name; font.pixelSize: 14; visible: historyModel.count === 0; Layout.alignment: Qt.AlignHCenter; Layout.topMargin: 40 }
                                     }
 
                                     ColumnLayout {
@@ -538,7 +540,7 @@ ApplicationWindow {
                                     Layout.alignment: Qt.AlignHCenter; running: parent.visible 
                                 }
                                 Text { 
-                                    text: "Searching for tracks..."; color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 14; Layout.alignment: Qt.AlignHCenter 
+                                    text: "Searching for tracks..."; color: "#666"; font.family: mainFont.name; font.pixelSize: 14; Layout.alignment: Qt.AlignHCenter 
                                 }
                             }
                         }
@@ -575,7 +577,7 @@ ApplicationWindow {
                                         }
                                         Text { 
                                             text: homeContent.getGreeting()
-                                            color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 12; font.weight: Font.Black
+                                            color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black
                                             opacity: 1.0
                                         }
                                     }
@@ -588,11 +590,11 @@ ApplicationWindow {
                                         
                                         ColumnLayout {
                                             anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter; anchors.margins: 30; spacing: 5
-                                            Text { text: "MY VIBE"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 28; font.weight: Font.Black }
+                                            Text { text: "MY VIBE"; color: "white"; font.family: mainFont.name; font.pixelSize: 28; font.weight: Font.Black }
                                             Text { 
                                                 text: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "PLAYING NOW" : "PERSONALIZED WAVE"
                                                 color: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "#44ff44" : "white"
-                                                font.family: "Nimbus Sans"; font.pixelSize: 14; opacity: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 1.0 : 0.8 
+                                                font.family: mainFont.name; font.pixelSize: 14; opacity: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 1.0 : 0.8 
                                                 font.weight: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? Font.Bold : Font.Normal
                                             }
                                         }
@@ -622,7 +624,7 @@ ApplicationWindow {
                                     ColumnLayout {
                                         Layout.fillWidth: true; spacing: 20
                                         visible: dailyMixesModel.count > 0
-                                        Text { text: "DAILY MIXES"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 16; font.weight: Font.Black }
+                                        Text { text: "DAILY MIXES"; color: "white"; font.family: mainFont.name; font.pixelSize: 16; font.weight: Font.Black }
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.preferredHeight: 160; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true
                                             Item {
@@ -684,7 +686,7 @@ ApplicationWindow {
 
                                     ColumnLayout {
                                         Layout.fillWidth: true; spacing: 20
-                                        Text { text: "CHARTS"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 16; font.weight: Font.Black }
+                                        Text { text: "CHARTS"; color: "white"; font.family: mainFont.name; font.pixelSize: 16; font.weight: Font.Black }
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.preferredHeight: chartsListView.contentHeight + 20; color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1; clip: true
                                             ListView {
@@ -700,7 +702,7 @@ ApplicationWindow {
                                                     Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#252525" : (leftChartsMouseArea.containsMouse ? "#222" : "transparent"); radius: 6
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Image { 
                                                             source: leftTrack ? MorphCache.getCachedCover(leftTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
@@ -708,8 +710,8 @@ ApplicationWindow {
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                                                         }
                                                         Rectangle {
                                                             width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, leftTrack ? MorphCache.isTrackCached(leftTrack.id) : false)
@@ -735,7 +737,7 @@ ApplicationWindow {
                                                     Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; visible: rightTrack !== null; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#252525" : (rightChartsMouseArea.containsMouse ? "#222" : "transparent"); radius: 6
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Image { 
                                                             source: rightTrack ? MorphCache.getCachedCover(rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                             layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
@@ -743,8 +745,8 @@ ApplicationWindow {
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                                                         }
                                                         Rectangle {
                                                             id: rightCacheDot
@@ -801,7 +803,7 @@ ApplicationWindow {
                                             spacing: 20
                                             RowLayout {
                                                 Layout.fillWidth: true
-                                                Text { text: "LIBRARY"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 16; font.weight: Font.Black }
+                                                Text { text: "LIBRARY"; color: "white"; font.family: mainFont.name; font.pixelSize: 16; font.weight: Font.Black }
                                                 Item { Layout.fillWidth: true }
                                                 RowLayout {
                                                     spacing: 10
@@ -809,14 +811,14 @@ ApplicationWindow {
                                                         text: "IMPORT"
                                                         onClicked: importPlaylistPopup.open()
                                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                        contentItem: Text { text: parent.text; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 12; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                         background: Rectangle { color: "#444"; radius: 6 }
                                                     }
                                                     Button {
                                                         text: "NEW PLAYLIST"
                                                         onClicked: createPlaylistPopup.open()
                                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                        contentItem: Text { text: parent.text; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 12; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                         background: Rectangle { color: "#333"; radius: 6 }
                                                     }
                                                 }
@@ -840,12 +842,12 @@ ApplicationWindow {
                                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                                 }
                                                                 Text { 
-                                                                    text: "LIKED TRACKS"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 13; font.weight: Font.Black
+                                                                    text: "LIKED TRACKS"; color: "white"; font.family: mainFont.name; font.pixelSize: 13; font.weight: Font.Black
                                                                     anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.margins: 12
                                                                 }
                                                                 Text {
                                                                     text: (window.likesVersion, MorphSettings.getLikedTracks().length)
-                                                                    color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 13; font.weight: Font.Black
+                                                                    color: "white"; font.family: mainFont.name; font.pixelSize: 13; font.weight: Font.Black
                                                                     anchors.bottom: parent.bottom; anchors.right: parent.right; anchors.margins: 12
                                                                 }
                                                             }
@@ -866,7 +868,7 @@ ApplicationWindow {
                                                                     }
                                                                     Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.pixelSize: 40; visible: model.coverUrl === "" }
                                                                 }
-                                                                Text { text: model.name; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
+                                                                Text { text: model.name; color: "white"; font.family: mainFont.name; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
                                                             }
                                                             MouseArea { id: playlistMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: openPlaylist(model.name) }
                                                         }
@@ -884,7 +886,7 @@ ApplicationWindow {
                                                     text: "← BACK"
                                                     onClicked: librarySubView = "grid"
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold }
+                                                    contentItem: Text { text: parent.text; color: "#888"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold }
                                                     background: Item {}
                                                 }
                                                 Image {
@@ -901,11 +903,11 @@ ApplicationWindow {
                                                 }
                                                 Text { 
                                                     text: currentPlaylist === "" ? "LIKED TRACKS" : currentPlaylist.toUpperCase()
-                                                    color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 16; font.weight: Font.Bold 
+                                                    color: "white"; font.family: mainFont.name; font.pixelSize: 16; font.weight: Font.Bold 
                                                 }
                                                 Text {
                                                     text: fullPlaylistTracks.length + " TRACKS"
-                                                    color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold
+                                                    color: "#666"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold
                                                     Layout.alignment: Qt.AlignVCenter
                                                 }
                                                 Item { Layout.fillWidth: true }
@@ -924,14 +926,14 @@ ApplicationWindow {
                                                             createPlaylistPopup.open()
                                                         }
                                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                        contentItem: Text { text: parent.text; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                         background: Rectangle { color: "#333"; radius: 4; border.color: "#444" }
                                                     }
                                                     Button {
                                                         text: "DELETE"
                                                         onClicked: deleteConfirmationPopup.open()
                                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                        contentItem: Text { text: parent.text; color: "#ff4444"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        contentItem: Text { text: parent.text; color: "#ff4444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                         background: Rectangle { color: "#220000"; radius: 4; border.color: "#441111" }
                                                     }
                                                 }
@@ -971,7 +973,7 @@ ApplicationWindow {
                                     ColumnLayout {
                                         id: settingsMainContent
                                         spacing: 25
-                                        Text { text: "SETTINGS"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 16; font.weight: Font.Bold }
+                                        Text { text: "SETTINGS"; color: "white"; font.family: mainFont.name; font.pixelSize: 16; font.weight: Font.Bold }
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 10
                                             RowLayout {
@@ -980,11 +982,11 @@ ApplicationWindow {
                                                     source: "qrc:/assets/yandex_music_icon.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
                                                     sourceSize.width: 32; sourceSize.height: 32
                                                 }
-                                                Text { text: "Yandex Music Token"; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 11 }
+                                                Text { text: "Yandex Music Token"; color: "#888"; font.family: mainFont.name; font.pixelSize: 11 }
                                             }
                                             TextField {
                                                 id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
-                                                color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
+                                                color: "white"; font.family: mainFont.name; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
                                                 background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
                                                 onEditingFinished: {
                                                     MorphSettings.setYandexToken(text)
@@ -1000,11 +1002,11 @@ ApplicationWindow {
                                                     source: "qrc:/assets/soundcloud_icon.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
                                                     sourceSize.width: 32; sourceSize.height: 32
                                                 }
-                                                Text { text: "SoundCloud Client ID"; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 11 }
+                                                Text { text: "SoundCloud Client ID"; color: "#888"; font.family: mainFont.name; font.pixelSize: 11 }
                                             }
                                             TextField {
                                                 id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
-                                                color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
+                                                color: "white"; font.family: mainFont.name; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
                                                 background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
                                                 onEditingFinished: {
                                                     MorphSettings.setSoundCloudToken(text)
@@ -1014,7 +1016,7 @@ ApplicationWindow {
                                         }
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 10
-                                            Text { text: "Audio Quality"; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 11 }
+                                            Text { text: "Audio Quality"; color: "#888"; font.family: mainFont.name; font.pixelSize: 11 }
                                             RowLayout {
                                                 spacing: 10
                                                 Button {
@@ -1031,7 +1033,7 @@ ApplicationWindow {
                                                         }
                                                     }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: lowQualBtn.active ? "black" : "white"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    contentItem: Text { text: parent.text; color: lowQualBtn.active ? "black" : "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
                                                     background: Rectangle { color: lowQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
                                                 }
                                                 Button {
@@ -1048,7 +1050,7 @@ ApplicationWindow {
                                                         }
                                                     }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: medQualBtn.active ? "black" : "white"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    contentItem: Text { text: parent.text; color: medQualBtn.active ? "black" : "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
                                                     background: Rectangle { color: medQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
                                                 }
                                                 Button {
@@ -1065,7 +1067,7 @@ ApplicationWindow {
                                                         }
                                                     }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: highQualBtn.active ? "black" : "white"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    contentItem: Text { text: parent.text; color: highQualBtn.active ? "black" : "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
                                                     background: Rectangle { color: highQualBtn.active ? "white" : "#1a1a1a"; radius: 6; border.color: "#333" }
                                                 }
                                             }
@@ -1088,10 +1090,10 @@ ApplicationWindow {
                                                     sourceSize.width: 40; sourceSize.height: 40
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                 }
-                                                Text { text: "Manage Storage"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
+                                                Text { text: "Manage Storage"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
                                                 Text { 
                                                     text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize()))
-                                                    color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 13; verticalAlignment: Text.AlignVCenter
+                                                    color: "#888"; font.family: mainFont.name; font.pixelSize: 13; verticalAlignment: Text.AlignVCenter
                                                 }
                                                 Image {
                                                     source: "qrc:/assets/chevron-right.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16; Layout.alignment: Qt.AlignVCenter
@@ -1113,7 +1115,7 @@ ApplicationWindow {
                                                     sourceSize.width: 40; sourceSize.height: 40
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                 }
-                                                Text { text: "Discord RPC"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
+                                                Text { text: "Discord RPC"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Medium; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
                                                 Switch {
                                                     id: discordRpcSwitch; Layout.alignment: Qt.AlignVCenter; Layout.preferredHeight: 20; padding: 0
                                                     checked: (window.settingsVersion, MorphSettings.getDiscordRpcEnabled())
@@ -1153,8 +1155,8 @@ ApplicationWindow {
                                                         }
                                                         ColumnLayout {
                                                             spacing: 2
-                                                            Text { text: "morph"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold }
-                                                            Text { text: "Version " + MorphSettings.getAboutInfo().version; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 12 }
+                                                            Text { text: "morph"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
+                                                            Text { text: "Version " + MorphSettings.getAboutInfo().version; color: "#888"; font.family: mainFont.name; font.pixelSize: 12 }
                                                         }
                                                         Item { Layout.fillWidth: true }
                                                         RowLayout {
@@ -1196,39 +1198,39 @@ ApplicationWindow {
                                                         columns: 2; rowSpacing: 8; columnSpacing: 20
                                                         Layout.fillWidth: true
                                                         
-                                                        Text { text: "Build Number"; color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: "Build Number"; color: "#666"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Medium }
                                                         Text { 
-                                                            text: MorphSettings.getAboutInfo().build_number; color: "#aaa"; font.family: "Nimbus Sans"; font.pixelSize: 11
+                                                            text: MorphSettings.getAboutInfo().build_number; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 11
                                                             Layout.fillWidth: true; horizontalAlignment: Text.AlignRight 
                                                         }
                                                         
-                                                        Text { text: "Build Date"; color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: "Build Date"; color: "#666"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Medium }
                                                         Text { 
-                                                            text: MorphSettings.getAboutInfo().build_date + " " + MorphSettings.getAboutInfo().build_time; color: "#aaa"; font.family: "Nimbus Sans"; font.pixelSize: 11
+                                                            text: MorphSettings.getAboutInfo().build_date + " " + MorphSettings.getAboutInfo().build_time; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 11
                                                             Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
                                                         }
                                                         
-                                                        Text { text: "Qt Version"; color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: "Qt Version"; color: "#666"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Medium }
                                                         Text { 
-                                                            text: MorphSettings.getAboutInfo().qt_version; color: "#aaa"; font.family: "Nimbus Sans"; font.pixelSize: 11
+                                                            text: MorphSettings.getAboutInfo().qt_version; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 11
                                                             Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
                                                         }
                                                         
-                                                        Text { text: "OS"; color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: "OS"; color: "#666"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Medium }
                                                         Text { 
-                                                            text: MorphSettings.getAboutInfo().os_name; color: "#aaa"; font.family: "Nimbus Sans"; font.pixelSize: 11
+                                                            text: MorphSettings.getAboutInfo().os_name; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 11
                                                             Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
                                                         }
                                                         
-                                                        Text { text: "Kernel"; color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: "Kernel"; color: "#666"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Medium }
                                                         Text { 
-                                                            text: MorphSettings.getAboutInfo().kernel; color: "#aaa"; font.family: "Nimbus Sans"; font.pixelSize: 11
+                                                            text: MorphSettings.getAboutInfo().kernel; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 11
                                                             Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
                                                         }
                                                         
-                                                        Text { text: "Architecture"; color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Medium }
+                                                        Text { text: "Architecture"; color: "#666"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Medium }
                                                         Text { 
-                                                            text: MorphSettings.getAboutInfo().arch; color: "#aaa"; font.family: "Nimbus Sans"; font.pixelSize: 11
+                                                            text: MorphSettings.getAboutInfo().arch; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 11
                                                             Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
                                                         }
                                                     }
@@ -1254,10 +1256,10 @@ ApplicationWindow {
                                                 text: "← BACK"
                                                 onClicked: settingsSubView = "main"
                                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                contentItem: Text { text: parent.text; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold }
+                                                contentItem: Text { text: parent.text; color: "#888"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold }
                                                 background: Item {}
                                             }
-                                            Text { text: "STORAGE USAGE"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 16; font.weight: Font.Bold; Layout.alignment: Qt.AlignVCenter }
+                                            Text { text: "STORAGE USAGE"; color: "white"; font.family: mainFont.name; font.pixelSize: 16; font.weight: Font.Bold; Layout.alignment: Qt.AlignVCenter }
                                             Item { Layout.fillWidth: true }
                                         }
 
@@ -1267,10 +1269,10 @@ ApplicationWindow {
                                                 anchors.fill: parent; anchors.margins: 20; spacing: 15
                                                 RowLayout {
                                                     Layout.fillWidth: true
-                                                    Text { text: "Total Cache"; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 13; Layout.fillWidth: true }
+                                                    Text { text: "Total Cache"; color: "#888"; font.family: mainFont.name; font.pixelSize: 13; Layout.fillWidth: true }
                                                     Text { 
                                                         text: formatSize((window.cacheVersion, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize()))
-                                                        color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 15; font.weight: Font.Bold 
+                                                        color: "white"; font.family: mainFont.name; font.pixelSize: 15; font.weight: Font.Bold 
                                                     }
                                                 }
                                                 Item {
@@ -1301,11 +1303,11 @@ ApplicationWindow {
                                                     spacing: 15
                                                     RowLayout {
                                                         Rectangle { width: 8; height: 8; radius: 4; color: "#44ff44" }
-                                                        Text { text: "Tracks (" + Math.round((window.cacheVersion, MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())) * 100) + "%)"; color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11 }
+                                                        Text { text: "Tracks (" + Math.round((window.cacheVersion, MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())) * 100) + "%)"; color: "#666"; font.family: mainFont.name; font.pixelSize: 11 }
                                                     }
                                                     RowLayout {
                                                         Rectangle { width: 8; height: 8; radius: 4; color: "#bb66ff" }
-                                                        Text { text: "Covers (" + Math.round((window.cacheVersion, MorphCache.getCoverCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())) * 100) + "%)"; color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11 }
+                                                        Text { text: "Covers (" + Math.round((window.cacheVersion, MorphCache.getCoverCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())) * 100) + "%)"; color: "#666"; font.family: mainFont.name; font.pixelSize: 11 }
                                                     }
                                                 }
                                             }
@@ -1313,7 +1315,7 @@ ApplicationWindow {
 
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 5
-                                            Text { text: "SELECT DATA TO CLEAR"; color: "#444"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Black; Layout.bottomMargin: 5 }
+                                            Text { text: "SELECT DATA TO CLEAR"; color: "#444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; Layout.bottomMargin: 5 }
                                             
                                             Rectangle {
                                                 Layout.fillWidth: true; Layout.preferredHeight: contentColumn.implicitHeight; color: "#1a1a1a"; radius: 10; border.color: "#333"
@@ -1329,10 +1331,10 @@ ApplicationWindow {
                                                                 width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"; Layout.alignment: Qt.AlignVCenter
                                                                 Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                             }
-                                                            Text { text: "Track Cache"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
+                                                            Text { text: "Track Cache"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
                                                             Text { 
                                                                 text: (window.cacheVersion, MorphCache.getTrackCacheCount()) + " tracks, " + formatSize((window.cacheVersion, MorphCache.getTrackCacheSize()))
-                                                                color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
+                                                                color: "#888"; font.family: mainFont.name; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                             }
                                                             Image {
                                                                 source: "qrc:/assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
@@ -1385,8 +1387,8 @@ ApplicationWindow {
                                                                             width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#44ff44" : "#222"
                                                                             Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                                         }
-                                                                        Text { text: model.id; color: "#aaa"; font.family: "Nimbus Sans"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
-                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11 }
+                                                                        Text { text: model.id; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: mainFont.name; font.pixelSize: 11 }
                                                                     }
                                                                     MouseArea { 
                                                                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -1421,10 +1423,10 @@ ApplicationWindow {
                                                                 width: 20; height: 20; radius: 4; color: cacheContent.clearCovers ? "#bb66ff" : "#333"; Layout.alignment: Qt.AlignVCenter
                                                                 Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearCovers; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                             }
-                                                            Text { text: "Cover Cache"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
+                                                            Text { text: "Cover Cache"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
                                                             Text { 
                                                                 text: (window.cacheVersion, MorphCache.getCoverCacheCount()) + " covers, " + formatSize((window.cacheVersion, MorphCache.getCoverCacheSize()))
-                                                                color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
+                                                                color: "#888"; font.family: mainFont.name; font.pixelSize: 13; Layout.alignment: Qt.AlignVCenter
                                                             }
                                                             Image {
                                                                 source: "qrc:/assets/chevron-down.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16
@@ -1477,8 +1479,8 @@ ApplicationWindow {
                                                                             width: 16; height: 16; radius: 4; color: (cacheContent.clearCovers || model.selected) ? "#bb66ff" : "#222"
                                                                             Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearCovers || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                                         }
-                                                                        Text { text: model.name; color: "#aaa"; font.family: "Nimbus Sans"; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
-                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11 }
+                                                                        Text { text: model.name; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
+                                                                        Text { text: formatSize(model.size); color: "#666"; font.family: mainFont.name; font.pixelSize: 11 }
                                                                     }
                                                                     MouseArea { 
                                                                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -1572,7 +1574,7 @@ ApplicationWindow {
                                             contentItem: Text { 
                                                 text: cacheContent.showSuccess ? "CLEARED SUCCESSFULLY!" : "CLEAR SELECTED DATA"
                                                 color: cacheContent.showSuccess ? "#44ff44" : (clearBtn.enabled ? "white" : "#444")
-                                                font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Black
+                                                font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Black
                                                 horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                                             }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
@@ -1580,11 +1582,11 @@ ApplicationWindow {
 
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 10
-                                            Text { text: "CACHE SETTINGS"; color: "#444"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Black }
+                                            Text { text: "CACHE SETTINGS"; color: "#444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black }
                                             
                                             RowLayout {
                                                 Layout.fillWidth: true
-                                                Text { text: "Save Track Cache"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                Text { text: "Save Track Cache"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; Layout.fillWidth: true }
                                                 Switch {
                                                     id: saveTrackSwitch; Layout.alignment: Qt.AlignVCenter; Layout.preferredHeight: 20; padding: 0
                                                     checked: (window.settingsVersion, MorphSettings.getSaveTrackCache())
@@ -1608,7 +1610,7 @@ ApplicationWindow {
                                             
                                             RowLayout {
                                                 Layout.fillWidth: true
-                                                Text { text: "Save Cover Cache"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; Layout.fillWidth: true }
+                                                Text { text: "Save Cover Cache"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; Layout.fillWidth: true }
                                                 Switch {
                                                     id: saveCoverSwitch; Layout.alignment: Qt.AlignVCenter; Layout.preferredHeight: 20; padding: 0
                                                     checked: (window.settingsVersion, MorphSettings.getSaveCoverCache())
@@ -1633,7 +1635,7 @@ ApplicationWindow {
 
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 10
-                                            Text { text: "CACHE LIMIT"; color: "#444"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Black }
+                                            Text { text: "CACHE LIMIT"; color: "#444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black }
                                             RowLayout {
                                                 spacing: 8
                                                 Repeater {
@@ -1659,7 +1661,7 @@ ApplicationWindow {
                                                         }
                                                         contentItem: Text { 
                                                             text: modelData.label; color: limitBtn.active ? "black" : "#888"
-                                                            font.family: "Nimbus Sans"; font.pixelSize: 10; font.weight: Font.Bold
+                                                            font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Bold
                                                             horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter 
                                                         }
                                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
@@ -1669,7 +1671,7 @@ ApplicationWindow {
                                             Text {
                                                 Layout.fillWidth: true
                                                 text: "If the cache size exceeds this limit, the oldest unused files will be deleted from the device memory."
-                                                color: "#555"; font.family: "Nimbus Sans"; font.pixelSize: 11; wrapMode: Text.Wrap
+                                                color: "#555"; font.family: mainFont.name; font.pixelSize: 11; wrapMode: Text.Wrap
                                             }
                                         }
                                     }
@@ -1709,7 +1711,7 @@ ApplicationWindow {
                                     opacity: progressHoverArea.containsMouse ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: 150 } }
                                     text: formatTime(MorphAudio.position)
-                                    color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 10; font.weight: Font.Bold
+                                    color: "white"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Bold
                                     y: -12
                                     x: {
                                         var desiredX = (progressSlider.visualPosition * parent.width) - (width / 2)
@@ -1723,7 +1725,7 @@ ApplicationWindow {
                                     opacity: progressHoverArea.containsMouse ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: 150 } }
                                     text: formatTime(MorphAudio.duration)
-                                    color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 10; font.weight: Font.Bold
+                                    color: "#666"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Bold
                                     anchors.right: parent.right; y: -12
                                 }
 
@@ -1750,11 +1752,11 @@ ApplicationWindow {
                                         }
                                         Column {
                                             Layout.fillWidth: true; clip: true
-                                            Text { width: parent.width; text: currentTrack ? currentTrack.title : ""; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                            Text { width: parent.width; text: currentTrack ? currentTrack.title : ""; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                             RowLayout {
                                                 width: parent.width; spacing: 6
                                                 Image { source: currentTrack ? getServiceIcon(currentTrack.service) : ""; Layout.preferredWidth: 10; Layout.preferredHeight: 10 }
-                                                Text { Layout.fillWidth: true; text: currentTrack ? currentTrack.artist : ""; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 12; elide: Text.ElideRight }
+                                                Text { Layout.fillWidth: true; text: currentTrack ? currentTrack.artist : ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                                             }
                                         }
                                     }
@@ -1810,11 +1812,11 @@ ApplicationWindow {
                                                 id: bitrateText; anchors.centerIn: parent
                                                 text: MorphAudio.bitrate + " kbps"
                                                 color: MorphAudio.bitrate <= 128 ? "#ff4444" : (MorphAudio.bitrate <= 256 ? "#ffcc00" : "#44ff44")
-                                                font.family: "Nimbus Sans"; font.pixelSize: 9; font.weight: Font.Bold
+                                                font.family: mainFont.name; font.pixelSize: 9; font.weight: Font.Bold
                                             }
                                         }
 
-                                        Text { text: "VOL"; color: "#444"; font.family: "Nimbus Sans"; font.pixelSize: 10; font.weight: Font.Black; visible: window.width > 800 }
+                                        Text { text: "VOL"; color: "#444"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; visible: window.width > 800 }
                                         Slider {
                                             id: volumeSlider; Layout.preferredWidth: window.width > 700 ? 80 : 50; Layout.preferredHeight: 20; from: 0; to: 100; value: MorphAudio.volume; onMoved: MorphAudio.volume = value
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
@@ -1896,11 +1898,11 @@ ApplicationWindow {
                 }
                 ColumnLayout {
                     Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                    Text { Layout.fillWidth: true; text: model.title || ""; color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#44ff44" : "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                    Text { Layout.fillWidth: true; text: model.title || ""; color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
                         Image { source: getServiceIcon(model.service); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
-                        Text { Layout.fillWidth: true; text: model.artist || ""; color: "#888"; font.family: "Nimbus Sans"; font.pixelSize: 12; elide: Text.ElideRight }
+                        Text { Layout.fillWidth: true; text: model.artist || ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                     }
                 }
                 RowLayout {
@@ -1913,7 +1915,7 @@ ApplicationWindow {
                     }
                     Text {
                         text: formatTime(model.durationMs || 0)
-                        color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 12; visible: (model.durationMs || 0) > 0
+                        color: "#666"; font.family: mainFont.name; font.pixelSize: 12; visible: (model.durationMs || 0) > 0
                         Layout.preferredWidth: 35
                         horizontalAlignment: Text.AlignRight
                     }
@@ -1953,7 +1955,7 @@ ApplicationWindow {
             anchors.fill: parent; color: "transparent"; radius: 6
             Rectangle {
                 anchors.fill: parent; anchors.margins: 2; color: copyItemMouse.containsMouse ? "#333" : "transparent"; radius: 4
-                Text { anchors.centerIn: parent; text: "COPY LINK"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 12; font.weight: Font.Bold }
+                Text { anchors.centerIn: parent; text: "COPY LINK"; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Bold }
                 MouseArea {
                     id: copyItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                     onClicked: {
@@ -2153,15 +2155,15 @@ ApplicationWindow {
         
         ColumnLayout {
             anchors.fill: parent; anchors.margins: 20; spacing: 15
-            Text { text: isEditingPlaylist ? "EDIT PLAYLIST" : "CREATE PLAYLIST"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold }
+            Text { text: isEditingPlaylist ? "EDIT PLAYLIST" : "CREATE PLAYLIST"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
             TextField {
                 id: plNameField; placeholderText: "PLAYLIST NAME"; Layout.fillWidth: true
-                color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 12; padding: 10
+                color: "white"; font.family: mainFont.name; font.pixelSize: 12; padding: 10
                 background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
             }
             TextField {
                 id: plCoverField; placeholderText: "COVER URL (IMGUR/PINTEREST)"; Layout.fillWidth: true
-                color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 12; padding: 10
+                color: "white"; font.family: mainFont.name; font.pixelSize: 12; padding: 10
                 background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
             }
             Button {
@@ -2178,7 +2180,7 @@ ApplicationWindow {
                     }
                 }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                contentItem: Text { text: parent.text; color: "black"; font.family: "Nimbus Sans"; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                contentItem: Text { text: parent.text; color: "black"; font.family: mainFont.name; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                 background: Rectangle { color: "white"; radius: 6 }
             }
         }
@@ -2193,14 +2195,14 @@ ApplicationWindow {
         background: Rectangle { color: "#1a1a1a"; radius: 12; border.color: "#333" }
         ColumnLayout {
             anchors.fill: parent; anchors.margins: 20; spacing: 20
-            Text { text: "DELETE PLAYLIST?"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold; Layout.alignment: Qt.AlignHCenter }
+            Text { text: "DELETE PLAYLIST?"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.alignment: Qt.AlignHCenter }
             RowLayout {
                 spacing: 15; Layout.fillWidth: true
                 Button {
                     text: "CANCEL"; Layout.fillWidth: true; Layout.preferredHeight: 36
                     onClicked: deleteConfirmationPopup.close()
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                    contentItem: Text { text: parent.text; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     background: Rectangle { color: "#333"; radius: 6 }
                 }
                 Button {
@@ -2211,7 +2213,7 @@ ApplicationWindow {
                         deleteConfirmationPopup.close()
                     }
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                    contentItem: Text { text: parent.text; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     background: Rectangle { color: "#ff4444"; radius: 6 }
                 }
             }
@@ -2230,11 +2232,11 @@ ApplicationWindow {
 
         ColumnLayout {
             anchors.fill: parent; anchors.margins: 20; spacing: 15
-            Text { text: "IMPORT PLAYLIST"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 14; font.weight: Font.Bold }
+            Text { text: "IMPORT PLAYLIST"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
             
             TextField {
                 id: importUrlField; placeholderText: "YANDEX OR SOUNDCLOUD URL"; Layout.fillWidth: true
-                color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 12; padding: 10; enabled: !importPlaylistPopup.isBusy
+                color: "white"; font.family: mainFont.name; font.pixelSize: 12; padding: 10; enabled: !importPlaylistPopup.isBusy
                 background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
             }
 
@@ -2243,7 +2245,7 @@ ApplicationWindow {
                 visible: importPlaylistPopup.errorMsg !== ""
                 clip: true
                 TextArea {
-                    text: importPlaylistPopup.errorMsg; color: "#ff4444"; font.family: "Nimbus Sans"; font.pixelSize: 10
+                    text: importPlaylistPopup.errorMsg; color: "#ff4444"; font.family: mainFont.name; font.pixelSize: 10
                     readOnly: true; selectByMouse: true; wrapMode: Text.Wrap
                     background: Rectangle { color: "#100000"; radius: 4; border.color: "#300" }
                 }
@@ -2268,7 +2270,7 @@ ApplicationWindow {
                         }
                     }
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                    contentItem: Text { text: parent.text; color: "black"; font.family: "Nimbus Sans"; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    contentItem: Text { text: parent.text; color: "black"; font.family: mainFont.name; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     background: Rectangle { color: "white"; radius: 6 }
                 }
                 Button {
@@ -2276,7 +2278,7 @@ ApplicationWindow {
                     visible: !importPlaylistPopup.isBusy
                     onClicked: importPlaylistPopup.close()
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                    contentItem: Text { text: parent.text; color: "white"; font.family: "Nimbus Sans"; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     background: Rectangle { color: "#333"; radius: 6 }
                 }
             }
