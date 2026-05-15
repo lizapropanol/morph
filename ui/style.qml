@@ -1184,7 +1184,9 @@ ApplicationWindow {
                                         Button {
                                             Layout.fillWidth: true; Layout.preferredHeight: 50
                                             onClicked: {
-                                                styleEditor.text = MorphSettings.getStyleFileContent()
+                                                var content = MorphSettings.getStyleFileContent()
+                                                styleEditor.text = content
+                                                configContent.initialConfigContent = content
                                                 settingsSubView = "config"
                                             }
                                             background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
@@ -1782,9 +1784,9 @@ ApplicationWindow {
                                         id: configContent
                                         spacing: 25
                                         visible: settingsSubView === "config"
+                                        property string initialConfigContent: ""
 
-                                        RowLayout {
-                                            Layout.fillWidth: true; spacing: 15
+                                        RowLayout {                                            Layout.fillWidth: true; spacing: 15
                                             Button {
                                                 text: "← BACK"
                                                 onClicked: settingsSubView = "main"
@@ -1861,14 +1863,15 @@ ApplicationWindow {
                                             Button {
                                                 text: "SAVE AND APPLY"
                                                 Layout.preferredHeight: 45; Layout.fillWidth: true
+                                                enabled: styleEditor.text !== configContent.initialConfigContent
                                                 onClicked: {
                                                     if (MorphSettings.writeStyleFileContent(styleEditor.text)) {
                                                         MorphApp.reload()
                                                     }
                                                 }
-                                                background: Rectangle { color: "#1a1a1a"; radius: 8; border.color: "#333" }
-                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                background: Rectangle { color: parent.enabled ? "#1a1a1a" : "#111"; radius: 8; border.color: parent.enabled ? "#333" : "#222" }
+                                                contentItem: Text { text: parent.text; color: parent.enabled ? "white" : "#444"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                MouseArea { anchors.fill: parent; cursorShape: parent.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor; acceptedButtons: Qt.NoButton }
                                             }
                                         }
                                     }
