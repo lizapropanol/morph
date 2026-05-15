@@ -80,12 +80,19 @@ ApplicationWindow {
         }
     }
 
+    function refreshPlaylists() {
+        playlistsModel.clear()
+        var pls = MorphSettings.getPlaylists()
+        for (var p in pls) playlistsModel.append({ "name": p, "coverUrl": pls[p].coverUrl || "" })
+    }
+
     Component.onCompleted: {
         var yToken = MorphSettings.getYandexToken()
         var sToken = MorphSettings.getSoundCloudToken()
         if (yToken) MorphServices.setYandexToken(yToken)
         if (sToken) MorphServices.setSoundCloudClientId(sToken)
-        
+
+        refreshPlaylists()
         MorphServices.getCharts()
         MorphServices.getDailyMixes()
         var hist = MorphSettings.getSearchHistory()
@@ -380,9 +387,7 @@ ApplicationWindow {
                                 saveLastImport = true
                                 if (currentView === "library") {
                                     librarySubView = "grid"
-                                    playlistsModel.clear()
-                                    var pls = MorphSettings.getPlaylists()
-                                    for (var p in pls) playlistsModel.append({ "name": p, "coverUrl": pls[p].coverUrl || "" })
+                                    refreshPlaylists()
                                 }
                                 if (currentView === "settings") {
                                     settingsSubView = "main"
@@ -2196,26 +2201,23 @@ ApplicationWindow {
         }
         function onPlaylistsChanged() {
             window.playlistsVersion++
-            if (currentView === "library") {
-                playlistsModel.clear()
+            refreshPlaylists()
+            
+            if (currentView === "library" && currentPlaylist !== "") {
+                libraryModel.clear()
                 var pls = MorphSettings.getPlaylists()
-                for (var p in pls) playlistsModel.append({ "name": p, "coverUrl": pls[p].coverUrl || "" })
-                
-                if (currentPlaylist !== "") {
-                    libraryModel.clear()
-                    var pData = pls[currentPlaylist]
-                    if (pData) {
-                        var tracks = pData.tracks || (Array.isArray(pData) ? pData : [])
-                        var temp = []
-                        for (var i = 0; i < tracks.length; i++) {
-                            var item = tracks[i]
-                            if (item.durationMs === undefined) item.durationMs = 0
-                            libraryModel.append(item)
-                            temp.push(item)
-                        }
-                        fullPlaylistTracks = temp
-                        loadedTracksCount = temp.length
+                var pData = pls[currentPlaylist]
+                if (pData) {
+                    var tracks = pData.tracks || (Array.isArray(pData) ? pData : [])
+                    var temp = []
+                    for (var i = 0; i < tracks.length; i++) {
+                        var item = tracks[i]
+                        if (item.durationMs === undefined) item.durationMs = 0
+                        libraryModel.append(item)
+                        temp.push(item)
                     }
+                    fullPlaylistTracks = temp
+                    loadedTracksCount = temp.length
                 }
             }
         }
