@@ -145,13 +145,24 @@ ApplicationWindow {
     }
 
     function openPlaylist(name) {
-        currentPlaylist = name
-        saveLastImport = true
+        var isLiked = (name === "LIKED")
+        var targetName = isLiked ? "" : name
+        
+        if (targetName === currentPlaylist && fullPlaylistTracks.length > 0) {
+            libraryModel.clear()
+            loadedTracksCount = 0
+            loadNextChunk()
+            librarySubView = "tracks"
+            libraryFlickable.contentY = 0
+            return
+        }
+
+        currentPlaylist = targetName
+        saveLastImport = !isLiked
         libraryModel.clear()
         var tempTracks = []
         loadedTracksCount = 0
-        if (name === "LIKED") {
-            currentPlaylist = ""
+        if (isLiked) {
             var likes = MorphSettings.getLikedTracks()
             for(var i = likes.length - 1; i >= 0; i--) {
                 var item = likes[i]
@@ -737,8 +748,14 @@ ApplicationWindow {
                                                                 trackContextMenu.openAt(mouse.x, mouse.y, leftChartsMouseArea, leftTrack)
                                                             }
                                                             else {
+                                                                currentPlaylist = "CHARTS"
+                                                                saveLastImport = false
+                                                                var tempTracks = []
+                                                                for(var i=0; i<chartsModel.count; i++) tempTracks.push(chartsModel.get(i))
+                                                                fullPlaylistTracks = tempTracks
                                                                 libraryModel.clear()
-                                                                for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
+                                                                loadedTracksCount = 0
+                                                                loadNextChunk()
                                                                 playTrack(libraryModel.get(index), index)
                                                             }
                                                         }
@@ -779,8 +796,14 @@ ApplicationWindow {
                                                                 trackContextMenu.openAt(mouse.x, mouse.y, rightChartsMouseArea, rightTrack)
                                                             }
                                                             else {
+                                                                currentPlaylist = "CHARTS"
+                                                                saveLastImport = false
+                                                                var tempTracks = []
+                                                                for(var i=0; i<chartsModel.count; i++) tempTracks.push(chartsModel.get(i))
+                                                                fullPlaylistTracks = tempTracks
                                                                 libraryModel.clear()
-                                                                for(var i=0; i<chartsModel.count; i++) libraryModel.append(chartsModel.get(i))
+                                                                loadedTracksCount = 0
+                                                                loadNextChunk()
                                                                 playTrack(libraryModel.get(index + 10), index + 10)
                                                             }
                                                         }
@@ -1912,6 +1935,15 @@ ApplicationWindow {
                             var hist = MorphSettings.getSearchHistory()
                             for (var i = 0; i < hist.length; i++) historyModel.append(hist[i])
 
+                            currentPlaylist = (searchModel.count > 0 ? "SEARCH_RESULTS" : "HISTORY")
+                            saveLastImport = false
+                            var tempTracks = []
+                            for (var i = 0; i < m.count; i++) tempTracks.push(m.get(i))
+                            fullPlaylistTracks = tempTracks
+                            libraryModel.clear()
+                            loadedTracksCount = 0
+                            loadNextChunk()
+
                             playTrack(tObj, index)
                         } else {
                             trackObj = libraryModel.get(index)
@@ -1975,7 +2007,12 @@ ApplicationWindow {
         id: trackContextMenu
         property bool openedUpwards: false
         parent: Overlay.overlay
-        width: 160; height: (currentView === "library" && currentPlaylist !== "" && saveLastImport) ? 130 : 90
+        width: 160; height: {
+            var count = 2
+            if (openedUpwards) count++
+            if (currentView === "library" && currentPlaylist !== "" && saveLastImport) count++
+            return (count * 40) + 10
+        }
         padding: 5
         background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333"; border.width: 1 }
         closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
@@ -1995,6 +2032,20 @@ ApplicationWindow {
                         } else if (targetContextTrack && targetContextTrack.service === "SoundCloud") {
                             MorphSettings.copyToClipboard("https://soundcloud.com/tracks/" + targetContextTrack.id)
                         }
+                        trackContextMenu.close()
+                    }
+                }
+            }
+            Rectangle {
+                visible: trackContextMenu.openedUpwards
+                Layout.fillWidth: true; Layout.preferredHeight: 40; color: goToPlMouse.containsMouse ? "#333" : "transparent"; radius: 4
+                Text { anchors.centerIn: parent; text: "SHOW PLAYLIST"; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black }
+                MouseArea {
+                    id: goToPlMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        currentView = "library"
+                        if (currentPlaylist === "") openPlaylist("LIKED")
+                        else openPlaylist(currentPlaylist)
                         trackContextMenu.close()
                     }
                 }
@@ -2121,13 +2172,18 @@ ApplicationWindow {
         }
         function onWaveReady(serviceName, results) {
             currentPlaylist = "MY_VIBE"
-            libraryModel.clear()
+            saveLastImport = false
+            var tempTracks = []
             for (var i = 0; i < results.length; i++) {
                 var item = results[i]
                 item.service = serviceName
                 if (item.durationMs === undefined) item.durationMs = 0
-                libraryModel.append(item)
+                tempTracks.push(item)
             }
+            fullPlaylistTracks = tempTracks
+            libraryModel.clear()
+            loadedTracksCount = 0
+            loadNextChunk()
             if (libraryModel.count > 0) playTrack(libraryModel.get(0), 0)
         }
         function onDailyMixesReady(serviceName, results) {
@@ -2161,15 +2217,19 @@ ApplicationWindow {
             }
             
             currentView = "library"
-            librarySubView = "list"
+            librarySubView = "tracks"
             currentPlaylist = name
             
-            libraryModel.clear()
+            var tempTracks = []
             for (var i = 0; i < tracks.length; i++) {
                 var item = tracks[i]
                 if (item.durationMs === undefined) item.durationMs = 0
-                libraryModel.append(item)
+                tempTracks.push(item)
             }
+            fullPlaylistTracks = tempTracks
+            libraryModel.clear()
+            loadedTracksCount = 0
+            loadNextChunk()
             
             if (libraryModel.count > 0) {
                 playTrack(libraryModel.get(0), 0)
