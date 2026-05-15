@@ -8,6 +8,11 @@ import QtQuick.Dialogs 1.3
 ApplicationWindow {
     id: window
     visible: true
+
+    Connections {
+        target: MorphApp
+        function onStyleFilesChanged() { refreshStyleFiles() }
+    }
     width: 1075
     height: 700
     minimumWidth: 600

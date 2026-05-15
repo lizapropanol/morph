@@ -7,6 +7,7 @@
 #include <QMenu>
 #include "utils/FileWatcher.h"
 #include "utils/CacheManager.h"
+#include "network/NetworkManager.h"
 #include "audio/AudioEngine.h"
 #include "ServiceManager.h"
 #include "settings/SettingsManager.h"
@@ -24,11 +25,15 @@ public slots:
     void toggleWindow();
     void updateTrayMenu();
 
+signals:
+    void styleFilesChanged();
+
 private:
     void setupTray();
 
     QQmlApplicationEngine* engine;
     FileWatcher* watcher;
+    NetworkManager* net;
     CacheManager* cache;
     AudioEngine* audio;
     ServiceManager* services;

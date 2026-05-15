@@ -9,9 +9,11 @@ class FileWatcher : public QObject {
 public:
     explicit FileWatcher(const QString& path, QObject* parent = nullptr);
     void setPath(const QString& path);
+    void setDirectory(const QString& path);
 
 signals:
     void fileChanged();
+    void directoryChanged();
 
 private:
     QFileSystemWatcher* watcher;

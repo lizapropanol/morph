@@ -1,25 +1,26 @@
 #include "Application.h"
-#include "utils/PathProvider.h"
-#include <QUrl>
 #include <QQmlContext>
-#include <QQuickWindow>
+#include <QIcon>
 #include <QApplication>
+#include <QQuickWindow>
+#include <QDebug>
+#include <QUrl>
+#include "utils/PathProvider.h"
+#include "services/TrackData.h"
 
-Application::Application(QObject* parent) : QObject(parent) {
+Application::Application(QObject *parent) : QObject(parent) {
+    PathProvider::ensureConfigExists();
+    
     engine = new QQmlApplicationEngine(this);
-    
-    NetworkManager* tempNet = new NetworkManager(this);
-    cache = new CacheManager(tempNet, this);
-    
+    net = new NetworkManager(this);
+    cache = new CacheManager(net, this);
+    settings = new SettingsManager(cache, this);
     audio = new AudioEngine(this);
     services = new ServiceManager(cache, this);
-    settings = new SettingsManager(cache, this);
     mpris = new MprisManager(audio, this);
     discord = new DiscordManager(audio, settings, this);
-
     watcher = new FileWatcher(settings->getActiveStylePath(), this);
-
-    services->setAudioQuality(settings->getAudioQuality());
+    watcher->setDirectory(PathProvider::getConfigPath());
 
     engine->rootContext()->setContextProperty("MorphAudio", audio);
     engine->rootContext()->setContextProperty("MorphServices", services);
@@ -32,6 +33,7 @@ Application::Application(QObject* parent) : QObject(parent) {
     setupTray();
 
     connect(watcher, &FileWatcher::fileChanged, this, &Application::reload);
+    connect(watcher, &FileWatcher::directoryChanged, this, &Application::styleFilesChanged);
     connect(audio, &AudioEngine::stateChanged, this, &Application::updateTrayMenu);
     connect(mpris, &MprisManager::metadataChanged, this, &Application::updateTrayMenu);
 }
@@ -41,7 +43,7 @@ void Application::start() {
         if (!obj && objUrl == QUrl::fromLocalFile(settings->getActiveStylePath())) {
             qCritical() << "MORPH_ERROR: Could not load QML file!" << objUrl;
         }
-    }, Qt::QueuedConnection);
+    });
 
     engine->load(QUrl::fromLocalFile(settings->getActiveStylePath()));
 }
@@ -63,10 +65,16 @@ void Application::reload() {
     engine->rootContext()->setContextProperty("MorphCache", cache);
     engine->rootContext()->setContextProperty("MorphApp", this);
 
-    engine->load(QUrl::fromLocalFile(PathProvider::getStyleFilePath()));
+    engine->load(QUrl::fromLocalFile(settings->getActiveStylePath()));
 }
 
 #include <QBuffer>
+#include <QImage>
+#include <QCoreApplication>
+#include <QQuickItem>
+#include <QQuickItemGrabResult>
+#include <QEventLoop>
+
 void Application::setupTray() {
     trayIcon = new QSystemTrayIcon(QIcon(":/assets/logo.svg"), this);
     trayMenu = new QMenu();
@@ -99,17 +107,9 @@ void Application::setupTray() {
     trayMenu->addAction(nextAction);
     trayMenu->addSeparator();
     trayMenu->addAction(toggleAction);
-    trayMenu->addSeparator();
     trayMenu->addAction(quitAction);
 
     trayIcon->setContextMenu(trayMenu);
-    
-    connect(trayIcon, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
-        if (reason == QSystemTrayIcon::Trigger) {
-            toggleWindow();
-        }
-    });
-
     trayIcon->show();
 }
 
@@ -120,27 +120,24 @@ void Application::updateTrayMenu() {
     if (title.isEmpty()) {
         trackInfoAction->setText("Not Playing");
     } else {
-        trackInfoAction->setText(artist + " - " + title);
+        trackInfoAction->setText(title + " - " + artist);
     }
 
     if (audio->isPlaying()) {
         playPauseAction->setText("Pause");
     } else {
-        playPauseAction->setText("Play");
+        playPauseAction->setText("Resume");
     }
 }
 
 void Application::toggleWindow() {
     if (engine->rootObjects().isEmpty()) return;
-    
     QQuickWindow* window = qobject_cast<QQuickWindow*>(engine->rootObjects().first());
-    if (!window) return;
-
-    if (window->isVisible()) {
-        window->hide();
-    } else {
-        window->show();
-        window->raise();
-        window->requestActivate();
+    if (window) {
+        if (window->isVisible()) window->hide();
+        else {
+            window->show();
+            window->raise();
+        }
     }
 }
