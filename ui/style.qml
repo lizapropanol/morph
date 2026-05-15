@@ -1803,7 +1803,7 @@ ApplicationWindow {
                                                 Layout.preferredHeight: 40; Layout.fillWidth: true
                                                 onClicked: importStyleDialog.open()
                                                 background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
-                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter }
+                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                             }
                                             Button {
@@ -1811,7 +1811,7 @@ ApplicationWindow {
                                                 Layout.preferredHeight: 40; Layout.fillWidth: true
                                                 onClicked: exportStyleDialog.open()
                                                 background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
-                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter }
+                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                             }
                                         }
@@ -1821,13 +1821,33 @@ ApplicationWindow {
                                             Text { text: "LIVE EDITOR"; color: "#444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black }
                                             Rectangle {
                                                 Layout.fillWidth: true; Layout.preferredHeight: 300; color: "#1a1a1a"; radius: 10; border.color: "#333"
-                                                ScrollView {
-                                                    anchors.fill: parent; anchors.margins: 5; clip: true
-                                                    TextArea {
-                                                        id: styleEditor
-                                                        color: "white"; font.family: "Monospace"; font.pixelSize: 12
-                                                        wrapMode: Text.NoWrap; selectByMouse: true
-                                                        background: null
+                                                RowLayout {
+                                                    anchors.fill: parent; spacing: 0
+                                                    Rectangle {
+                                                        width: 40; Layout.fillHeight: true; color: "#111"; radius: 10; visible: true
+                                                        clip: true
+                                                        Column {
+                                                            y: -styleEditorScrollView.contentY + 5
+                                                            width: parent.width; spacing: 0
+                                                            Repeater {
+                                                                model: styleEditor.lineCount
+                                                                Text {
+                                                                    width: 40; height: styleEditor.contentHeight / Math.max(1, styleEditor.lineCount)
+                                                                    text: (index + 1).toString(); color: "#444"; font.family: "Monospace"; font.pixelSize: 12
+                                                                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    ScrollView {
+                                                        id: styleEditorScrollView
+                                                        Layout.fillWidth: true; Layout.fillHeight: true; padding: 5; clip: true
+                                                        TextArea {
+                                                            id: styleEditor
+                                                            color: "white"; font.family: "Monospace"; font.pixelSize: 12
+                                                            wrapMode: Text.NoWrap; selectByMouse: true
+                                                            background: null
+                                                        }
                                                     }
                                                 }
                                             }
@@ -1839,8 +1859,8 @@ ApplicationWindow {
                                                         MorphApp.reload()
                                                     }
                                                 }
-                                                background: Rectangle { color: "#44ff44"; radius: 8 }
-                                                contentItem: Text { text: parent.text; color: "black"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter }
+                                                background: Rectangle { color: "#1a1a1a"; radius: 8; border.color: "#333" }
+                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                             }
                                         }
