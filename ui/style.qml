@@ -1887,21 +1887,18 @@ ApplicationWindow {
                                             }
                                             
                                             Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 350; color: "#1a1a1a"; radius: 10; border.color: "#333"
+                                                Layout.fillWidth: true; Layout.preferredHeight: configFlow.implicitHeight + 30; color: "#1a1a1a"; radius: 10; border.color: "#333"
                                                 clip: true
                                                 visible: styleFilesModel.count > 0
 
-                                                ScrollView {
+                                                Flow {
+                                                    id: configFlow
                                                     anchors.fill: parent
-                                                    padding: 15
+                                                    anchors.margins: 15
+                                                    spacing: 15
                                                     
-                                                    Flow {
-                                                        id: configFlow
-                                                        width: parent.width - 30
-                                                        spacing: 15
-                                                        
-                                                        Repeater {
-                                                            model: styleFilesModel
+                                                    Repeater {
+                                                        model: styleFilesModel
                                                         delegate: Rectangle {
                                                             id: configTile
                                                             width: 240; height: 250
@@ -1964,44 +1961,44 @@ ApplicationWindow {
                                                                     }
                                                                 }
 
-                                                                    RowLayout {
-                                                                        Layout.fillWidth: true; spacing: 8
-                                                                        Button {
-                                                                            text: "EXPORT"
-                                                                            Layout.preferredHeight: 28; Layout.fillWidth: true
-                                                                            onClicked: {
-                                                                                configContent.exportTargetFile = name
-                                                                                exportStyleDialog.open()
-                                                                            }
-                                                                            background: Rectangle { color: "#000"; radius: 6; border.color: "#222" }
-                                                                            contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                                RowLayout {
+                                                                    Layout.fillWidth: true; spacing: 8
+                                                                    Button {
+                                                                        text: "EXPORT"
+                                                                        Layout.preferredHeight: 28; Layout.fillWidth: true
+                                                                        onClicked: {
+                                                                            configContent.exportTargetFile = name
+                                                                            exportStyleDialog.open()
                                                                         }
-                                                                        Button {
-                                                                            visible: (activeStyleName === name)
-                                                                            Layout.preferredHeight: 28; Layout.preferredWidth: 28
-                                                                            onClicked: {
-                                                                                if (MorphSettings.savePreviewFromClipboard(name)) {
-                                                                                    refreshStyleFiles()
-                                                                                }
+                                                                        background: Rectangle { color: "#000"; radius: 6; border.color: "#222" }
+                                                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                                    }
+                                                                    Button {
+                                                                        visible: (activeStyleName === name)
+                                                                        Layout.preferredHeight: 28; Layout.preferredWidth: 28
+                                                                        onClicked: {
+                                                                            if (MorphSettings.savePreviewFromClipboard(name)) {
+                                                                                refreshStyleFiles()
                                                                             }
-                                                                            background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
-                                                                            contentItem: Item {
-                                                                                Image {
-                                                                                    anchors.centerIn: parent
-                                                                                    source: "qrc:/assets/camera-iris.svg"
-                                                                                    width: 16; height: 16
-                                                                                    sourceSize: Qt.size(32, 32)
-                                                                                    fillMode: Image.PreserveAspectFit
-                                                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                                                                }
-                                                                            }
-                                                                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                                                         }
+                                                                        background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
+                                                                        contentItem: Item {
+                                                                            Image {
+                                                                                anchors.centerIn: parent
+                                                                                source: "qrc:/assets/camera-iris.svg"
+                                                                                width: 16; height: 16
+                                                                                sourceSize: Qt.size(32, 32)
+                                                                                fillMode: Image.PreserveAspectFit
+                                                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                                            }
+                                                                        }
+                                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                                                     }
                                                                 }
                                                             }
-                                                        }                                                    }
+                                                        }
+                                                    }
                                                 }
                                             }
                                             Text { 
