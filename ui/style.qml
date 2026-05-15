@@ -13,7 +13,7 @@ ApplicationWindow {
     title: "morph"
     color: "black"
 
-    FontLoader { id: mainFont; source: "qrc:/assets/fonts/SFProText-Bold.ttf" }
+    FontLoader { id: mainFont; source: "qrc:/assets/fonts/interblack.otf" }
 
     property var currentTrack: null
     property int currentTrackIndex: -1

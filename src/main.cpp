@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     
-    int fontId = QFontDatabase::addApplicationFont(":/assets/fonts/SFProText-Bold.ttf");
+    int fontId = QFontDatabase::addApplicationFont(":/assets/fonts/interblack.otf");
     if (fontId != -1) {
         QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
         app.setFont(QFont(family));
