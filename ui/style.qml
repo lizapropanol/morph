@@ -1183,6 +1183,30 @@ ApplicationWindow {
 
                                         Button {
                                             Layout.fillWidth: true; Layout.preferredHeight: 50
+                                            onClicked: {
+                                                styleEditor.text = MorphSettings.getStyleFileContent()
+                                                settingsSubView = "config"
+                                            }
+                                            background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
+                                            contentItem: RowLayout {
+                                                anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
+                                                Image {
+                                                    source: "qrc:/assets/notebook-outline.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20; Layout.alignment: Qt.AlignVCenter
+                                                    sourceSize.width: 40; sourceSize.height: 40
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                }
+                                                Text { text: "Manage Config"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
+                                                Image {
+                                                    source: "qrc:/assets/chevron-right.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16; Layout.alignment: Qt.AlignVCenter
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
+                                                }
+                                            }
+                                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                        }
+
+                                        Button {
+                                            Layout.fillWidth: true; Layout.preferredHeight: 50
                                             onClicked: MorphSettings.setDiscordRpcEnabled(!MorphSettings.getDiscordRpcEnabled())
                                             background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
                                             contentItem: RowLayout {
@@ -1208,30 +1232,6 @@ ApplicationWindow {
                                                             Behavior on x { NumberAnimation { duration: 150 } }
                                                         }
                                                     }
-                                                }
-                                            }
-                                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                        }
-
-                                        Button {
-                                            Layout.fillWidth: true; Layout.preferredHeight: 50
-                                            onClicked: {
-                                                styleEditor.text = MorphSettings.getStyleFileContent()
-                                                settingsSubView = "config"
-                                            }
-                                            background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
-                                            contentItem: RowLayout {
-                                                anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                                anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
-                                                Image {
-                                                    source: "qrc:/assets/notebook-outline.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20; Layout.alignment: Qt.AlignVCenter
-                                                    sourceSize.width: 40; sourceSize.height: 40
-                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                                }
-                                                Text { text: "Manage Config"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
-                                                Image {
-                                                    source: "qrc:/assets/chevron-right.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16; Layout.alignment: Qt.AlignVCenter
-                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
                                                 }
                                             }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
@@ -1821,32 +1821,31 @@ ApplicationWindow {
                                             Text { text: "LIVE EDITOR"; color: "#444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black }
                                             Rectangle {
                                                 Layout.fillWidth: true; Layout.preferredHeight: 300; color: "#1a1a1a"; radius: 10; border.color: "#333"
-                                                RowLayout {
-                                                    anchors.fill: parent; spacing: 0
-                                                    Rectangle {
-                                                        width: 40; Layout.fillHeight: true; color: "#111"; radius: 10; visible: true
-                                                        clip: true
-                                                        Column {
-                                                            y: -styleEditorScrollView.contentY + 5
-                                                            width: parent.width; spacing: 0
-                                                            Repeater {
-                                                                model: styleEditor.lineCount
-                                                                Text {
-                                                                    width: 40; height: styleEditor.contentHeight / Math.max(1, styleEditor.lineCount)
-                                                                    text: (index + 1).toString(); color: "#444"; font.family: "Monospace"; font.pixelSize: 12
-                                                                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                                                clip: true
+                                                ScrollView {
+                                                    anchors.fill: parent
+                                                    TextArea {
+                                                        id: styleEditor
+                                                        color: "white"; font.family: "Monospace"; font.pixelSize: 12
+                                                        wrapMode: Text.NoWrap; selectByMouse: true
+                                                        background: null
+                                                        leftPadding: 50; topPadding: 10; bottomPadding: 10
+                                                        
+                                                        Rectangle {
+                                                            width: 40; height: Math.max(styleEditor.contentHeight + 20, 300)
+                                                            color: "#161616"; x: 0; y: 0
+                                                            Column {
+                                                                anchors.fill: parent; anchors.topMargin: 10
+                                                                Repeater {
+                                                                    model: styleEditor.lineCount
+                                                                    Text {
+                                                                        width: 40; height: styleEditor.contentHeight / Math.max(1, styleEditor.lineCount)
+                                                                        text: (index + 1).toString(); color: "#444"; font.family: "Monospace"; font.pixelSize: 12
+                                                                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                                                                    }
                                                                 }
                                                             }
-                                                        }
-                                                    }
-                                                    ScrollView {
-                                                        id: styleEditorScrollView
-                                                        Layout.fillWidth: true; Layout.fillHeight: true; padding: 5; clip: true
-                                                        TextArea {
-                                                            id: styleEditor
-                                                            color: "white"; font.family: "Monospace"; font.pixelSize: 12
-                                                            wrapMode: Text.NoWrap; selectByMouse: true
-                                                            background: null
+                                                            Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: "#333" }
                                                         }
                                                     }
                                                 }
