@@ -412,16 +412,16 @@ bool SettingsManager::savePreviewFromClipboard(const QString& fileName) {
     QImage image = clipboard->image();
     if (image.isNull()) return false;
 
-    QImage scaled = image.scaled(400, 225, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+    QImage scaled = image.scaled(800, 450, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     
-    int x = (scaled.width() - 400) / 2;
-    int y = (scaled.height() - 225) / 2;
-    scaled = scaled.copy(x, y, 400, 225);
+    int x = (scaled.width() - 800) / 2;
+    int y = (scaled.height() - 450) / 2;
+    scaled = scaled.copy(x, y, 800, 450);
 
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
-    scaled.save(&buffer, "JPG", 80);
+    scaled.save(&buffer, "JPG", 100);
     QString base64 = ba.toBase64();
 
     saveStylePreview(fileName, base64);
