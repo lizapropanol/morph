@@ -1968,6 +1968,7 @@ ApplicationWindow {
     property var targetContextTrack: null
     Popup {
         id: trackContextMenu
+        property bool openedUpwards: false
         parent: Overlay.overlay
         width: 150; height: (currentView === "library" && currentPlaylist !== "" && saveLastImport) ? 120 : 80
         padding: 0
@@ -2000,7 +2001,11 @@ ApplicationWindow {
                     id: addToPlMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         playlistPickerPopup.x = trackContextMenu.x + trackContextMenu.width + 5
-                        playlistPickerPopup.y = trackContextMenu.y
+                        if (trackContextMenu.openedUpwards) {
+                            playlistPickerPopup.y = trackContextMenu.y + trackContextMenu.height - playlistPickerPopup.height
+                        } else {
+                            playlistPickerPopup.y = trackContextMenu.y
+                        }
                         playlistPickerPopup.open()
                     }
                 }
@@ -2023,6 +2028,7 @@ ApplicationWindow {
         
         function openAt(mx, my, targetItem, track, upwards) {
             if (!track) return
+            openedUpwards = !!upwards
             var cleanTrack = {
                 "id": track.id || "",
                 "title": track.title || "Unknown Title",
@@ -2040,7 +2046,7 @@ ApplicationWindow {
             }
             targetContextTrack = cleanTrack
             var coords = targetItem.mapToItem(Overlay.overlay, mx, my)
-            x = coords.x; y = upwards ? coords.y - height : coords.y
+            x = coords.x; y = openedUpwards ? coords.y - height : coords.y
             open()
         }
     }
