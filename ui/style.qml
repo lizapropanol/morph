@@ -1775,6 +1775,11 @@ ApplicationWindow {
                                                 layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 48; height: 48; radius: 10 } }
                                             }
                                             Text { anchors.centerIn: parent; text: "♪"; color: "#333"; font.family: mainFont.name; font.pixelSize: 24; visible: nowPlayingImage.status !== Image.Ready }
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                acceptedButtons: Qt.RightButton
+                                                onPressed: if (mouse.button === Qt.RightButton) trackContextMenu.openAt(mouse.x, mouse.y, parent, currentTrack, true)
+                                            }
                                         }
                                         Column {
                                             Layout.fillWidth: true; clip: true
@@ -2016,7 +2021,7 @@ ApplicationWindow {
             }
         }
         
-        function openAt(mx, my, targetItem, track) {
+        function openAt(mx, my, targetItem, track, upwards) {
             if (!track) return
             var cleanTrack = {
                 "id": track.id || "",
@@ -2035,7 +2040,7 @@ ApplicationWindow {
             }
             targetContextTrack = cleanTrack
             var coords = targetItem.mapToItem(Overlay.overlay, mx, my)
-            x = coords.x; y = coords.y
+            x = coords.x; y = upwards ? coords.y - height : coords.y
             open()
         }
     }
