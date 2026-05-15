@@ -12,16 +12,72 @@ void SoundCloudService::setToken(const QString& token) {
     m_token = token;
 }
 
+QVariantList SoundCloudService::parseSoundCloudTracks(const QJsonArray& tracks) {
+    QVariantList results;
+    for (const QJsonValue& value : tracks) {
+        QJsonObject obj = value.toObject();
+        TrackData track;
+        track.id = QString::number(obj["id"].toInt());
+        track.title = obj["title"].toString();
+        track.durationMs = obj["duration"].toVariant().toLongLong();
+        
+        QJsonObject pub = obj["publisher_metadata"].toObject();
+        if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {
+            track.artist = pub["artist"].toString();
+        } else {
+            track.artist = obj["user"].toObject()["username"].toString();
+        }
+        
+        track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
+        track.webUrl = obj["permalink_url"].toString();
+        
+        QJsonArray transcodings = obj["media"].toObject()["transcodings"].toArray();
+        for (const QJsonValue& t : transcodings) {
+            QJsonObject to = t.toObject();
+            if (to["format"].toObject()["protocol"].toString() == "progressive") {
+                m_trackLinks[track.id] = to["url"].toString();
+                break;
+            }
+        }
+        
+        track.service = "SoundCloud";
+        results.append(track.toVariantMap());
+    }
+    return results;
+}
+
 void SoundCloudService::search(const QString& query) {
     if (m_token.isEmpty()) return;
+
+    QString authHeader = "";
+    if (m_token.startsWith("2-")) {
+        authHeader = "OAuth " + m_token;
+    }
+
+    if (query.startsWith("http") && query.contains("soundcloud.com")) {
+        QUrl url("https://api-v2.soundcloud.com/resolve");
+        QUrlQuery q;
+        q.addQueryItem("url", query);
+        if (authHeader.isEmpty()) q.addQueryItem("client_id", m_token);
+        url.setQuery(q);
+
+        net->get(url, authHeader, [this](QNetworkReply* reply) {
+            if (reply->error() != QNetworkReply::NoError) return;
+            QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+            QJsonObject result = doc.object();
+            if (result["kind"].toString() == "track") {
+                QJsonArray tracks;
+                tracks.append(result);
+                emit searchResultsReady("SoundCloud", parseSoundCloudTracks(tracks));
+            }
+        });
+        return;
+    }
 
     QUrl url("https://api-v2.soundcloud.com/search/tracks");
     QUrlQuery q;
     q.addQueryItem("q", query);
-    QString authHeader = "";
-    if (m_token.startsWith("2-")) {
-        authHeader = "OAuth " + m_token;
-    } else {
+    if (authHeader.isEmpty()) {
         q.addQueryItem("client_id", m_token);
     }
     q.addQueryItem("limit", "20");
@@ -32,40 +88,8 @@ void SoundCloudService::search(const QString& query) {
 
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         QJsonArray tracks = doc.object()["collection"].toArray();
-        
-        QVariantList results;
         m_trackLinks.clear();
-
-        for (const QJsonValue& value : tracks) {
-            QJsonObject obj = value.toObject();
-            TrackData track;
-            track.id = QString::number(obj["id"].toInt());
-            track.title = obj["title"].toString();
-            track.durationMs = obj["duration"].toVariant().toLongLong();
-            
-            QJsonObject pub = obj["publisher_metadata"].toObject();
-            if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {
-                track.artist = pub["artist"].toString();
-            } else {
-                track.artist = obj["user"].toObject()["username"].toString();
-            }
-            
-            track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
-            track.webUrl = obj["permalink_url"].toString();
-            
-            QJsonArray transcodings = obj["media"].toObject()["transcodings"].toArray();
-            for (const QJsonValue& t : transcodings) {
-                QJsonObject to = t.toObject();
-                if (to["format"].toObject()["protocol"].toString() == "progressive") {
-                    m_trackLinks[track.id] = to["url"].toString();
-                    break;
-                }
-            }
-            
-            track.service = "SoundCloud";
-            results.append(track.toVariantMap());
-        }
-        emit searchResultsReady("SoundCloud", results);
+        emit searchResultsReady("SoundCloud", parseSoundCloudTracks(tracks));
     });
 }
 

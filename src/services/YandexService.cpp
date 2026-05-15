@@ -62,6 +62,19 @@ QVariantList YandexService::parseYandexTracks(const QJsonArray& tracks) {
 void YandexService::search(const QString& query) {
     if (m_token.isEmpty()) return;
 
+    QRegularExpression trackRe("track/(\\d+)");
+    QRegularExpressionMatch trackMatch = trackRe.match(query);
+    if (trackMatch.hasMatch()) {
+        QString trackId = trackMatch.captured(1);
+        QUrl url("https://api.music.yandex.net/tracks/" + trackId);
+        net->get(url, m_token, [this](QNetworkReply* reply) {
+            if (reply->error() != QNetworkReply::NoError) return;
+            QJsonArray tracks = QJsonDocument::fromJson(reply->readAll()).object()["result"].toArray();
+            emit searchResultsReady("Yandex", parseYandexTracks(tracks));
+        });
+        return;
+    }
+
     QUrl url("https://api.music.yandex.net/search");
     QUrlQuery q;
     q.addQueryItem("text", query);

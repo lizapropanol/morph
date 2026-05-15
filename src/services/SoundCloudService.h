@@ -23,6 +23,7 @@ private:
     void fetchStreamUrl(const QString& trackId, const QString& transcodingUrl);
     void fetchPlaylistTracksMetadata(const QString& playlistName, const QString& coverUrl, const QStringList& trackIds);
     void fetchNextPlaylistChunk(const QString& playlistName, const QString& coverUrl, QStringList* remainingIds, QVariantList* allTracks);
+    QVariantList parseSoundCloudTracks(const QJsonArray& tracks);
 
 private:
     NetworkManager* net;
