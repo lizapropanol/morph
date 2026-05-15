@@ -636,13 +636,13 @@ ApplicationWindow {
                                                         width: 140; height: 140
                                                         Rectangle {
                                                             anchors.fill: parent; radius: 15; color: "#1a1a1a"; clip: true
-                                                            Text { anchors.centerIn: parent; text: "♪"; color: "#333"; font.family: mainFont.name; font.pixelSize: 40; visible: mixImage.status !== Image.Ready }
                                                             Image {
                                                                 id: mixImage
                                                                 anchors.fill: parent; source: MorphCache.getCachedCover(model.coverUrl || ""); fillMode: Image.PreserveAspectCrop; asynchronous: true
                                                                 layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 15 } }
                                                                 onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                             }
+                                                            Text { anchors.centerIn: parent; text: "♪"; color: "#333"; font.family: mainFont.name; font.pixelSize: 40; visible: mixImage.status !== Image.Ready }
                                                             Rectangle {                                                                anchors.fill: parent; color: "#aa000000"; visible: mixMouseArea.containsMouse; radius: 15
                                                                 Image {
                                                                     anchors.centerIn: parent; source: "qrc:/assets/play.svg"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
@@ -706,7 +706,6 @@ ApplicationWindow {
                                                         Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Rectangle {
                                                             Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
-                                                            Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: leftTrackImage.status !== Image.Ready }
                                                             Image { 
                                                                 id: leftTrackImage
                                                                 anchors.fill: parent
@@ -714,6 +713,7 @@ ApplicationWindow {
                                                                 layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                                 onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                             }
+                                                            Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: leftTrackImage.status !== Image.Ready }
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
@@ -747,7 +747,6 @@ ApplicationWindow {
                                                         Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Rectangle {
                                                             Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
-                                                            Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: rightTrackImage.status !== Image.Ready }
                                                             Image { 
                                                                 id: rightTrackImage
                                                                 anchors.fill: parent
@@ -755,6 +754,7 @@ ApplicationWindow {
                                                                 layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                                                 onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                             }
+                                                            Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: rightTrackImage.status !== Image.Ready }
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
@@ -875,17 +875,17 @@ ApplicationWindow {
                                                                 anchors.fill: parent; anchors.margins: 10; spacing: 8
                                                                     Rectangle {
                                                                         Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
-                                                                        Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 40; visible: playlistImage.status !== Image.Ready }
                                                                         Image {
                                                                             id: playlistImage
-                                                                            anchors.fill: parent; source: MorphCache.getCachedCover(model.coverUrl || ""); fillMode: Image.PreserveAspectCrop
-                                                                            visible: model.coverUrl !== ""; layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 120; height: 120; radius: 8 } }
+                                                                            anchors.fill: parent; source: coverUrl ? MorphCache.getCachedCover(coverUrl) : ""; fillMode: Image.PreserveAspectCrop
+                                                                            visible: coverUrl && coverUrl !== ""; layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 120; height: 120; radius: 8 } }
                                                                         }
-                                                                        Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 40; visible: model.coverUrl === "" }
+                                                                        Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 40; visible: playlistImage.status !== Image.Ready }
+                                                                        Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 40; visible: !coverUrl || coverUrl === "" }
                                                                     }
-                                                                Text { text: model.name; color: "white"; font.family: mainFont.name; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
+                                                                Text { text: name || ""; color: "white"; font.family: mainFont.name; font.pixelSize: 13; font.weight: Font.Bold; elide: Text.ElideRight; Layout.fillWidth: true }
                                                             }
-                                                            MouseArea { id: playlistMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: openPlaylist(model.name) }
+                                                            MouseArea { id: playlistMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: openPlaylist(name) }
                                                         }
                                                     }
                                                 }
@@ -907,7 +907,6 @@ ApplicationWindow {
                                                 Rectangle {
                                                     visible: currentPlaylist !== ""
                                                     Layout.preferredWidth: 40; Layout.preferredHeight: 40; color: "#333"; radius: 8
-                                                    Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 20; visible: playlistHeaderImage.status !== Image.Ready }
                                                     Image {
                                                         id: playlistHeaderImage
                                                         anchors.fill: parent
@@ -920,6 +919,7 @@ ApplicationWindow {
                                                         fillMode: Image.PreserveAspectCrop
                                                         layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 40; height: 40; radius: 8 } }
                                                     }
+                                                    Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 20; visible: playlistHeaderImage.status !== Image.Ready }
                                                 }
                                                 Text { 
                                                     text: currentPlaylist === "" ? "LIKED TRACKS" : currentPlaylist.toUpperCase()
@@ -1768,13 +1768,13 @@ ApplicationWindow {
                                         width: Math.min(parent.width, 350); spacing: 15; visible: currentTrack !== null
                                         Rectangle {
                                             Layout.preferredWidth: 48; Layout.preferredHeight: 48; color: "#1a1a1a"; radius: 10
-                                            Text { anchors.centerIn: parent; text: "♪"; color: "#333"; font.family: mainFont.name; font.pixelSize: 24; visible: nowPlayingImage.status !== Image.Ready }
                                             Image { 
                                                 id: nowPlayingImage
                                                 anchors.fill: parent
                                                 source: currentTrack ? MorphCache.getCachedCover(currentTrack.coverUrl) : ""; fillMode: Image.PreserveAspectCrop
                                                 layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 48; height: 48; radius: 10 } }
                                             }
+                                            Text { anchors.centerIn: parent; text: "♪"; color: "#333"; font.family: mainFont.name; font.pixelSize: 24; visible: nowPlayingImage.status !== Image.Ready }
                                         }
                                         Column {
                                             Layout.fillWidth: true; clip: true
@@ -1864,9 +1864,9 @@ ApplicationWindow {
         id: trackDelegate
         Rectangle {
             id: trackDelegateRoot
-            width: ListView.view.width
+            width: ListView.view ? ListView.view.width : 500
             height: 54
-            color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#252525" : (trackMouseArea.containsMouse ? "#222" : "transparent")
+            color: (currentTrack && currentTrack.id === id && currentTrack.service === service) ? "#252525" : (trackMouseArea.containsMouse ? "#222" : "transparent")
             radius: 6
 
             MouseArea {
@@ -1877,25 +1877,25 @@ ApplicationWindow {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onPressed: {
                     if (mouse.button === Qt.RightButton) {
-                        var track;
+                        var trackObj;
                         if (currentView === "search") {
                             var view = ListView.view
-                            track = view ? view.model.get(index) : (searchModel.count > 0 ? searchModel.get(index) : historyModel.get(index))
+                            trackObj = view ? view.model.get(index) : (searchModel.count > 0 ? searchModel.get(index) : historyModel.get(index))
                         } else {
-                            track = libraryModel.get(index)
+                            trackObj = libraryModel.get(index)
                         }
-                        trackContextMenu.openAt(mouse.x, mouse.y, trackMouseArea, track)
+                        trackContextMenu.openAt(mouse.x, mouse.y, trackMouseArea, trackObj)
                     }
                 }
                 onClicked: {
                     if (mouse.button === Qt.LeftButton) {
-                        var track; var m;
+                        var trackObj; var m;
                         if (currentView === "search") {
                             var view = ListView.view
                             m = view ? view.model : (searchModel.count > 0 ? searchModel : historyModel)
-                            track = m.get(index)
+                            trackObj = m.get(index)
 
-                            var tObj = { "id": track.id, "title": track.title, "artist": track.artist, "coverUrl": track.coverUrl, "service": track.service, "webUrl": track.webUrl || "", "durationMs": track.durationMs || 0 }
+                            var tObj = { "id": trackObj.id, "title": trackObj.title, "artist": trackObj.artist, "coverUrl": trackObj.coverUrl, "service": trackObj.service, "webUrl": trackObj.webUrl || "", "durationMs": trackObj.durationMs || 0 }
                             MorphSettings.addSearchHistory(tObj)
 
                             historyModel.clear()
@@ -1904,8 +1904,8 @@ ApplicationWindow {
 
                             playTrack(tObj, index)
                         } else {
-                            track = libraryModel.get(index)
-                            playTrack(track, index)
+                            trackObj = libraryModel.get(index)
+                            playTrack(trackObj, index)
                         }
                     }
                 }
@@ -1918,23 +1918,23 @@ ApplicationWindow {
                 spacing: 15
                 Rectangle {
                     Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
-                    Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: trackImage.status !== Image.Ready }
                     Image { 
                         id: trackImage
                         anchors.fill: parent
-                        source: MorphCache.getCachedCover(model.coverUrl || ""); fillMode: Image.PreserveAspectCrop 
+                        source: MorphCache.getCachedCover(coverUrl || ""); fillMode: Image.PreserveAspectCrop 
                         layer.enabled: true
                         layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                         onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                     }
+                    Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: trackImage.status !== Image.Ready }
                 }
                 ColumnLayout {
                     Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                    Text { Layout.fillWidth: true; text: model.title || ""; color: (currentTrack && currentTrack.id === model.id && currentTrack.service === model.service) ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === id && currentTrack.service === service) ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
-                        Image { source: getServiceIcon(model.service); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
-                        Text { Layout.fillWidth: true; text: model.artist || ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
+                        Image { source: getServiceIcon(service); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
+                        Text { Layout.fillWidth: true; text: artist || ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                     }
                 }
                 RowLayout {
@@ -1943,33 +1943,19 @@ ApplicationWindow {
                     
                     Rectangle {
                         width: 6; height: 6; radius: 3; color: "#44ff44"
-                        visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
+                        visible: (window.cacheVersion, MorphCache.isTrackCached(id))
                     }
                     Text {
-                        text: formatTime(model.durationMs || 0)
-                        color: "#666"; font.family: mainFont.name; font.pixelSize: 12; visible: (model.durationMs || 0) > 0
-                        Layout.preferredWidth: 35
-                        horizontalAlignment: Text.AlignRight
+                        text: formatTime(durationMs || 0)
+                        color: "#666"; font.family: mainFont.name; font.pixelSize: 12; visible: (durationMs || 0) > 0
                     }
                     Image {
-                        source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                        source: (window.likesVersion, MorphSettings.isLiked(id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                         MouseArea { 
-                            anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service, "album": model.album || "", "webUrl": model.webUrl || "", "durationMs": model.durationMs || 0 }); cursorShape: Qt.PointingHandCursor 
+                            anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": id, "title": title, "artist": artist, "coverUrl": coverUrl, "service": service, "album": album || "", "webUrl": webUrl || "", "durationMs": durationMs || 0 }); cursorShape: Qt.PointingHandCursor 
                         }
                     }
                 }
-            }
-        }
-    }
-
-    property var trackToPlaylist: null
-    Menu {
-        id: playlistMenu
-        Repeater {
-            model: playlistsModel
-            MenuItem {
-                text: model.name
-                onClicked: if(trackToPlaylist) MorphSettings.addToPlaylist(model.name, trackToPlaylist)
             }
         }
     }
@@ -2017,7 +2003,23 @@ ApplicationWindow {
         }
         
         function openAt(mx, my, targetItem, track) {
-            targetContextTrack = track
+            if (!track) return
+            var cleanTrack = {
+                "id": track.id || "",
+                "title": track.title || "Unknown Title",
+                "artist": track.artist || "Unknown Artist",
+                "album": track.album || "",
+                "coverUrl": track.coverUrl || "",
+                "service": track.service || "",
+                "webUrl": track.webUrl || "",
+                "durationMs": track.durationMs || 0
+            }
+            if (cleanTrack.service === "") {
+                if (cleanTrack.coverUrl.indexOf("yandex") !== -1) cleanTrack.service = "Yandex"
+                else if (cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
+                else cleanTrack.service = "Yandex"
+            }
+            targetContextTrack = cleanTrack
             var coords = targetItem.mapToItem(Overlay.overlay, mx, my)
             x = coords.x; y = coords.y
             open()
@@ -2037,7 +2039,7 @@ ApplicationWindow {
             model: playlistsModel
             clip: true
             delegate: Rectangle {
-                width: parent.width; height: 40; color: plItemMouse.containsMouse ? "#333" : "transparent"; radius: 4
+                width: 170; height: 40; color: plItemMouse.containsMouse ? "#333" : "transparent"; radius: 4
                 Text {
                     anchors.centerIn: parent; width: parent.width - 20
                     text: model.name; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black
@@ -2046,7 +2048,7 @@ ApplicationWindow {
                 MouseArea {
                     id: plItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if (targetContextTrack) {
+                        if (targetContextTrack && targetContextTrack.id !== "") {
                             MorphSettings.addToPlaylist(model.name, targetContextTrack)
                         }
                         playlistPickerPopup.close()
