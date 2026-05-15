@@ -1883,45 +1883,69 @@ ApplicationWindow {
                                             }
                                             
                                             Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: Math.min(styleFilesModel.count * 45, 200); color: "#1a1a1a"; radius: 10; border.color: "#333"
+                                                Layout.fillWidth: true; Layout.preferredHeight: 350; color: "#1a1a1a"; radius: 10; border.color: "#333"
                                                 clip: true
                                                 visible: styleFilesModel.count > 0
-                                                ListView {
-                                                    id: styleFilesList
-                                                    anchors.fill: parent; model: styleFilesModel; clip: true
-                                                    delegate: Rectangle {
-                                                        width: styleFilesList.width; height: 45; color: (activeStyleName === name) ? "#222" : (styleItemMouse.containsMouse ? "#1f1f1f" : "transparent")
-                                                        property string activeStyleName: (window.settingsVersion, MorphSettings.getActiveStyleName())
+
+                                                ScrollView {
+                                                    anchors.fill: parent
+                                                    padding: 15
+                                                    
+                                                    Flow {
+                                                        id: configFlow
+                                                        width: parent.width - 30
+                                                        spacing: 15
                                                         
-                                                        RowLayout {
-                                                            anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
-                                                            Rectangle { width: 8; height: 8; radius: 4; color: "#44ff44"; visible: parent.parent.activeStyleName === name }
-                                                            Text { 
-                                                                text: name; color: (parent.parent.activeStyleName === name) ? "white" : "#888"
-                                                                font.family: mainFont.name; font.pixelSize: 13; font.weight: Font.Black; Layout.fillWidth: true 
-                                                            }
-                                                            Button {
-                                                                text: "EXPORT"
-                                                                Layout.preferredHeight: 28; Layout.preferredWidth: 70
-                                                                onClicked: {
-                                                                    configContent.exportTargetFile = name
-                                                                    exportStyleDialog.open()
+                                                        Repeater {
+                                                            model: styleFilesModel
+                                                            delegate: Rectangle {
+                                                                width: 140; height: 140
+                                                                color: (activeStyleName === name) ? "#222" : (styleItemMouse.containsMouse ? "#1f1f1f" : "#131313")
+                                                                radius: 12; border.color: (activeStyleName === name) ? "#44ff44" : "#333"; border.width: 1
+                                                                property string activeStyleName: (window.settingsVersion, MorphSettings.getActiveStyleName())
+                                                                
+                                                                ColumnLayout {
+                                                                    anchors.fill: parent; anchors.margins: 12; spacing: 8
+                                                                    
+                                                                    Rectangle {
+                                                                        Layout.fillWidth: true; Layout.fillHeight: true; color: "#111"; radius: 8
+                                                                        Image {
+                                                                            anchors.centerIn: parent
+                                                                            source: "qrc:/assets/notebook-outline.svg"; width: 32; height: 32; sourceSize: Qt.size(64, 64)
+                                                                            layer.enabled: true; layer.effect: ColorOverlay { color: (activeStyleName === name) ? "#44ff44" : "#444" }
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    Text { 
+                                                                        text: name; color: (activeStyleName === name) ? "white" : "#888"
+                                                                        font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black
+                                                                        Layout.fillWidth: true; elide: Text.ElideMiddle; horizontalAlignment: Text.AlignHCenter 
+                                                                    }
+                                                                    
+                                                                    Button {
+                                                                        text: "EXPORT"
+                                                                        Layout.preferredHeight: 24; Layout.fillWidth: true
+                                                                        onClicked: {
+                                                                            configContent.exportTargetFile = name
+                                                                            exportStyleDialog.open()
+                                                                        }
+                                                                        background: Rectangle { color: "#000"; radius: 4; border.color: "#222" }
+                                                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 8; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                                    }
                                                                 }
-                                                                background: Rectangle { color: "#111"; radius: 4; border.color: "#333" }
-                                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 9; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                                
+                                                                MouseArea {
+                                                                    id: styleItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                                                    onClicked: {
+                                                                        if (parent.activeStyleName !== name) {
+                                                                            MorphSettings.setActiveStyleName(name)
+                                                                            MorphApp.reload()
+                                                                        }
+                                                                    }
+                                                                }
                                                             }
                                                         }
-                                                        MouseArea {
-                                                            id: styleItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                                            onClicked: {
-                                                                if (parent.activeStyleName !== name) {
-                                                                    MorphSettings.setActiveStyleName(name)
-                                                                    MorphApp.reload()
-                                                                }
-                                                            }
-                                                        }
-                                                        Rectangle { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right; height: 1; color: "#222"; visible: index < styleFilesModel.count - 1 }
                                                     }
                                                 }
                                             }
