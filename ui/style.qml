@@ -94,7 +94,8 @@ ApplicationWindow {
         for (var i = 0; i < files.length; i++) {
             var name = files[i]
             var preview = MorphSettings.getStylePreview(name)
-            styleFilesModel.append({ "name": name, "preview": preview })
+            var colorsStr = MorphSettings.getStyleColors(name)
+            styleFilesModel.append({ "name": name, "preview": preview, "colorsString": colorsStr })
         }
     }
 
@@ -1901,50 +1902,67 @@ ApplicationWindow {
                                                         
                                                         Repeater {
                                                             model: styleFilesModel
-                                                            delegate: Rectangle {
-                                                                width: 240; height: 250
-                                                                color: (activeStyleName === name) ? "#222" : (styleItemMouse.containsMouse ? "#1f1f1f" : "#131313")
-                                                                radius: 12; border.color: (activeStyleName === name) ? "#44ff44" : "#333"; border.width: 1
-                                                                property string activeStyleName: (window.settingsVersion, MorphSettings.getActiveStyleName())
+                                                        delegate: Rectangle {
+                                                            id: configTile
+                                                            width: 240; height: 250
+                                                            color: (activeStyleName === name) ? "#222" : (styleItemMouse.containsMouse ? "#1f1f1f" : "#131313")
+                                                            radius: 12; border.color: (activeStyleName === name) ? "#44ff44" : "#333"; border.width: 1
+                                                            property string activeStyleName: (window.settingsVersion, MorphSettings.getActiveStyleName())
+                                                            
+                                                            MouseArea {
+                                                                id: styleItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                                                onClicked: {
+                                                                    if (parent.activeStyleName !== name) {
+                                                                        MorphSettings.setActiveStyleName(name)
+                                                                        MorphApp.reload()
+                                                                    }
+                                                                }
+                                                            }
 
-                                                                MouseArea {
-                                                                    id: styleItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                                                    onClicked: {
-                                                                        if (parent.activeStyleName !== name) {
-                                                                            MorphSettings.setActiveStyleName(name)
-                                                                            MorphApp.reload()
+                                                            ColumnLayout {
+                                                                anchors.fill: parent; anchors.margins: 12; spacing: 10
+
+                                                                Rectangle {
+                                                                    Layout.fillWidth: true; Layout.preferredHeight: 122; color: "#111"; radius: 4; clip: true
+                                                                    Image {
+                                                                        id: previewImage
+                                                                        anchors.fill: parent
+                                                                        source: model.preview ? "data:image/jpg;base64," + model.preview : ""
+                                                                        sourceSize.width: 400; sourceSize.height: 225
+                                                                        fillMode: Image.PreserveAspectCrop
+                                                                        visible: model.preview !== ""
+                                                                        smooth: true
+                                                                        layer.enabled: true
+                                                                        layer.effect: OpacityMask { maskSource: Rectangle { width: previewImage.width; height: previewImage.height; radius: 4 } }
+                                                                    }
+                                                                    Image {
+                                                                        anchors.centerIn: parent
+                                                                        source: "qrc:/assets/notebook-outline.svg"; width: 48; height: 48; sourceSize: Qt.size(128, 128)
+                                                                        layer.enabled: true; layer.effect: ColorOverlay { color: (activeStyleName === name) ? "#44ff44" : "#444" }
+                                                                        visible: model.preview === ""
+                                                                    }
+                                                                }                                                                    
+                                                                Text { 
+                                                                    text: name; color: (activeStyleName === name) ? "white" : "#888"
+                                                                    font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black
+                                                                    Layout.fillWidth: true; elide: Text.ElideMiddle; horizontalAlignment: Text.AlignHCenter 
+                                                                }
+
+                                                                Row {
+                                                                    Layout.alignment: Qt.AlignHCenter
+                                                                    spacing: 6
+                                                                    Repeater {
+                                                                        model: (typeof colorsString !== "undefined" && colorsString.length > 0) ? colorsString.split(",") : []
+                                                                        delegate: Rectangle {
+                                                                            width: 12; height: 12; radius: 6
+                                                                            color: modelData
+                                                                            border.color: "#333"; border.width: 1
+                                                                            antialiasing: true
+                                                                            layer.enabled: true
+                                                                            layer.samples: 4
                                                                         }
                                                                     }
                                                                 }
-
-                                                                ColumnLayout {
-                                                                    anchors.fill: parent; anchors.margins: 12; spacing: 10
-
-                                                                    Rectangle {
-                                                                        Layout.fillWidth: true; Layout.preferredHeight: 122; color: "#111"; radius: 4; clip: true
-                                                                        Image {
-                                                                            id: previewImage
-                                                                            anchors.fill: parent
-                                                                            source: model.preview ? "data:image/jpg;base64," + model.preview : ""
-                                                                            sourceSize.width: 400; sourceSize.height: 225
-                                                                            fillMode: Image.PreserveAspectCrop
-                                                                            visible: model.preview !== ""
-                                                                            smooth: true
-                                                                            layer.enabled: true
-                                                                            layer.effect: OpacityMask { maskSource: Rectangle { width: previewImage.width; height: previewImage.height; radius: 4 } }
-                                                                        }
-                                                                        Image {
-                                                                            anchors.centerIn: parent
-                                                                            source: "qrc:/assets/notebook-outline.svg"; width: 48; height: 48; sourceSize: Qt.size(128, 128)
-                                                                            layer.enabled: true; layer.effect: ColorOverlay { color: (activeStyleName === name) ? "#44ff44" : "#444" }
-                                                                            visible: model.preview === ""
-                                                                        }
-                                                                    }                                                                    
-                                                                    Text { 
-                                                                        text: name; color: (activeStyleName === name) ? "white" : "#888"
-                                                                        font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black
-                                                                        Layout.fillWidth: true; elide: Text.ElideMiddle; horizontalAlignment: Text.AlignHCenter 
-                                                                    }
 
                                                                     RowLayout {
                                                                         Layout.fillWidth: true; spacing: 8

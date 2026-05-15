@@ -428,6 +428,41 @@ bool SettingsManager::savePreviewFromClipboard(const QString& fileName) {
     return true;
 }
 
+QString SettingsManager::getStyleColors(const QString& fileName) {
+    QString path = PathProvider::getConfigPath() + "/" + fileName;
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) return "";
+
+    QString content = QString::fromUtf8(file.readAll());
+    QRegularExpression previewRe("// MORPH_PREVIEW: [A-Za-z0-9+/=]+\\n");
+    content.remove(previewRe);
+
+    QRegularExpression re("#[0-9A-Fa-f]{3,8}");
+    QRegularExpressionMatchIterator i = re.globalMatch(content);
+    
+    QStringList colors;
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        QString color = match.captured(0).toLower();
+        int len = color.length();
+        if (len != 4 && len != 5 && len != 7 && len != 9) continue;
+
+        if (len == 5) color = "#" + color.mid(1);
+        if (len == 9) color = "#" + color.mid(3);
+        if (len == 4) {
+            QString r = color.at(1);
+            QString g = color.at(2);
+            QString b = color.at(3);
+            color = QString("#%1%1%2%2%3%3").arg(r, g, b);
+        }
+        if (!colors.contains(color) && color != "#000000" && color != "#ffffff" && color != "#111111" && color != "#222222") {
+            colors << color;
+            if (colors.size() >= 6) break;
+        }
+    }
+    return colors.join(",");
+}
+
 QVariantMap SettingsManager::getAboutInfo() {
     QVariantMap info;
 #ifdef MORPH_VERSION
