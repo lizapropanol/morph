@@ -7,7 +7,6 @@
 
 Application::Application(QObject* parent) : QObject(parent) {
     engine = new QQmlApplicationEngine(this);
-    watcher = new FileWatcher(PathProvider::getStyleFilePath(), this);
     
     NetworkManager* tempNet = new NetworkManager(this);
     cache = new CacheManager(tempNet, this);
@@ -17,6 +16,8 @@ Application::Application(QObject* parent) : QObject(parent) {
     settings = new SettingsManager(cache, this);
     mpris = new MprisManager(audio, this);
     discord = new DiscordManager(audio, settings, this);
+
+    watcher = new FileWatcher(settings->getActiveStylePath(), this);
 
     services->setAudioQuality(settings->getAudioQuality());
 
@@ -37,12 +38,12 @@ Application::Application(QObject* parent) : QObject(parent) {
 
 void Application::start() {
     connect(engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *obj, const QUrl &objUrl) {
-        if (!obj && objUrl == QUrl::fromLocalFile(PathProvider::getStyleFilePath())) {
+        if (!obj && objUrl == QUrl::fromLocalFile(settings->getActiveStylePath())) {
             qCritical() << "MORPH_ERROR: Could not load QML file!" << objUrl;
         }
     }, Qt::QueuedConnection);
 
-    engine->load(QUrl::fromLocalFile(PathProvider::getStyleFilePath()));
+    engine->load(QUrl::fromLocalFile(settings->getActiveStylePath()));
 }
 
 void Application::reload() {
@@ -52,6 +53,8 @@ void Application::reload() {
         obj->deleteLater();
     }
     
+    watcher->setPath(settings->getActiveStylePath());
+
     engine->rootContext()->setContextProperty("MorphAudio", audio);
     engine->rootContext()->setContextProperty("MorphServices", services);
     engine->rootContext()->setContextProperty("MorphSettings", settings);

@@ -65,7 +65,12 @@ public slots:
     Q_INVOKABLE QString getStyleFileContent();
     Q_INVOKABLE bool writeStyleFileContent(const QString& content);
     Q_INVOKABLE bool importStyleFile(const QString& fileUrl);
-    Q_INVOKABLE bool exportStyleFile(const QString& fileUrl);
+    Q_INVOKABLE bool exportStyleFile(const QString& fileName, const QString& fileUrl);
+
+    Q_INVOKABLE QVariantList getStyleFileList();
+    Q_INVOKABLE QString getActiveStyleName();
+    Q_INVOKABLE void setActiveStyleName(const QString& name);
+    QString getActiveStylePath();
 
 signals:
     void likesChanged();

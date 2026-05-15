@@ -296,7 +296,7 @@ bool SettingsManager::getDiscordRpcEnabled() {
 #include <QUrl>
 
 QString SettingsManager::getStyleFileContent() {
-    QFile file(PathProvider::getStyleFilePath());
+    QFile file(getActiveStylePath());
     if (file.open(QIODevice::ReadOnly)) {
         return QString::fromUtf8(file.readAll());
     }
@@ -304,7 +304,7 @@ QString SettingsManager::getStyleFileContent() {
 }
 
 bool SettingsManager::writeStyleFileContent(const QString& content) {
-    QFile file(PathProvider::getStyleFilePath());
+    QFile file(getActiveStylePath());
     if (file.open(QIODevice::WriteOnly)) {
         file.write(content.toUtf8());
         file.close();
@@ -319,22 +319,57 @@ bool SettingsManager::importStyleFile(const QString& fileUrl) {
     
     if (!QFile::exists(localPath)) return false;
 
-    QString dest = PathProvider::getStyleFilePath();
+    QFileInfo info(localPath);
+    QString fileName = info.fileName();
+    if (!fileName.endsWith(".qml")) return false;
+
+    QString dest = PathProvider::getConfigPath() + "/" + fileName;
     if (QFile::exists(dest)) QFile::remove(dest);
     
-    return QFile::copy(localPath, dest);
+    if (QFile::copy(localPath, dest)) {
+        setActiveStyleName(fileName);
+        return true;
+    }
+    return false;
 }
 
-bool SettingsManager::exportStyleFile(const QString& fileUrl) {
+bool SettingsManager::exportStyleFile(const QString& fileName, const QString& fileUrl) {
     QString localPath = QUrl(fileUrl).toLocalFile();
     if (localPath.isEmpty()) localPath = fileUrl;
 
-    QString src = PathProvider::getStyleFilePath();
+    QString src = PathProvider::getConfigPath() + "/" + fileName;
     if (!QFile::exists(src)) return false;
 
     if (QFile::exists(localPath)) QFile::remove(localPath);
     
     return QFile::copy(src, localPath);
+}
+
+QVariantList SettingsManager::getStyleFileList() {
+    QVariantList list;
+    QDir dir(PathProvider::getConfigPath());
+    QStringList filters;
+    filters << "*.qml";
+    QFileInfoList files = dir.entryInfoList(filters, QDir::Files, QDir::Name);
+    for (const QFileInfo& info : files) {
+        list.append(info.fileName());
+    }
+    return list;
+}
+
+QString SettingsManager::getActiveStyleName() {
+    if (!m_data.contains("active_config")) return "style.qml";
+    return m_data["active_config"].toString();
+}
+
+void SettingsManager::setActiveStyleName(const QString& name) {
+    m_data["active_config"] = name;
+    save();
+    emit settingsChanged();
+}
+
+QString SettingsManager::getActiveStylePath() {
+    return PathProvider::getConfigPath() + "/" + getActiveStyleName();
 }
 
 QVariantMap SettingsManager::getAboutInfo() {

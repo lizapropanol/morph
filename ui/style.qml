@@ -87,6 +87,14 @@ ApplicationWindow {
         for (var p in pls) playlistsModel.append({ "name": p, "coverUrl": pls[p].coverUrl || "" })
     }
 
+    function refreshStyleFiles() {
+        styleFilesModel.clear()
+        var files = MorphSettings.getStyleFileList()
+        for (var i = 0; i < files.length; i++) {
+            styleFilesModel.append({ "name": files[i] })
+        }
+    }
+
     Component.onCompleted: {
         var yToken = MorphSettings.getYandexToken()
         var sToken = MorphSettings.getSoundCloudToken()
@@ -94,8 +102,8 @@ ApplicationWindow {
         if (sToken) MorphServices.setSoundCloudClientId(sToken)
 
         refreshPlaylists()
-        MorphServices.getCharts()
-        MorphServices.getDailyMixes()
+        refreshStyleFiles()
+        MorphServices.getCharts(); MorphServices.getDailyMixes()
         var hist = MorphSettings.getSearchHistory()
         for (var i = 0; i < hist.length; i++) historyModel.append(hist[i])
         
@@ -274,6 +282,7 @@ ApplicationWindow {
     ListModel { id: historyModel; Component.onCompleted: forceRole(this) }
     ListModel { id: chartsModel; Component.onCompleted: forceRole(this) }
     ListModel { id: dailyMixesModel }
+    ListModel { id: styleFilesModel }
     ListModel { id: detailedTracksModel }
     ListModel { id: detailedCoversModel }
 
@@ -283,6 +292,7 @@ ApplicationWindow {
         nameFilters: ["QML files (*.qml)"]
         onAccepted: {
             if (MorphSettings.importStyleFile(fileUrl)) {
+                refreshStyleFiles()
                 MorphApp.reload()
             }
         }
@@ -294,7 +304,7 @@ ApplicationWindow {
         selectExisting: false
         nameFilters: ["QML files (*.qml)"]
         onAccepted: {
-            MorphSettings.exportStyleFile(fileUrl)
+            MorphSettings.exportStyleFile(configContent.exportTargetFile, fileUrl)
         }
     }
 
@@ -1187,6 +1197,7 @@ ApplicationWindow {
                                                 var content = MorphSettings.getStyleFileContent()
                                                 styleEditor.text = content
                                                 configContent.initialConfigContent = content
+                                                refreshStyleFiles()
                                                 settingsSubView = "config"
                                             }
                                             background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
@@ -1785,6 +1796,7 @@ ApplicationWindow {
                                         spacing: 25
                                         visible: settingsSubView === "config"
                                         property string initialConfigContent: ""
+                                        property string exportTargetFile: ""
 
                                         RowLayout {                                            Layout.fillWidth: true; spacing: 15
                                             Button {
@@ -1796,26 +1808,6 @@ ApplicationWindow {
                                             }
                                             Text { text: "CONFIG MANAGEMENT"; color: "white"; font.family: mainFont.name; font.pixelSize: 16; font.weight: Font.Bold; Layout.alignment: Qt.AlignVCenter }
                                             Item { Layout.fillWidth: true }
-                                        }
-
-                                        RowLayout {
-                                            spacing: 15
-                                            Button {
-                                                text: "IMPORT QML"
-                                                Layout.preferredHeight: 40; Layout.fillWidth: true
-                                                onClicked: importStyleDialog.open()
-                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
-                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                            }
-                                            Button {
-                                                text: "EXPORT QML"
-                                                Layout.preferredHeight: 40; Layout.fillWidth: true
-                                                onClicked: exportStyleDialog.open()
-                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
-                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                            }
                                         }
 
                                         ColumnLayout {
@@ -1872,6 +1864,70 @@ ApplicationWindow {
                                                 background: Rectangle { color: parent.enabled ? "#1a1a1a" : "#111"; radius: 8; border.color: parent.enabled ? "#333" : "#222" }
                                                 contentItem: Text { text: parent.text; color: parent.enabled ? "white" : "#444"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                 MouseArea { anchors.fill: parent; cursorShape: parent.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor; acceptedButtons: Qt.NoButton }
+                                            }
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 10
+                                            RowLayout {
+                                                Layout.fillWidth: true; spacing: 10
+                                                Text { text: "CONFIG LIBRARY"; color: "#444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; Layout.fillWidth: true }
+                                                Button {
+                                                    text: "IMPORT QML"
+                                                    Layout.preferredHeight: 30; Layout.preferredWidth: 100
+                                                    onClicked: importStyleDialog.open()
+                                                    background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                    contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                }
+                                            }
+                                            
+                                            Rectangle {
+                                                Layout.fillWidth: true; Layout.preferredHeight: Math.min(styleFilesModel.count * 45, 200); color: "#1a1a1a"; radius: 10; border.color: "#333"
+                                                clip: true
+                                                visible: styleFilesModel.count > 0
+                                                ListView {
+                                                    id: styleFilesList
+                                                    anchors.fill: parent; model: styleFilesModel; clip: true
+                                                    delegate: Rectangle {
+                                                        width: styleFilesList.width; height: 45; color: (activeStyleName === name) ? "#222" : (styleItemMouse.containsMouse ? "#1f1f1f" : "transparent")
+                                                        property string activeStyleName: (window.settingsVersion, MorphSettings.getActiveStyleName())
+                                                        
+                                                        RowLayout {
+                                                            anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
+                                                            Rectangle { width: 8; height: 8; radius: 4; color: "#44ff44"; visible: parent.parent.activeStyleName === name }
+                                                            Text { 
+                                                                text: name; color: (parent.parent.activeStyleName === name) ? "white" : "#888"
+                                                                font.family: mainFont.name; font.pixelSize: 13; font.weight: Font.Black; Layout.fillWidth: true 
+                                                            }
+                                                            Button {
+                                                                text: "EXPORT"
+                                                                Layout.preferredHeight: 28; Layout.preferredWidth: 70
+                                                                onClicked: {
+                                                                    configContent.exportTargetFile = name
+                                                                    exportStyleDialog.open()
+                                                                }
+                                                                background: Rectangle { color: "#111"; radius: 4; border.color: "#333" }
+                                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 9; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                            }
+                                                        }
+                                                        MouseArea {
+                                                            id: styleItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                                            onClicked: {
+                                                                if (parent.activeStyleName !== name) {
+                                                                    MorphSettings.setActiveStyleName(name)
+                                                                    MorphApp.reload()
+                                                                }
+                                                            }
+                                                        }
+                                                        Rectangle { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right; height: 1; color: "#222"; visible: index < styleFilesModel.count - 1 }
+                                                    }
+                                                }
+                                            }
+                                            Text { 
+                                                text: "No other config files found in the directory."; color: "#444"; font.family: mainFont.name; font.pixelSize: 12
+                                                visible: styleFilesModel.count === 0; Layout.alignment: Qt.AlignHCenter
                                             }
                                         }
                                     }
