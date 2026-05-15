@@ -1822,31 +1822,39 @@ ApplicationWindow {
                                             Rectangle {
                                                 Layout.fillWidth: true; Layout.preferredHeight: 300; color: "#1a1a1a"; radius: 10; border.color: "#333"
                                                 clip: true
+                                                
+                                                Rectangle { 
+                                                    x: 40; width: 1; height: parent.height; color: "#333" 
+                                                }
+
+                                                Item {
+                                                    width: 40; anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
+                                                    clip: true
+                                                    Column {
+                                                        y: (styleEditorScrollView.contentItem ? -styleEditorScrollView.contentItem.contentY : 0) + 10
+                                                        width: parent.width; spacing: 0
+                                                        Repeater {
+                                                            model: styleEditor.lineCount
+                                                            Text {
+                                                                width: 40; height: styleEditor.contentHeight / Math.max(1, styleEditor.lineCount)
+                                                                text: (index + 1).toString(); color: "#444"; font.family: "Monospace"; font.pixelSize: 12
+                                                                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
                                                 ScrollView {
-                                                    anchors.fill: parent
+                                                    id: styleEditorScrollView
+                                                    anchors.left: parent.left; anchors.leftMargin: 41
+                                                    anchors.right: parent.right; anchors.top: parent.top; anchors.bottom: parent.bottom
+                                                    clip: true
                                                     TextArea {
                                                         id: styleEditor
                                                         color: "white"; font.family: "Monospace"; font.pixelSize: 12
                                                         wrapMode: Text.NoWrap; selectByMouse: true
                                                         background: null
-                                                        leftPadding: 50; topPadding: 10; bottomPadding: 10
-                                                        
-                                                        Rectangle {
-                                                            width: 40; height: Math.max(styleEditor.contentHeight + 20, 300)
-                                                            color: "#161616"; x: 0; y: 0
-                                                            Column {
-                                                                anchors.fill: parent; anchors.topMargin: 10
-                                                                Repeater {
-                                                                    model: styleEditor.lineCount
-                                                                    Text {
-                                                                        width: 40; height: styleEditor.contentHeight / Math.max(1, styleEditor.lineCount)
-                                                                        text: (index + 1).toString(); color: "#444"; font.family: "Monospace"; font.pixelSize: 12
-                                                                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                                                                    }
-                                                                }
-                                                            }
-                                                            Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: "#333" }
-                                                        }
+                                                        leftPadding: 10; topPadding: 10; bottomPadding: 10
                                                     }
                                                 }
                                             }
