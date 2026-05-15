@@ -26,6 +26,7 @@ Application::Application(QObject* parent) : QObject(parent) {
     engine->rootContext()->setContextProperty("MorphMpris", mpris);
     engine->rootContext()->setContextProperty("MorphDiscord", discord);
     engine->rootContext()->setContextProperty("MorphCache", cache);
+    engine->rootContext()->setContextProperty("MorphApp", this);
 
     setupTray();
 
@@ -57,6 +58,7 @@ void Application::reload() {
     engine->rootContext()->setContextProperty("MorphMpris", mpris);
     engine->rootContext()->setContextProperty("MorphDiscord", discord);
     engine->rootContext()->setContextProperty("MorphCache", cache);
+    engine->rootContext()->setContextProperty("MorphApp", this);
 
     engine->load(QUrl::fromLocalFile(PathProvider::getStyleFilePath()));
 }

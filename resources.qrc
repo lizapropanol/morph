@@ -29,6 +29,7 @@
     <file>assets/telegram.svg</file>
     <file>assets/information.svg</file>
     <file>assets/harddisk.svg</file>
+    <file>assets/notebook-outline.svg</file>
     <file>assets/fonts/interblack.otf</file>
 </qresource>
 </RCC>

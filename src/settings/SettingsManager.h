@@ -62,6 +62,11 @@ public slots:
 
     Q_INVOKABLE QVariantMap getAboutInfo();
 
+    Q_INVOKABLE QString getStyleFileContent();
+    Q_INVOKABLE bool writeStyleFileContent(const QString& content);
+    Q_INVOKABLE bool importStyleFile(const QString& fileUrl);
+    Q_INVOKABLE bool exportStyleFile(const QString& fileUrl);
+
 signals:
     void likesChanged();
     void playlistsChanged();

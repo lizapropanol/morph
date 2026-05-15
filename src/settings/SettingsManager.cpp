@@ -293,6 +293,50 @@ bool SettingsManager::getDiscordRpcEnabled() {
     return m_data["discord_rpc"].toBool();
 }
 
+#include <QUrl>
+
+QString SettingsManager::getStyleFileContent() {
+    QFile file(PathProvider::getStyleFilePath());
+    if (file.open(QIODevice::ReadOnly)) {
+        return QString::fromUtf8(file.readAll());
+    }
+    return "";
+}
+
+bool SettingsManager::writeStyleFileContent(const QString& content) {
+    QFile file(PathProvider::getStyleFilePath());
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(content.toUtf8());
+        file.close();
+        return true;
+    }
+    return false;
+}
+
+bool SettingsManager::importStyleFile(const QString& fileUrl) {
+    QString localPath = QUrl(fileUrl).toLocalFile();
+    if (localPath.isEmpty()) localPath = fileUrl;
+    
+    if (!QFile::exists(localPath)) return false;
+
+    QString dest = PathProvider::getStyleFilePath();
+    if (QFile::exists(dest)) QFile::remove(dest);
+    
+    return QFile::copy(localPath, dest);
+}
+
+bool SettingsManager::exportStyleFile(const QString& fileUrl) {
+    QString localPath = QUrl(fileUrl).toLocalFile();
+    if (localPath.isEmpty()) localPath = fileUrl;
+
+    QString src = PathProvider::getStyleFilePath();
+    if (!QFile::exists(src)) return false;
+
+    if (QFile::exists(localPath)) QFile::remove(localPath);
+    
+    return QFile::copy(src, localPath);
+}
+
 QVariantMap SettingsManager::getAboutInfo() {
     QVariantMap info;
 #ifdef MORPH_VERSION

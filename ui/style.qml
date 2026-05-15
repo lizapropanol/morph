@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtGraphicalEffects 1.15
+import QtQuick.Dialogs 1.3
 
 ApplicationWindow {
     id: window
@@ -275,6 +276,27 @@ ApplicationWindow {
     ListModel { id: dailyMixesModel }
     ListModel { id: detailedTracksModel }
     ListModel { id: detailedCoversModel }
+
+    FileDialog {
+        id: importStyleDialog
+        title: "Select QML Style File"
+        nameFilters: ["QML files (*.qml)"]
+        onAccepted: {
+            if (MorphSettings.importStyleFile(fileUrl)) {
+                MorphApp.reload()
+            }
+        }
+    }
+
+    FileDialog {
+        id: exportStyleDialog
+        title: "Export Style File"
+        selectExisting: false
+        nameFilters: ["QML files (*.qml)"]
+        onAccepted: {
+            MorphSettings.exportStyleFile(fileUrl)
+        }
+    }
 
     property bool isStartup: true
     property bool tracksExpanded: false
@@ -1015,8 +1037,16 @@ ApplicationWindow {
                                 StackLayout {
                                     id: settingsStack
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: settingsSubView === "main" ? settingsMainContent.height : cacheContent.height
-                                    currentIndex: settingsSubView === "main" ? 0 : 1
+                                    Layout.preferredHeight: {
+                                        if (settingsSubView === "main") return settingsMainContent.height
+                                        if (settingsSubView === "cache") return cacheContent.height
+                                        return configContent.height
+                                    }
+                                    currentIndex: {
+                                        if (settingsSubView === "main") return 0
+                                        if (settingsSubView === "cache") return 1
+                                        return 2
+                                    }
 
                                     ColumnLayout {
                                         id: settingsMainContent
@@ -1178,6 +1208,30 @@ ApplicationWindow {
                                                             Behavior on x { NumberAnimation { duration: 150 } }
                                                         }
                                                     }
+                                                }
+                                            }
+                                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                        }
+
+                                        Button {
+                                            Layout.fillWidth: true; Layout.preferredHeight: 50
+                                            onClicked: {
+                                                styleEditor.text = MorphSettings.getStyleFileContent()
+                                                settingsSubView = "config"
+                                            }
+                                            background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
+                                            contentItem: RowLayout {
+                                                anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 10
+                                                Image {
+                                                    source: "qrc:/assets/notebook-outline.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20; Layout.alignment: Qt.AlignVCenter
+                                                    sourceSize.width: 40; sourceSize.height: 40
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                }
+                                                Text { text: "Manage Config"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.fillWidth: true; verticalAlignment: Text.AlignVCenter }
+                                                Image {
+                                                    source: "qrc:/assets/chevron-right.svg"; Layout.preferredWidth: 16; Layout.preferredHeight: 16; Layout.alignment: Qt.AlignVCenter
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "#444" }
                                                 }
                                             }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
@@ -1720,6 +1774,74 @@ ApplicationWindow {
                                                 Layout.fillWidth: true
                                                 text: "If the cache size exceeds this limit, the oldest unused files will be deleted from the device memory."
                                                 color: "#555"; font.family: mainFont.name; font.pixelSize: 11; wrapMode: Text.Wrap
+                                            }
+                                        }
+                                    }
+
+                                    ColumnLayout {
+                                        id: configContent
+                                        spacing: 25
+                                        visible: settingsSubView === "config"
+
+                                        RowLayout {
+                                            Layout.fillWidth: true; spacing: 15
+                                            Button {
+                                                text: "← BACK"
+                                                onClicked: settingsSubView = "main"
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                contentItem: Text { text: parent.text; color: "#888"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold }
+                                                background: Item {}
+                                            }
+                                            Text { text: "CONFIG MANAGEMENT"; color: "white"; font.family: mainFont.name; font.pixelSize: 16; font.weight: Font.Bold; Layout.alignment: Qt.AlignVCenter }
+                                            Item { Layout.fillWidth: true }
+                                        }
+
+                                        RowLayout {
+                                            spacing: 15
+                                            Button {
+                                                text: "IMPORT QML"
+                                                Layout.preferredHeight: 40; Layout.fillWidth: true
+                                                onClicked: importStyleDialog.open()
+                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter }
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                            }
+                                            Button {
+                                                text: "EXPORT QML"
+                                                Layout.preferredHeight: 40; Layout.fillWidth: true
+                                                onClicked: exportStyleDialog.open()
+                                                background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter }
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                            }
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 10
+                                            Text { text: "LIVE EDITOR"; color: "#444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black }
+                                            Rectangle {
+                                                Layout.fillWidth: true; Layout.preferredHeight: 300; color: "#1a1a1a"; radius: 10; border.color: "#333"
+                                                ScrollView {
+                                                    anchors.fill: parent; anchors.margins: 5; clip: true
+                                                    TextArea {
+                                                        id: styleEditor
+                                                        color: "white"; font.family: "Monospace"; font.pixelSize: 12
+                                                        wrapMode: Text.NoWrap; selectByMouse: true
+                                                        background: null
+                                                    }
+                                                }
+                                            }
+                                            Button {
+                                                text: "SAVE AND APPLY"
+                                                Layout.preferredHeight: 45; Layout.fillWidth: true
+                                                onClicked: {
+                                                    if (MorphSettings.writeStyleFileContent(styleEditor.text)) {
+                                                        MorphApp.reload()
+                                                    }
+                                                }
+                                                background: Rectangle { color: "#44ff44"; radius: 8 }
+                                                contentItem: Text { text: parent.text; color: "black"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter }
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                             }
                                         }
                                     }
