@@ -163,6 +163,27 @@ void SettingsManager::addToPlaylist(const QString& playlistName, const QVariantM
     emit playlistsChanged();
 }
 
+void SettingsManager::removeFromPlaylist(const QString& playlistName, const QString& trackId) {
+    QJsonObject playlists = m_data["playlists"].toObject();
+    if (!playlists.contains(playlistName)) return;
+
+    QJsonObject playlistData = playlists[playlistName].toObject();
+    QJsonArray tracks = playlistData["tracks"].toArray();
+    
+    for (int i = 0; i < tracks.size(); ++i) {
+        if (tracks[i].toObject()["id"].toString() == trackId) {
+            tracks.removeAt(i);
+            break;
+        }
+    }
+
+    playlistData["tracks"] = tracks;
+    playlists[playlistName] = playlistData;
+    m_data["playlists"] = playlists;
+    save();
+    emit playlistsChanged();
+}
+
 QVariantMap SettingsManager::getPlaylists() {
     if (!m_data.contains("playlists") || !m_data["playlists"].isObject()) return QVariantMap();
     return m_data["playlists"].toObject().toVariantMap();

@@ -34,6 +34,7 @@ public slots:
     void renamePlaylist(const QString& oldName, const QString& newName, const QString& coverUrl);
     void deletePlaylist(const QString& name);
     void addToPlaylist(const QString& playlistName, const QVariantMap& track);
+    void removeFromPlaylist(const QString& playlistName, const QString& trackId);
     QVariantMap getPlaylists();
 
     void setYandexToken(const QString& token);
