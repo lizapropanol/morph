@@ -843,6 +843,11 @@ ApplicationWindow {
                                                                     text: "LIKED TRACKS"; color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 13; font.weight: Font.Black
                                                                     anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.margins: 12
                                                                 }
+                                                                Text {
+                                                                    text: (window.likesVersion, MorphSettings.getLikedTracks().length)
+                                                                    color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 13; font.weight: Font.Black
+                                                                    anchors.bottom: parent.bottom; anchors.right: parent.right; anchors.margins: 12
+                                                                }
                                                             }
                                                             MouseArea { id: likedMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; onClicked: openPlaylist("LIKED") }
                                                         }
