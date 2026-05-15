@@ -139,7 +139,7 @@ ApplicationWindow {
         currentPlaylist = name
         saveLastImport = true
         libraryModel.clear()
-        fullPlaylistTracks = []
+        var tempTracks = []
         loadedTracksCount = 0
         if (name === "LIKED") {
             currentPlaylist = ""
@@ -148,10 +148,10 @@ ApplicationWindow {
                 var item = likes[i]
                 if (!item.service) item.service = "Yandex"
                 if (item.durationMs === undefined) item.durationMs = 0
-                fullPlaylistTracks.push(item)
+                tempTracks.push(item)
             }
         }
- else {
+        else {
             var pls = MorphSettings.getPlaylists()
             var pData = pls[name]
             if (pData) {
@@ -164,15 +164,15 @@ ApplicationWindow {
                         else t.service = "Yandex"
                     }
                     if (t.durationMs === undefined) t.durationMs = 0
-                    fullPlaylistTracks.push(t)
+                    tempTracks.push(t)
                 }
             }
         }
+        fullPlaylistTracks = tempTracks
         loadNextChunk()
         librarySubView = "tracks"
         libraryFlickable.contentY = 0
     }
-
     function loadNextChunk() {
         if (loadedTracksCount >= fullPlaylistTracks.length) return
         var limit = Math.min(loadedTracksCount + 100, fullPlaylistTracks.length)
@@ -897,6 +897,11 @@ ApplicationWindow {
                                                 Text { 
                                                     text: currentPlaylist === "" ? "LIKED TRACKS" : currentPlaylist.toUpperCase()
                                                     color: "white"; font.family: "Nimbus Sans"; font.pixelSize: 16; font.weight: Font.Bold 
+                                                }
+                                                Text {
+                                                    text: fullPlaylistTracks.length + " TRACKS"
+                                                    color: "#666"; font.family: "Nimbus Sans"; font.pixelSize: 11; font.weight: Font.Bold
+                                                    Layout.alignment: Qt.AlignVCenter
                                                 }
                                                 Item { Layout.fillWidth: true }
                                                 
@@ -2067,11 +2072,15 @@ ApplicationWindow {
             if (currentView === "library" && currentPlaylist === "") {
                 libraryModel.clear()
                 var likes = MorphSettings.getLikedTracks()
+                var temp = []
                 for(var i = likes.length - 1; i >= 0; i--) {
                     var item = likes[i]
                     if (item.durationMs === undefined) item.durationMs = 0
                     libraryModel.append(item)
+                    temp.push(item)
                 }
+                fullPlaylistTracks = temp
+                loadedTracksCount = temp.length
             }
         }
         function onPlaylistsChanged() {
@@ -2086,11 +2095,15 @@ ApplicationWindow {
                     var pData = pls[currentPlaylist]
                     if (pData) {
                         var tracks = pData.tracks || (Array.isArray(pData) ? pData : [])
+                        var temp = []
                         for (var i = 0; i < tracks.length; i++) {
                             var item = tracks[i]
                             if (item.durationMs === undefined) item.durationMs = 0
                             libraryModel.append(item)
+                            temp.push(item)
                         }
+                        fullPlaylistTracks = temp
+                        loadedTracksCount = temp.length
                     }
                 }
             }
