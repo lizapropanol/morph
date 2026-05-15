@@ -1970,15 +1970,15 @@ ApplicationWindow {
         id: trackContextMenu
         property bool openedUpwards: false
         parent: Overlay.overlay
-        width: 150; height: (currentView === "library" && currentPlaylist !== "" && saveLastImport) ? 120 : 80
-        padding: 0
+        width: 160; height: (currentView === "library" && currentPlaylist !== "" && saveLastImport) ? 130 : 90
+        padding: 5
         background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333"; border.width: 1 }
         closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
         
         contentItem: ColumnLayout {
             spacing: 0
             Rectangle {
-                Layout.fillWidth: true; Layout.preferredHeight: 40; color: copyItemMouse.containsMouse ? "#333" : "transparent"
+                Layout.fillWidth: true; Layout.preferredHeight: 40; color: copyItemMouse.containsMouse ? "#333" : "transparent"; radius: 4
                 Text { anchors.centerIn: parent; text: "COPY LINK"; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black }
                 MouseArea {
                     id: copyItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -1995,7 +1995,7 @@ ApplicationWindow {
                 }
             }
             Rectangle {
-                Layout.fillWidth: true; Layout.preferredHeight: 40; color: addToPlMouse.containsMouse ? "#333" : "transparent"
+                Layout.fillWidth: true; Layout.preferredHeight: 40; color: addToPlMouse.containsMouse ? "#333" : "transparent"; radius: 4
                 Text { anchors.centerIn: parent; text: "ADD TO PLAYLIST"; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black }
                 MouseArea {
                     id: addToPlMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -2012,7 +2012,7 @@ ApplicationWindow {
             }
             Rectangle {
                 visible: currentView === "library" && currentPlaylist !== "" && saveLastImport
-                Layout.fillWidth: true; Layout.preferredHeight: 40; color: removePlMouse.containsMouse ? "#333" : "transparent"
+                Layout.fillWidth: true; Layout.preferredHeight: 40; color: removePlMouse.containsMouse ? "#333" : "transparent"; radius: 4
                 Text { anchors.centerIn: parent; text: "REMOVE FROM"; color: "#ff4444"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black }
                 MouseArea {
                     id: removePlMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
