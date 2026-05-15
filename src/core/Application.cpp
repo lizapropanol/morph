@@ -66,6 +66,7 @@ void Application::reload() {
     engine->load(QUrl::fromLocalFile(PathProvider::getStyleFilePath()));
 }
 
+#include <QBuffer>
 void Application::setupTray() {
     trayIcon = new QSystemTrayIcon(QIcon(":/assets/logo.svg"), this);
     trayMenu = new QMenu();

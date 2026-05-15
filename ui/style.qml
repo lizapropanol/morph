@@ -91,7 +91,9 @@ ApplicationWindow {
         styleFilesModel.clear()
         var files = MorphSettings.getStyleFileList()
         for (var i = 0; i < files.length; i++) {
-            styleFilesModel.append({ "name": files[i] })
+            var name = files[i]
+            var preview = MorphSettings.getStylePreview(name)
+            styleFilesModel.append({ "name": name, "preview": preview })
         }
     }
 
@@ -1899,42 +1901,11 @@ ApplicationWindow {
                                                         Repeater {
                                                             model: styleFilesModel
                                                             delegate: Rectangle {
-                                                                width: 140; height: 140
+                                                                width: 240; height: 250
                                                                 color: (activeStyleName === name) ? "#222" : (styleItemMouse.containsMouse ? "#1f1f1f" : "#131313")
                                                                 radius: 12; border.color: (activeStyleName === name) ? "#44ff44" : "#333"; border.width: 1
                                                                 property string activeStyleName: (window.settingsVersion, MorphSettings.getActiveStyleName())
-                                                                
-                                                                ColumnLayout {
-                                                                    anchors.fill: parent; anchors.margins: 12; spacing: 8
-                                                                    
-                                                                    Rectangle {
-                                                                        Layout.fillWidth: true; Layout.fillHeight: true; color: "#111"; radius: 8
-                                                                        Image {
-                                                                            anchors.centerIn: parent
-                                                                            source: "qrc:/assets/notebook-outline.svg"; width: 32; height: 32; sourceSize: Qt.size(64, 64)
-                                                                            layer.enabled: true; layer.effect: ColorOverlay { color: (activeStyleName === name) ? "#44ff44" : "#444" }
-                                                                        }
-                                                                    }
-                                                                    
-                                                                    Text { 
-                                                                        text: name; color: (activeStyleName === name) ? "white" : "#888"
-                                                                        font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black
-                                                                        Layout.fillWidth: true; elide: Text.ElideMiddle; horizontalAlignment: Text.AlignHCenter 
-                                                                    }
-                                                                    
-                                                                    Button {
-                                                                        text: "EXPORT"
-                                                                        Layout.preferredHeight: 24; Layout.fillWidth: true
-                                                                        onClicked: {
-                                                                            configContent.exportTargetFile = name
-                                                                            exportStyleDialog.open()
-                                                                        }
-                                                                        background: Rectangle { color: "#000"; radius: 4; border.color: "#222" }
-                                                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 8; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                                    }
-                                                                }
-                                                                
+
                                                                 MouseArea {
                                                                     id: styleItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                                                                     onClicked: {
@@ -1944,9 +1915,67 @@ ApplicationWindow {
                                                                         }
                                                                     }
                                                                 }
+
+                                                                ColumnLayout {
+                                                                    anchors.fill: parent; anchors.margins: 12; spacing: 10
+
+                                                                    Rectangle {
+                                                                        Layout.fillWidth: true; Layout.preferredHeight: 122; color: "#111"; radius: 4; clip: true
+                                                                        Image {
+                                                                            id: previewImage
+                                                                            anchors.fill: parent
+                                                                            source: model.preview ? "data:image/jpg;base64," + model.preview : ""
+                                                                            fillMode: Image.PreserveAspectCrop
+                                                                            visible: model.preview !== ""
+                                                                            layer.enabled: true
+                                                                            layer.effect: OpacityMask { maskSource: Rectangle { width: previewImage.width; height: previewImage.height; radius: 4 } }
+                                                                        }
+                                                                        Image {
+                                                                            anchors.centerIn: parent
+                                                                            source: "qrc:/assets/notebook-outline.svg"; width: 48; height: 48; sourceSize: Qt.size(128, 128)
+                                                                            layer.enabled: true; layer.effect: ColorOverlay { color: (activeStyleName === name) ? "#44ff44" : "#444" }
+                                                                            visible: model.preview === ""
+                                                                        }
+
+                                                                        Rectangle {
+                                                                            anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 8
+                                                                            width: 32; height: 32; radius: 16; color: "#cc000000"
+                                                                            visible: (activeStyleName === name)
+                                                                            Image {
+                                                                                anchors.centerIn: parent
+                                                                                source: "qrc:/assets/plus.svg"; width: 14; height: 14
+                                                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                                            }
+                                                                            MouseArea {
+                                                                                anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                                                onClicked: {
+                                                                                    if (MorphSettings.savePreviewFromClipboard(name)) {
+                                                                                        refreshStyleFiles()
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }                                                                    
+                                                                    Text { 
+                                                                        text: name; color: (activeStyleName === name) ? "white" : "#888"
+                                                                        font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black
+                                                                        Layout.fillWidth: true; elide: Text.ElideMiddle; horizontalAlignment: Text.AlignHCenter 
+                                                                    }
+
+                                                                    Button {
+                                                                        text: "EXPORT"
+                                                                        Layout.preferredHeight: 28; Layout.fillWidth: true
+                                                                        onClicked: {
+                                                                            configContent.exportTargetFile = name
+                                                                            exportStyleDialog.open()
+                                                                        }
+                                                                        background: Rectangle { color: "#000"; radius: 6; border.color: "#222" }
+                                                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                                    }
+                                                                }
                                                             }
-                                                        }
-                                                    }
+                                                        }                                                    }
                                                 }
                                             }
                                             Text { 

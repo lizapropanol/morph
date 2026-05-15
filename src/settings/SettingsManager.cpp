@@ -372,6 +372,62 @@ QString SettingsManager::getActiveStylePath() {
     return PathProvider::getConfigPath() + "/" + getActiveStyleName();
 }
 
+#include <QRegularExpression>
+
+QString SettingsManager::getStylePreview(const QString& fileName) {
+    QString path = PathProvider::getConfigPath() + "/" + fileName;
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) return "";
+    
+    QTextStream in(&file);
+    QString firstLine = in.readLine();
+    if (firstLine.startsWith("// MORPH_PREVIEW: ")) {
+        return firstLine.mid(18);
+    }
+    return "";
+}
+
+void SettingsManager::saveStylePreview(const QString& fileName, const QString& base64) {
+    QString path = PathProvider::getConfigPath() + "/" + fileName;
+    QFile file(path);
+    if (!file.open(QIODevice::ReadWrite)) return;
+    
+    QString content = QString::fromUtf8(file.readAll());
+    QRegularExpression re("// MORPH_PREVIEW: [A-Za-z0-9+/=]+\\n");
+    content.remove(re);
+    
+    QString newContent = "// MORPH_PREVIEW: " + base64 + "\n" + content;
+    file.resize(0);
+    file.write(newContent.toUtf8());
+    file.close();
+    
+    emit settingsChanged();
+}
+
+#include <QBuffer>
+#include <QImage>
+
+bool SettingsManager::savePreviewFromClipboard(const QString& fileName) {
+    QClipboard* clipboard = QGuiApplication::clipboard();
+    QImage image = clipboard->image();
+    if (image.isNull()) return false;
+
+    QImage scaled = image.scaled(400, 225, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+    
+    int x = (scaled.width() - 400) / 2;
+    int y = (scaled.height() - 225) / 2;
+    scaled = scaled.copy(x, y, 400, 225);
+
+    QByteArray ba;
+    QBuffer buffer(&ba);
+    buffer.open(QIODevice::WriteOnly);
+    scaled.save(&buffer, "JPG", 80);
+    QString base64 = ba.toBase64();
+
+    saveStylePreview(fileName, base64);
+    return true;
+}
+
 QVariantMap SettingsManager::getAboutInfo() {
     QVariantMap info;
 #ifdef MORPH_VERSION
