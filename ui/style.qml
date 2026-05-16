@@ -182,7 +182,7 @@ ApplicationWindow {
         loadedTracksCount = 0
         if (isLiked) {
             var likes = MorphSettings.getLikedTracks()
-            for(var i = likes.length - 1; i >= 0; i--) {
+            for(var i = 0; i < likes.length; i++) {
                 var item = likes[i]
                 if (!item.service) item.service = "Yandex"
                 if (item.durationMs === undefined) item.durationMs = 0
