@@ -51,6 +51,12 @@ void PathProvider::ensureConfigExists() {
         QFile::setPermissions(styleFile, QFile::WriteUser | QFile::ReadUser);
     }
 
+    QString lightStyleFile = getConfigPath() + "/style_white.qml";
+    if (!QFile::exists(lightStyleFile)) {
+        QFile::copy(":/ui/style_white.qml", lightStyleFile);
+        QFile::setPermissions(lightStyleFile, QFile::WriteUser | QFile::ReadUser);
+    }
+
     QStringList assets = {
         "logo.svg", "heart-outline.svg", "heart.svg", "magnify.svg", "pause-circle.svg",
         "chevron-left.svg", "chevron-right.svg", "chevron-down.svg", "chevron-up.svg",
