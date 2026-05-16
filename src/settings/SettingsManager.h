@@ -64,6 +64,9 @@ public slots:
 
     Q_INVOKABLE QString getStyleFileContent();
     Q_INVOKABLE bool writeStyleFileContent(const QString& content);
+    Q_INVOKABLE QString getStyleContentByName(const QString& fileName);
+    Q_INVOKABLE bool writeStyleContentByName(const QString& fileName, const QString& content);
+    Q_INVOKABLE void saveTemporaryPreview(const QString& content);
     Q_INVOKABLE bool importStyleFile(const QString& fileUrl);
     Q_INVOKABLE bool exportStyleFile(const QString& fileName, const QString& fileUrl);
 

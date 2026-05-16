@@ -303,6 +303,35 @@ QString SettingsManager::getStyleFileContent() {
     return "";
 }
 
+QString SettingsManager::getStyleContentByName(const QString& fileName) {
+    QString path = PathProvider::getConfigPath() + "/" + fileName;
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly)) {
+        return QString::fromUtf8(file.readAll());
+    }
+    return "";
+}
+
+bool SettingsManager::writeStyleContentByName(const QString& fileName, const QString& content) {
+    QString path = PathProvider::getConfigPath() + "/" + fileName;
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(content.toUtf8());
+        file.close();
+        return true;
+    }
+    return false;
+}
+
+void SettingsManager::saveTemporaryPreview(const QString& content) {
+    QString path = PathProvider::getConfigPath() + "/.preview_ide.qml";
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(content.toUtf8());
+        file.close();
+    }
+}
+
 bool SettingsManager::writeStyleFileContent(const QString& content) {
     QFile file(getActiveStylePath());
     if (file.open(QIODevice::WriteOnly)) {

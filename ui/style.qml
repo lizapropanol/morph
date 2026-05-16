@@ -25,6 +25,9 @@ ApplicationWindow {
     property var currentTrack: null
     property int currentTrackIndex: -1
     property string currentView: "home"
+    property string editingFileName: ""
+    property bool isEditorMode: false
+    property bool isPreviewRunning: previewLoader.status === Loader.Ready
     property string currentPlaylist: ""
     property string searchSource: "all"
     property string oldPlaylistName: ""
@@ -1203,9 +1206,6 @@ ApplicationWindow {
                                         Button {
                                             Layout.fillWidth: true; Layout.preferredHeight: 50
                                             onClicked: {
-                                                var content = MorphSettings.getStyleFileContent()
-                                                styleEditor.text = content
-                                                configContent.initialConfigContent = content
                                                 refreshStyleFiles()
                                                 settingsSubView = "config"
                                             }
@@ -1821,63 +1821,6 @@ ApplicationWindow {
 
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 10
-                                            Text { text: "LIVE EDITOR"; color: "#444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black }
-                                            Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: 300; color: "#1a1a1a"; radius: 10; border.color: "#333"
-                                                clip: true
-                                                
-                                                Rectangle { 
-                                                    x: 40; width: 1; height: parent.height; color: "#333" 
-                                                }
-
-                                                Item {
-                                                    width: 40; anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
-                                                    clip: true
-                                                    Column {
-                                                        y: (styleEditorScrollView.contentItem ? -styleEditorScrollView.contentItem.contentY : 0) + 10
-                                                        width: parent.width; spacing: 0
-                                                        Repeater {
-                                                            model: styleEditor.lineCount
-                                                            Text {
-                                                                width: 40; height: styleEditor.contentHeight / Math.max(1, styleEditor.lineCount)
-                                                                text: (index + 1).toString(); color: "#444"; font.family: "Monospace"; font.pixelSize: 12
-                                                                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                                ScrollView {
-                                                    id: styleEditorScrollView
-                                                    anchors.left: parent.left; anchors.leftMargin: 41
-                                                    anchors.right: parent.right; anchors.top: parent.top; anchors.bottom: parent.bottom
-                                                    clip: true
-                                                    TextArea {
-                                                        id: styleEditor
-                                                        color: "white"; font.family: "Monospace"; font.pixelSize: 12
-                                                        wrapMode: Text.NoWrap; selectByMouse: true
-                                                        background: null
-                                                        leftPadding: 10; topPadding: 10; bottomPadding: 10
-                                                    }
-                                                }
-                                            }
-                                            Button {
-                                                text: "SAVE AND APPLY"
-                                                Layout.preferredHeight: 45; Layout.fillWidth: true
-                                                enabled: styleEditor.text !== configContent.initialConfigContent
-                                                onClicked: {
-                                                    if (MorphSettings.writeStyleFileContent(styleEditor.text)) {
-                                                        MorphApp.reload()
-                                                    }
-                                                }
-                                                background: Rectangle { color: parent.enabled ? "#1a1a1a" : "#111"; radius: 8; border.color: parent.enabled ? "#333" : "#222" }
-                                                contentItem: Text { text: parent.text; color: parent.enabled ? "white" : "#444"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                MouseArea { anchors.fill: parent; cursorShape: parent.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor; acceptedButtons: Qt.NoButton }
-                                            }
-                                        }
-
-                                        ColumnLayout {
-                                            Layout.fillWidth: true; spacing: 10
                                             RowLayout {
                                                 Layout.fillWidth: true; spacing: 10
                                                 Text { text: "CONFIG LIBRARY"; color: "#444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Black; Layout.fillWidth: true }
@@ -1977,6 +1920,25 @@ ApplicationWindow {
                                                                         }
                                                                         background: Rectangle { color: "#000"; radius: 6; border.color: "#222" }
                                                                         contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                                    }
+                                                                    Button {
+                                                                        Layout.preferredHeight: 28; Layout.preferredWidth: 28
+                                                                        onClicked: {
+                                                                            editingFileName = name
+                                                                            isEditorMode = true
+                                                                            styleEditorArea.text = MorphSettings.getStyleContentByName(name)
+                                                                        }
+                                                                        background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
+                                                                        contentItem: Item {
+                                                                            Image {
+                                                                                anchors.centerIn: parent
+                                                                                source: "qrc:/assets/pencil.svg"; width: 14; height: 14
+                                                                                sourceSize: Qt.size(32, 32)
+                                                                                fillMode: Image.PreserveAspectFit
+                                                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                                            }
+                                                                        }
                                                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                                                     }
                                                                     Button {
@@ -2739,5 +2701,140 @@ ApplicationWindow {
             }
         }
         onClosed: { importPlaylistPopup.isBusy = false; importPlaylistPopup.errorMsg = ""; importUrlField.text = "" }
+    }
+
+    Rectangle {
+        id: ideOverlay
+        anchors.fill: parent
+        color: "#0a0a0a"
+        visible: isEditorMode
+        z: 20000
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 0
+
+            Rectangle {
+                Layout.fillWidth: true; Layout.preferredHeight: 50; color: "#111"
+                RowLayout {
+                    anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20; spacing: 15
+                    Button {
+                        text: "← BACK"
+                        onClicked: {
+                            isEditorMode = false
+                            previewLoader.source = ""
+                        }
+                        background: Item {}
+                        contentItem: Text { text: parent.text; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Bold }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                    }
+                    Text { text: "EDITING: " + editingFileName; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.fillWidth: true }
+                    Button {
+                        id: runStopBtn
+                        text: isPreviewRunning ? "■ STOP PREVIEW" : "▶ RUN PREVIEW"
+                        Layout.preferredHeight: 32; Layout.preferredWidth: 130
+                        onClicked: {
+                            if (isPreviewRunning) {
+                                previewLoader.source = ""
+                                return
+                            }
+
+                            var rawCode = styleEditorArea.text
+                            var transformed = rawCode.replace(/ApplicationWindow\s*{/, "Rectangle {")
+                            transformed = transformed.replace(/^(\s*)onClosing\s*:/m, "$1function _onClosing()")
+                            transformed = transformed.replace(/^(\s*)minimumWidth\s*:/m, "$1property int _minW:")
+                            transformed = transformed.replace(/^(\s*)minimumHeight\s*:/m, "$1property int _minH:")
+                            transformed = transformed.replace(/^(\s*)title\s*:/m, "$1property string _title:")
+                            transformed = transformed.replace(/^(\s*)visible\s*:\s*true/m, "$1visible: true; anchors.fill: parent")
+                            
+                            MorphSettings.saveTemporaryPreview(transformed)
+                            var configDir = MorphSettings.getActiveStylePath().substring(0, MorphSettings.getActiveStylePath().lastIndexOf("/"))
+                            previewLoader.source = "file://" + configDir + "/.preview_ide.qml?t=" + Date.now()
+                        }
+                        background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: isPreviewRunning ? "#ff4444" : "#333" }
+                        contentItem: Text { text: parent.text; color: isPreviewRunning ? "#ff4444" : "#44ff44"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                    }
+                    Button {
+                        text: "SAVE"
+                        Layout.preferredHeight: 32; Layout.preferredWidth: 80
+                        onClicked: {
+                            if (MorphSettings.writeStyleContentByName(editingFileName, styleEditorArea.text)) {
+                                refreshStyleFiles()
+                            }
+                        }
+                        background: Rectangle { color: "#44ff44"; radius: 6 }
+                        contentItem: Text { text: parent.text; color: "black"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                    }
+                }
+            }
+
+            SplitView {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                orientation: Qt.Vertical
+
+                Rectangle {
+                    SplitView.fillWidth: true; SplitView.preferredHeight: parent.height * 0.6
+                    color: "#1a1a1a"
+                    
+                    Rectangle { x: 45; width: 1; height: parent.height; color: "#333" }
+
+                    Item {
+                        width: 45; anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
+                        clip: true
+                        Column {
+                            y: -editorScrollView.contentItem.contentY + 15
+                            width: parent.width; spacing: 0
+                            Repeater {
+                                model: styleEditorArea.lineCount
+                                Text {
+                                    width: 45; height: styleEditorArea.contentHeight / Math.max(1, styleEditorArea.lineCount)
+                                    text: (index + 1).toString(); color: "#444"; font.family: "Monospace"; font.pixelSize: 12
+                                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                                }
+                            }
+                        }
+                    }
+
+                    ScrollView {
+                        id: editorScrollView
+                        anchors.left: parent.left; anchors.leftMargin: 46; anchors.right: parent.right; anchors.top: parent.top; anchors.bottom: parent.bottom
+                        clip: true
+                        TextArea {
+                            id: styleEditorArea
+                            color: "white"; font.family: "Monospace"; font.pixelSize: 13
+                            wrapMode: Text.NoWrap; selectByMouse: true
+                            background: null; leftPadding: 10; topPadding: 15; bottomPadding: 15
+                        }
+                    }
+                }
+
+                Rectangle {
+                    SplitView.fillWidth: true; SplitView.fillHeight: true
+                    color: "#050505"
+                    clip: true
+
+                    Item {
+                        anchors.centerIn: parent
+                        width: 1075; height: 700
+                        scale: Math.min(parent.width / 1075, parent.height / 700) * 0.9
+
+                        Rectangle { anchors.fill: parent; color: "black"; border.color: "#333"; border.width: 1 }
+
+                        Loader {
+                            id: previewLoader
+                            anchors.fill: parent
+                            clip: true
+                        }
+                    }
+
+                    Text {
+                        anchors.bottom: parent.bottom; anchors.right: parent.right; anchors.margins: 10
+                        text: "LIVE INTERACTIVE PREVIEW"; color: "#444"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black
+                    }
+                }
+            }
+        }
     }
 }
