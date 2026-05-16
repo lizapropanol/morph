@@ -320,14 +320,23 @@ bool SettingsManager::importStyleFile(const QString& fileUrl) {
     if (!QFile::exists(localPath)) return false;
 
     QFileInfo info(localPath);
-    QString fileName = info.fileName();
-    if (!fileName.endsWith(".qml")) return false;
+    QString baseFileName = info.baseName();
+    QString extension = info.completeSuffix();
+    if (extension != "qml") return false;
 
-    QString dest = PathProvider::getConfigPath() + "/" + fileName;
-    if (QFile::exists(dest)) QFile::remove(dest);
+    QString configPath = PathProvider::getConfigPath();
+    QString finalFileName = baseFileName + "." + extension;
+    QString dest = configPath + "/" + finalFileName;
+    
+    int counter = 1;
+    while (QFile::exists(dest)) {
+        finalFileName = QString("%1 (%2).%3").arg(baseFileName).arg(counter).arg(extension);
+        dest = configPath + "/" + finalFileName;
+        counter++;
+    }
     
     if (QFile::copy(localPath, dest)) {
-        setActiveStyleName(fileName);
+        setActiveStyleName(finalFileName);
         return true;
     }
     return false;
