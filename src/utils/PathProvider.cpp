@@ -57,6 +57,12 @@ void PathProvider::ensureConfigExists() {
         QFile::setPermissions(lightStyleFile, QFile::WriteUser | QFile::ReadUser);
     }
 
+    QString autoStyleFile = getConfigPath() + "/auto_theme.qml";
+    if (!QFile::exists(autoStyleFile)) {
+        QFile::copy(":/ui/auto_theme.qml", autoStyleFile);
+        QFile::setPermissions(autoStyleFile, QFile::WriteUser | QFile::ReadUser);
+    }
+
     QStringList assets = {
         "logo.svg", "heart-outline.svg", "heart.svg", "magnify.svg", "pause-circle.svg",
         "chevron-left.svg", "chevron-right.svg", "chevron-down.svg", "chevron-up.svg",
