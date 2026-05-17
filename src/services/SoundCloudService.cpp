@@ -17,7 +17,7 @@ QVariantList SoundCloudService::parseSoundCloudTracks(const QJsonArray& tracks) 
     for (const QJsonValue& value : tracks) {
         QJsonObject obj = value.toObject();
         TrackData track;
-        track.id = QString::number(obj["id"].toInt());
+        track.id = obj["id"].toVariant().toString();
         track.title = obj["title"].toString();
         track.durationMs = obj["duration"].toVariant().toLongLong();
         

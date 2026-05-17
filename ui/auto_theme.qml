@@ -2282,7 +2282,7 @@ ApplicationWindow {
                     Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? systemTheme.accent : systemTheme.text; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
-                        Image { source: getServiceIcon(service); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
+                        Image { source: getServiceIcon(model.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
                         Text { Layout.fillWidth: true; text: artist || ""; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                     }
                 }
@@ -2292,7 +2292,7 @@ ApplicationWindow {
                     
                     Rectangle {
                         width: 6; height: 6; radius: 3; color: systemTheme.accent
-                        visible: (window.cacheVersion, MorphCache.isTrackCached(id))
+                        visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
                     }
                     Text {
                         text: formatTime(durationMs || 0)

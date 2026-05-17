@@ -2152,7 +2152,7 @@ ApplicationWindow {
             id: trackDelegateRoot
             width: ListView.view ? ListView.view.width : 500
             height: 54
-            color: (currentTrack && currentTrack.id === id && currentTrack.service === service) ? "#252525" : (trackMouseArea.containsMouse ? "#dddddd" : "transparent")
+            color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#252525" : (trackMouseArea.containsMouse ? "#dddddd" : "transparent")
             radius: 6
 
             MouseArea {
@@ -2225,10 +2225,10 @@ ApplicationWindow {
                 }
                 ColumnLayout {
                     Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === id && currentTrack.service === service) ? "#44ff44" : "#111111"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#44ff44" : "#111111"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
-                        Image { source: getServiceIcon(service); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
+                        Image { source: getServiceIcon(model.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
                         Text { Layout.fillWidth: true; text: artist || ""; color: "#555555"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                     }
                 }
@@ -2238,16 +2238,16 @@ ApplicationWindow {
                     
                     Rectangle {
                         width: 6; height: 6; radius: 3; color: "#44ff44"
-                        visible: (window.cacheVersion, MorphCache.isTrackCached(id))
+                        visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
                     }
                     Text {
                         text: formatTime(durationMs || 0)
                         color: "#777777"; font.family: mainFont.name; font.pixelSize: 12; visible: (durationMs || 0) > 0
                     }
                     Image {
-                        source: (window.likesVersion, MorphSettings.isLiked(id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: "#111111" }
+                        source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: "#111111" }
                         MouseArea { 
-                            anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": id, "title": title, "artist": artist, "coverUrl": coverUrl, "service": service, "album": album || "", "webUrl": webUrl || "", "durationMs": durationMs || 0 }); cursorShape: Qt.PointingHandCursor 
+                            anchors.fill: parent; onClicked: MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service || "Yandex", "album": model.album || "", "webUrl": model.webUrl || "", "durationMs": model.durationMs || 0 }); cursorShape: Qt.PointingHandCursor 
                         }
                     }
                 }
