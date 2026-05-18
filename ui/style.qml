@@ -1832,6 +1832,21 @@ ApplicationWindow {
                                                     contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                                 }
+                                                Button {
+                                                    implicitHeight: 30; implicitWidth: 30
+                                                    padding: 0
+                                                    onClicked: createStylePopup.open()
+                                                    background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
+                                                    contentItem: Item {
+                                                        Image {
+                                                            anchors.centerIn: parent
+                                                            source: "qrc:/assets/plus.svg"; width: 14; height: 14
+                                                            sourceSize: Qt.size(32, 32); fillMode: Image.PreserveAspectFit
+                                                            layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                        }
+                                                    }
+                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                }
                                             }
                                             
                                             Rectangle {
@@ -2834,6 +2849,75 @@ ApplicationWindow {
                         text: "LIVE INTERACTIVE PREVIEW"; color: "#444"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black
                     }
                 }
+            }
+        }
+    }
+
+    Popup {
+        id: createStylePopup
+        parent: Overlay.overlay
+        x: (parent.width - width) / 2; y: (parent.height - height) / 2
+        width: 300; height: 230; modal: true; focus: true
+        background: Rectangle { color: "#1a1a1a"; radius: 12; border.color: "#333" }
+        
+        property bool useTemplate: false
+
+        ColumnLayout {
+            anchors.fill: parent; anchors.margins: 20; spacing: 15
+            Text { text: "CREATE NEW CONFIG"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
+            TextField {
+                id: newStyleNameField; placeholderText: "CONFIG NAME"; Layout.fillWidth: true
+                color: "white"; font.family: mainFont.name; font.pixelSize: 12; padding: 10
+                background: Rectangle { color: "black"; radius: 6; border.color: "#333" }
+                
+                Text {
+                    text: newStyleNameField.text === "" ? "" : ".qml"
+                    color: "white"; opacity: 0.4; font: newStyleNameField.font
+                    anchors.left: parent.left; anchors.leftMargin: newStyleNameField.leftPadding + newStyleNameField.contentWidth + 2
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true; spacing: 10
+                Text { text: "Base on style.qml"; color: "white"; font.family: mainFont.name; font.pixelSize: 12; Layout.fillWidth: true }
+                Switch {
+                    id: useTemplateSwitch; Layout.alignment: Qt.AlignVCenter; Layout.preferredHeight: 20; padding: 0
+                    checked: createStylePopup.useTemplate
+                    onToggled: createStylePopup.useTemplate = checked
+                    indicator: Rectangle {
+                        implicitWidth: 36; implicitHeight: 20; radius: 10
+                        color: useTemplateSwitch.checked ? "#44ff44" : "black"
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Rectangle {
+                            x: useTemplateSwitch.checked ? parent.width - width - 2 : 2; y: 2
+                            width: 16; height: 16; radius: 8; color: "white"
+                            Behavior on x { NumberAnimation { duration: 150 } }
+                        }
+                    }
+                }
+            }
+
+            Button {
+                text: "CREATE"; Layout.fillWidth: true; Layout.preferredHeight: 40
+                onClicked: {
+                    if (newStyleNameField.text !== "") {
+                        var fileName = newStyleNameField.text + ".qml"
+                        var content = createStylePopup.useTemplate ? MorphSettings.getStyleContentByName("style.qml") : ""
+                        if (MorphSettings.writeStyleContentByName(fileName, content)) {
+                            createStylePopup.close()
+                            editingFileName = fileName
+                            isEditorMode = true
+                            styleEditorArea.text = content
+                            refreshStyleFiles()
+                            newStyleNameField.text = ""
+                            createStylePopup.useTemplate = false
+                        }
+                    }
+                }
+                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                contentItem: Text { text: parent.text; color: "black"; font.family: mainFont.name; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                background: Rectangle { color: "white"; radius: 6 }
             }
         }
     }
