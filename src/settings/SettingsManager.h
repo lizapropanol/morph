@@ -15,10 +15,15 @@
 #include <QClipboard>
 #include <QGuiApplication>
 
+#include <QQuickTextDocument>
+#include "../utils/QmlHighlighter.h"
+
 class SettingsManager : public QObject {
     Q_OBJECT
 public:
     explicit SettingsManager(CacheManager* cache, QObject* parent = nullptr);
+    
+    Q_INVOKABLE void attachHighlighter(QObject* textDocument);
 
 public slots:
     void copyToClipboard(const QString& text);

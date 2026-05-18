@@ -2903,34 +2903,102 @@ ApplicationWindow {
                     SplitView.fillWidth: true; SplitView.preferredHeight: parent.height * 0.6
                     color: systemTheme.card
                     
-                    Rectangle { x: 45; width: 1; height: parent.height; color: systemTheme.card }
+                    Rectangle { x: 45; width: 1; height: parent.height; color: systemTheme.border; opacity: 0.2 }
 
-                    Item {
-                        width: 45; anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
+                    ScrollView {
+                        id: lineNumbersScroll
+                        anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
+                        width: 45
                         clip: true
-                        Column {
-                            y: -editorScrollView.contentItem.contentY + 15
-                            width: parent.width; spacing: 0
-                            Repeater {
-                                model: styleEditorArea.lineCount
-                                Text {
-                                    width: 45; height: styleEditorArea.contentHeight / Math.max(1, styleEditorArea.lineCount)
-                                    text: (index + 1).toString(); color: systemTheme.subtext; font.family: "Monospace"; font.pixelSize: 12
-                                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                                }
+                        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AlwaysOff }
+                        ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
+                        
+                        Binding {
+                            target: lineNumbersScroll.contentItem
+                            property: "contentY"
+                            value: editorScrollView.contentItem.contentY
+                            when: lineNumbersScroll.contentItem !== null
+                        }
+
+                        TextArea {
+                            id: lineNumbersArea
+                            text: {
+                                var res = ""
+                                for (var i = 1; i <= styleEditorArea.lineCount; i++) res += i + "\n"
+                                return res
+                            }
+                            readOnly: true
+                            color: systemTheme.subtext
+                            font: styleEditorArea.font
+                            renderType: styleEditorArea.renderType
+                            background: null
+                            leftPadding: 0; rightPadding: 0
+                            topPadding: styleEditorArea.topPadding
+                            bottomPadding: styleEditorArea.bottomPadding
+                            horizontalAlignment: Text.AlignHCenter
+                            selectByMouse: false; focus: false
+                            activeFocusOnTab: false
+                            onWidthChanged: width = 45
+                        }
+                    }
+
+                    Rectangle {
+                        id: minimapContainer
+                        anchors.right: parent.right; anchors.top: parent.top; anchors.bottom: parent.bottom
+                        width: 120
+                        color: Qt.darker(systemTheme.background, 1.2)
+                        clip: true
+                        
+                        Text {
+                            id: minimapText
+                            text: styleEditorArea.text
+                            font.family: "Monospace"
+                            font.pixelSize: 2
+                            color: systemTheme.subtext
+                            wrapMode: Text.NoWrap
+                            leftPadding: 4; topPadding: 4; bottomPadding: 4
+                            y: minimapContainer.height < height ? -minimapContainer.scrollProgress * (height - minimapContainer.height) : 0
+                        }
+
+                        Rectangle {
+                            id: minimapIndicator
+                            width: parent.width
+                            height: styleEditorArea.contentHeight > 0 ? (editorScrollView.height / styleEditorArea.contentHeight) * minimapText.height : parent.height
+                            y: minimapContainer.height < minimapText.height ? minimapContainer.scrollProgress * (minimapContainer.height - height) : 0
+                            color: systemTheme.accent
+                            opacity: 0.15
+                        }
+
+                        property real scrollProgress: styleEditorArea.contentHeight > editorScrollView.height ? editorScrollView.contentItem.contentY / (styleEditorArea.contentHeight - editorScrollView.height) : 0
+
+                        MouseArea {
+                            anchors.fill: parent
+                            property bool dragging: false
+                            onPressed: { dragging = true; updateScroll(mouse.y) }
+                            onPositionChanged: { if (dragging) updateScroll(mouse.y) }
+                            onReleased: dragging = false
+                            function updateScroll(my) {
+                                var p = (my - minimapIndicator.height / 2) / Math.max(1, minimapContainer.height - minimapIndicator.height);
+                                p = Math.max(0, Math.min(1, p));
+                                editorScrollView.contentItem.contentY = p * (styleEditorArea.contentHeight - editorScrollView.height);
                             }
                         }
                     }
 
                     ScrollView {
                         id: editorScrollView
-                        anchors.left: parent.left; anchors.leftMargin: 46; anchors.right: parent.right; anchors.top: parent.top; anchors.bottom: parent.bottom
+                        anchors.left: lineNumbersScroll.right; anchors.right: minimapContainer.left; anchors.top: parent.top; anchors.bottom: parent.bottom
                         clip: true
                         TextArea {
                             id: styleEditorArea
                             color: systemTheme.text; font.family: "Monospace"; font.pixelSize: 13
+                            renderType: Text.NativeRendering
                             wrapMode: Text.NoWrap; selectByMouse: true
                             background: null; leftPadding: 10; topPadding: 15; bottomPadding: 15
+                            selectionColor: Qt.rgba(systemTheme.accent.r, systemTheme.accent.g, systemTheme.accent.b, 0.3)
+                            Component.onCompleted: {
+                                MorphSettings.attachHighlighter(styleEditorArea.textDocument)
+                            }
                         }
                     }
                 }

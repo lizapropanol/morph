@@ -28,6 +28,7 @@ add_executable(morph
     src/main.cpp
     src/core/Application.h src/core/Application.cpp
     src/utils/PathProvider.h src/utils/PathProvider.cpp
+    src/utils/QmlHighlighter.h src/utils/QmlHighlighter.cpp
     src/utils/CacheManager.h src/utils/CacheManager.cpp
     src/utils/FileWatcher.h src/utils/FileWatcher.cpp
     src/utils/CryptoUtils.h src/utils/CryptoUtils.cpp

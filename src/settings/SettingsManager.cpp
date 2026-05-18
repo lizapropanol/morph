@@ -11,6 +11,14 @@ SettingsManager::SettingsManager(CacheManager* cache, QObject* parent) : QObject
     load();
 }
 
+void SettingsManager::attachHighlighter(QObject* textDocument) {
+    if (!textDocument) return;
+    QQuickTextDocument* doc = qobject_cast<QQuickTextDocument*>(textDocument);
+    if (doc) {
+        new QmlHighlighter(doc->textDocument());
+    }
+}
+
 void SettingsManager::copyToClipboard(const QString& text) {
     QGuiApplication::clipboard()->setText(text);
 }
