@@ -383,6 +383,14 @@ bool SettingsManager::exportStyleFile(const QString& fileName, const QString& fi
     return QFile::copy(src, localPath);
 }
 
+bool SettingsManager::deleteStyleFile(const QString& fileName) {
+    QString path = PathProvider::getConfigPath() + "/" + fileName;
+    if (QFile::exists(path)) {
+        return QFile::remove(path);
+    }
+    return false;
+}
+
 QVariantList SettingsManager::getStyleFileList() {
     QVariantList list;
     QDir dir(PathProvider::getConfigPath());

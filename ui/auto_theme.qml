@@ -1862,6 +1862,41 @@ ApplicationWindow {
                                         visible: settingsSubView === "config"
                                         property string initialConfigContent: ""
                                         property string exportTargetFile: ""
+                                        property string deleteTargetFile: ""
+
+                                        Popup {
+                                            id: deleteStylePopup
+                                            parent: Overlay.overlay
+                                            x: (parent.width - width) / 2; y: (parent.height - height) / 2
+                                            width: 280; height: 150; modal: true; focus: true
+                                            background: Rectangle { color: systemTheme.card; radius: 12; border.color: systemTheme.border }
+                                            ColumnLayout {
+                                                anchors.fill: parent; anchors.margins: 20; spacing: 20
+                                                Text { text: "DELETE CONFIG?"; color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.alignment: Qt.AlignHCenter }
+                                                RowLayout {
+                                                    spacing: 15; Layout.fillWidth: true
+                                                    Button {
+                                                        text: "CANCEL"; Layout.fillWidth: true; Layout.preferredHeight: 36
+                                                        onClicked: deleteStylePopup.close()
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                        contentItem: Text { text: parent.text; color: systemTheme.background; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        background: Rectangle { color: systemTheme.text; radius: 6 }
+                                                    }
+                                                    Button {
+                                                        text: "DELETE"; Layout.fillWidth: true; Layout.preferredHeight: 36
+                                                        onClicked: {
+                                                            if (MorphSettings.deleteStyleFile(configContent.deleteTargetFile)) {
+                                                                refreshStyleFiles()
+                                                                deleteStylePopup.close()
+                                                            }
+                                                        }
+                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                        background: Rectangle { color: "#ff4444"; radius: 6 }
+                                                    }
+                                                }
+                                            }
+                                        }
 
                                         RowLayout {                                            Layout.fillWidth: true; spacing: 15
                                             Button {
@@ -2005,6 +2040,25 @@ ApplicationWindow {
                                                                             Image {
                                                                                 anchors.centerIn: parent
                                                                                 source: "qrc:/assets/pencil.svg"; width: 14; height: 14
+                                                                                sourceSize: Qt.size(32, 32)
+                                                                                fillMode: Image.PreserveAspectFit
+                                                                                layer.enabled: true; layer.effect: ColorOverlay { color: systemTheme.text }
+                                                                            }
+                                                                        }
+                                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                                    }
+                                                                    Button {
+                                                                        visible: (name !== "style.qml" && name !== "style_white.qml" && name !== "auto_theme.qml")
+                                                                        Layout.preferredHeight: 28; Layout.preferredWidth: 28
+                                                                        onClicked: {
+                                                                            configContent.deleteTargetFile = name
+                                                                            deleteStylePopup.open()
+                                                                        }
+                                                                        background: Rectangle { color: systemTheme.background; radius: 6; border.color: systemTheme.border }
+                                                                        contentItem: Item {
+                                                                            Image {
+                                                                                anchors.centerIn: parent
+                                                                                source: "qrc:/assets/delete.svg"; width: 14; height: 14
                                                                                 sourceSize: Qt.size(32, 32)
                                                                                 fillMode: Image.PreserveAspectFit
                                                                                 layer.enabled: true; layer.effect: ColorOverlay { color: systemTheme.text }

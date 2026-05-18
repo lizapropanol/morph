@@ -69,9 +69,9 @@ public slots:
     Q_INVOKABLE void saveTemporaryPreview(const QString& content);
     Q_INVOKABLE bool importStyleFile(const QString& fileUrl);
     Q_INVOKABLE bool exportStyleFile(const QString& fileName, const QString& fileUrl);
+    Q_INVOKABLE bool deleteStyleFile(const QString& fileName);
 
-    Q_INVOKABLE QString getStylePreview(const QString& fileName);
-    void saveStylePreview(const QString& fileName, const QString& base64);
+    Q_INVOKABLE QString getStylePreview(const QString& fileName);    void saveStylePreview(const QString& fileName, const QString& base64);
     Q_INVOKABLE bool savePreviewFromClipboard(const QString& fileName);
     Q_INVOKABLE QString getStyleColors(const QString& fileName);
 
