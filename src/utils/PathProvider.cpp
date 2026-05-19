@@ -7,13 +7,15 @@
 QString PathProvider::getConfigPath() {
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if (!path.endsWith("/morph")) path = QDir::cleanPath(path + "/morph");
-    return path;
+    QString canonical = QDir(path).canonicalPath();
+    return canonical.isEmpty() ? path : canonical;
 }
 
 QString PathProvider::getDataPath() {
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!path.endsWith("/morph")) path = QDir::cleanPath(path + "/morph");
-    return path;
+    QString canonical = QDir(path).canonicalPath();
+    return canonical.isEmpty() ? path : canonical;
 }
 
 QString PathProvider::getStyleFilePath() {

@@ -188,7 +188,7 @@ ApplicationWindow {
         }
     }
 
-    onClosing: saveCurrentSession()
+    onClosing: { saveCurrentSession() }
     onCurrentTrackChanged: saveCurrentSession()
     onRepeatOneChanged: saveCurrentSession()
 
@@ -2877,16 +2877,21 @@ ApplicationWindow {
 
                             var rawCode = styleEditorArea.text
                             var transformed = rawCode.replace(/ApplicationWindow\s*{/, "Rectangle {")
-                            transformed = transformed.replace(/^(\s*)onClosing\s*:/m, "$1function _onClosing()")
+                            transformed = transformed.replace(/^(\s*)onClosing\s*:\s*(.*)$/m, (match, p1, p2) => {
+                                let body = p2.trim();
+                                if (body.startsWith("{") && body.endsWith("}")) return `${p1}function _onClosing() ${body}`;
+                                return `${p1}function _onClosing() { ${body} }`;
+                            })
                             transformed = transformed.replace(/^(\s*)minimumWidth\s*:/m, "$1property int _minW:")
                             transformed = transformed.replace(/^(\s*)minimumHeight\s*:/m, "$1property int _minH:")
                             transformed = transformed.replace(/^(\s*)title\s*:/m, "$1property string _title:")
                             transformed = transformed.replace(/^(\s*)visible\s*:\s*true/m, "$1visible: true; anchors.fill: parent")
-                            
+
                             MorphSettings.saveTemporaryPreview(transformed)
-                            var configDir = MorphSettings.getActiveStylePath().substring(0, MorphSettings.getActiveStylePath().lastIndexOf("/"))
-                            previewLoader.source = "file://" + configDir + "/.preview_ide.qml?t=" + Date.now()
-                        }
+                            var stylePath = MorphSettings.getActiveStylePath()
+                            var configDir = stylePath.substring(0, stylePath.lastIndexOf("/"))
+                            var finalUrl = "file://" + configDir + "/.preview_ide.qml"
+                            previewLoader.source = Qt.resolvedUrl(finalUrl) + "?t=" + Date.now()                        }
                         background: Rectangle { color: systemTheme.card; radius: 6; border.color: isPreviewRunning ? "#ff4444" : systemTheme.container }
                         contentItem: Text { text: parent.text; color: isPreviewRunning ? "#ff4444" : systemTheme.accent; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
