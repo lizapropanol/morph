@@ -935,7 +935,14 @@ ApplicationWindow {
 
                                 ColumnLayout {
                                     id: libraryContent
-                                    width: libraryFlickable.width - 70
+                                    width: {
+                                        if (librarySubView === "tracks") {
+                                            var scrollY = Math.max(0, libraryFlickable.contentY)
+                                            var progress = Math.min(1, Math.max(0, (scrollY - 30) / 45))
+                                            return libraryFlickable.width - 70 + (72 * progress)
+                                        }
+                                        return libraryFlickable.width - 70
+                                    }
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     anchors.top: parent.top; anchors.topMargin: 35
                                     spacing: 20
@@ -1099,7 +1106,9 @@ ApplicationWindow {
                                                 }
                                             }
                                             Rectangle {
-                                                Layout.fillWidth: true; Layout.preferredHeight: libraryTracksList.contentHeight + 20; color: systemTheme.card; radius: 12; border.color: systemTheme.border; border.width: 1; clip: true
+                                                Layout.fillWidth: true; Layout.preferredHeight: libraryTracksList.contentHeight + 20; color: systemTheme.card
+                                                radius: 12
+                                                border.color: systemTheme.border; border.width: 1; clip: true
                                                 ListView { 
                                                     id: libraryTracksList
                                                     anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true
