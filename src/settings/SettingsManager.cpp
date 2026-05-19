@@ -517,6 +517,36 @@ QString SettingsManager::getStyleColors(const QString& fileName) {
     return colors.join(",");
 }
 
+QString SettingsManager::getStyleConfigVersion(const QString& fileName) {
+    QString path = PathProvider::getConfigPath() + "/" + fileName;
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) return "1.0";
+    
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (line.startsWith("// MORPH_CONFIG_VERSION: ")) {
+            return line.mid(25).trimmed();
+        }
+    }
+    return "1.0";
+}
+
+QString SettingsManager::getStyleAppVersion(const QString& fileName) {
+    QString path = PathProvider::getConfigPath() + "/" + fileName;
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) return "Unknown";
+    
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (line.startsWith("// MORPH_APP_VERSION: ")) {
+            return line.mid(22).trimmed();
+        }
+    }
+    return "Unknown";
+}
+
 QVariantMap SettingsManager::getAboutInfo() {
     QVariantMap info;
 #ifdef MORPH_VERSION

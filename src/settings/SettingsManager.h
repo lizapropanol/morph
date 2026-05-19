@@ -79,6 +79,8 @@ public slots:
     Q_INVOKABLE QString getStylePreview(const QString& fileName);    void saveStylePreview(const QString& fileName, const QString& base64);
     Q_INVOKABLE bool savePreviewFromClipboard(const QString& fileName);
     Q_INVOKABLE QString getStyleColors(const QString& fileName);
+    Q_INVOKABLE QString getStyleConfigVersion(const QString& fileName);
+    Q_INVOKABLE QString getStyleAppVersion(const QString& fileName);
 
     Q_INVOKABLE QVariantList getStyleFileList();
     Q_INVOKABLE QString getActiveStyleName();
