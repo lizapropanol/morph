@@ -577,6 +577,7 @@ ApplicationWindow {
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: searchField.activeFocus ? systemTheme.accent : "#666" }
                                                 }
                                                 TextField {
+                placeholderTextColor: systemTheme.accent
                                                     id: searchField; placeholderText: "What do you want to listen to?"; Layout.fillWidth: true; color: systemTheme.text
                                                     font.family: mainFont.name; font.pixelSize: 16; background: null; verticalAlignment: TextInput.AlignVCenter
                                                     onTextChanged: { if (text.trim() === "") { searchModel.clear(); isSearching = false; searchTimer.stop() } else searchTimer.restart() }
@@ -1152,6 +1153,7 @@ ApplicationWindow {
                                                 Text { text: "Yandex Music Token"; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 11 }
                                             }
                                             TextField {
+                placeholderTextColor: systemTheme.accent
                                                 id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
                                                 color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
                                                 background: Rectangle { color: systemTheme.card; radius: 6; border.color: systemTheme.border }
@@ -1172,6 +1174,7 @@ ApplicationWindow {
                                                 Text { text: "SoundCloud Client ID"; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 11 }
                                             }
                                             TextField {
+                placeholderTextColor: systemTheme.accent
                                                 id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
                                                 color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
                                                 background: Rectangle { color: systemTheme.card; radius: 6; border.color: systemTheme.border }
@@ -2710,11 +2713,13 @@ ApplicationWindow {
             anchors.fill: parent; anchors.margins: 20; spacing: 15
             Text { text: isEditingPlaylist ? "EDIT PLAYLIST" : "CREATE PLAYLIST"; color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
             TextField {
+                placeholderTextColor: systemTheme.accent
                 id: plNameField; placeholderText: "PLAYLIST NAME"; Layout.fillWidth: true
                 color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 12; padding: 10
                 background: Rectangle { color: systemTheme.background; radius: 6; border.color: systemTheme.border }
             }
             TextField {
+                placeholderTextColor: systemTheme.accent
                 id: plCoverField; placeholderText: "COVER URL (IMGUR/PINTEREST)"; Layout.fillWidth: true
                 color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 12; padding: 10
                 background: Rectangle { color: systemTheme.background; radius: 6; border.color: systemTheme.border }
@@ -2788,6 +2793,7 @@ ApplicationWindow {
             Text { text: "IMPORT PLAYLIST"; color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
             
             TextField {
+                placeholderTextColor: systemTheme.accent
                 id: importUrlField; placeholderText: "YANDEX OR SOUNDCLOUD URL"; Layout.fillWidth: true
                 color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 12; padding: 10; enabled: !importPlaylistPopup.isBusy
                 background: Rectangle { color: systemTheme.background; radius: 6; border.color: systemTheme.border }
@@ -2937,6 +2943,7 @@ ApplicationWindow {
                         }
 
                         TextArea {
+                            placeholderTextColor: systemTheme.accent
                             id: lineNumbersArea
                             text: {
                                 var res = ""
@@ -3006,6 +3013,7 @@ ApplicationWindow {
                         anchors.left: lineNumbersScroll.right; anchors.right: minimapContainer.left; anchors.top: parent.top; anchors.bottom: parent.bottom
                         clip: true
                         TextArea {
+                            placeholderTextColor: systemTheme.accent
                             id: styleEditorArea
                             color: systemTheme.text; font.family: "Monospace"; font.pixelSize: 13
                             renderType: Text.NativeRendering
@@ -3060,6 +3068,7 @@ ApplicationWindow {
             anchors.fill: parent; anchors.margins: 20; spacing: 15
             Text { text: "CREATE NEW CONFIG"; color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
             TextField {
+                placeholderTextColor: systemTheme.accent
                 id: newStyleNameField; placeholderText: "CONFIG NAME"; Layout.fillWidth: true
                 color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 12; padding: 10
                 background: Rectangle { color: systemTheme.background; radius: 6; border.color: systemTheme.border }

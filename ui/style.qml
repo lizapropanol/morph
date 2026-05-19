@@ -535,6 +535,7 @@ ApplicationWindow {
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: searchField.activeFocus ? "#44ff44" : "#666" }
                                                 }
                                                 TextField {
+                placeholderTextColor: "#666"
                                                     id: searchField; placeholderText: "What do you want to listen to?"; Layout.fillWidth: true; color: "white"
                                                     font.family: mainFont.name; font.pixelSize: 16; background: null; verticalAlignment: TextInput.AlignVCenter
                                                     onTextChanged: { if (text.trim() === "") { searchModel.clear(); isSearching = false; searchTimer.stop() } else searchTimer.restart() }
@@ -1096,6 +1097,7 @@ ApplicationWindow {
                                                 Text { text: "Yandex Music Token"; color: "#888"; font.family: mainFont.name; font.pixelSize: 11 }
                                             }
                                             TextField {
+                placeholderTextColor: "#666"
                                                 id: yandexTokenField; text: MorphSettings.getYandexToken(); Layout.fillWidth: true
                                                 color: "white"; font.family: mainFont.name; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
                                                 background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
@@ -1116,6 +1118,7 @@ ApplicationWindow {
                                                 Text { text: "SoundCloud Client ID"; color: "#888"; font.family: mainFont.name; font.pixelSize: 11 }
                                             }
                                             TextField {
+                placeholderTextColor: "#666"
                                                 id: soundcloudTokenField; text: MorphSettings.getSoundCloudToken(); Layout.fillWidth: true
                                                 color: "white"; font.family: mainFont.name; font.pixelSize: 13; padding: 12; echoMode: TextInput.Password
                                                 background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
@@ -2654,11 +2657,13 @@ ApplicationWindow {
             anchors.fill: parent; anchors.margins: 20; spacing: 15
             Text { text: isEditingPlaylist ? "EDIT PLAYLIST" : "CREATE PLAYLIST"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
             TextField {
+                placeholderTextColor: "#666"
                 id: plNameField; placeholderText: "PLAYLIST NAME"; Layout.fillWidth: true
                 color: "white"; font.family: mainFont.name; font.pixelSize: 12; padding: 10
                 background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
             }
             TextField {
+                placeholderTextColor: "#666"
                 id: plCoverField; placeholderText: "COVER URL (IMGUR/PINTEREST)"; Layout.fillWidth: true
                 color: "white"; font.family: mainFont.name; font.pixelSize: 12; padding: 10
                 background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
@@ -2732,6 +2737,7 @@ ApplicationWindow {
             Text { text: "IMPORT PLAYLIST"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
             
             TextField {
+                placeholderTextColor: "#666"
                 id: importUrlField; placeholderText: "YANDEX OR SOUNDCLOUD URL"; Layout.fillWidth: true
                 color: "white"; font.family: mainFont.name; font.pixelSize: 12; padding: 10; enabled: !importPlaylistPopup.isBusy
                 background: Rectangle { color: "#111"; radius: 6; border.color: "#333" }
@@ -2881,6 +2887,7 @@ ApplicationWindow {
                         }
 
                         TextArea {
+                            placeholderTextColor: "#666"
                             id: lineNumbersArea
                             text: {
                                 var res = ""
@@ -2950,6 +2957,7 @@ ApplicationWindow {
                         anchors.left: lineNumbersScroll.right; anchors.right: minimapContainer.left; anchors.top: parent.top; anchors.bottom: parent.bottom
                         clip: true
                         TextArea {
+                            placeholderTextColor: "#666"
                             id: styleEditorArea
                             color: "white"; font.family: "Monospace"; font.pixelSize: 13
                             renderType: Text.NativeRendering
@@ -3004,6 +3012,7 @@ ApplicationWindow {
             anchors.fill: parent; anchors.margins: 20; spacing: 15
             Text { text: "CREATE NEW CONFIG"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold }
             TextField {
+                placeholderTextColor: "#666"
                 id: newStyleNameField; placeholderText: "CONFIG NAME"; Layout.fillWidth: true
                 color: "white"; font.family: mainFont.name; font.pixelSize: 12; padding: 10
                 background: Rectangle { color: "black"; radius: 6; border.color: "#333" }
