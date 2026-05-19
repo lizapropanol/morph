@@ -24,6 +24,7 @@ public slots:
     void reload();
     void toggleWindow();
     void updateTrayMenu();
+    Q_INVOKABLE void clearQmlCache();
 
 signals:
     void styleFilesChanged();

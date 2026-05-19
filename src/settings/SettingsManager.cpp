@@ -332,7 +332,7 @@ bool SettingsManager::writeStyleContentByName(const QString& fileName, const QSt
 }
 
 void SettingsManager::saveTemporaryPreview(const QString& content) {
-    QString path = PathProvider::getConfigPath() + "/.preview_ide.qml";
+    QString path = PathProvider::getConfigPath() + "/.PreviewIde.qml";
     QFile file(path);
     if (file.open(QIODevice::WriteOnly)) {
         file.write(content.toUtf8());

@@ -2912,8 +2912,10 @@ ApplicationWindow {
                             MorphSettings.saveTemporaryPreview(transformed)
                             var stylePath = MorphSettings.getActiveStylePath()
                             var configDir = stylePath.substring(0, stylePath.lastIndexOf("/"))
-                            var finalUrl = "file://" + configDir + "/.preview_ide.qml"
-                            previewLoader.source = Qt.resolvedUrl(finalUrl) + "?t=" + Date.now()                        }
+                            var finalUrl = "file://" + configDir + "/.PreviewIde.qml"
+                            previewLoader.source = ""
+                            MorphApp.clearQmlCache()
+                            previewLoader.source = Qt.resolvedUrl(finalUrl)                        }
                         background: Rectangle { color: "#f0f0f0"; radius: 6; border.color: isPreviewRunning ? "#ff4444" : "#cccccc" }
                         contentItem: Text { text: parent.text; color: isPreviewRunning ? "#ff4444" : "#44ff44"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }

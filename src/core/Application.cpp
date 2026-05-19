@@ -69,6 +69,10 @@ void Application::reload() {
     engine->load(QUrl::fromLocalFile(settings->getActiveStylePath()));
 }
 
+void Application::clearQmlCache() {
+    if (engine) engine->clearComponentCache();
+}
+
 #include <QBuffer>
 #include <QImage>
 #include <QCoreApplication>
