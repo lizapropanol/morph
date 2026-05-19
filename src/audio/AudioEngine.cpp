@@ -1,15 +1,19 @@
 #include "AudioEngine.h"
 #include <QUrl>
+#include <QMediaMetaData>
 
 AudioEngine::AudioEngine(QObject* parent) : QObject(parent) {
     player = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+    player->setAudioOutput(audioOutput);
+    
     pollTimer = new QTimer(this);
     pollTimer->setInterval(16);
     
-    connect(player, &QMediaPlayer::volumeChanged, this, &AudioEngine::volumeChanged);
+    connect(audioOutput, &QAudioOutput::volumeChanged, this, &AudioEngine::volumeChanged);
     connect(player, &QMediaPlayer::durationChanged, this, &AudioEngine::durationChanged);
-    connect(player, &QMediaPlayer::stateChanged, [this]() {
-        if (player->state() == QMediaPlayer::PlayingState) pollTimer->start();
+    connect(player, &QMediaPlayer::playbackStateChanged, [this]() {
+        if (player->playbackState() == QMediaPlayer::PlayingState) pollTimer->start();
         else pollTimer->stop();
         emit stateChanged();
     });
@@ -18,18 +22,18 @@ AudioEngine::AudioEngine(QObject* parent) : QObject(parent) {
         if (status == QMediaPlayer::EndOfMedia) emit finished();
     });
 
-    connect(player, QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error), [this](QMediaPlayer::Error error) {
-        emit this->error(player->errorString());
+    connect(player, &QMediaPlayer::errorOccurred, [this](QMediaPlayer::Error error, const QString &errorString) {
+        emit this->error(errorString);
     });
     
-    connect(player, QOverload<>::of(&QMediaPlayer::metaDataChanged), this, &AudioEngine::bitrateChanged);
+    connect(player, &QMediaPlayer::metaDataChanged, this, &AudioEngine::bitrateChanged);
     
     connect(pollTimer, &QTimer::timeout, this, &AudioEngine::positionChanged);
 }
 
-int AudioEngine::volume() const { return player->volume(); }
+int AudioEngine::volume() const { return qRound(audioOutput->volume() * 100); }
 
-void AudioEngine::setVolume(int volume) { player->setVolume(volume); }
+void AudioEngine::setVolume(int volume) { audioOutput->setVolume(volume / 100.0f); }
 
 qint64 AudioEngine::position() const { return player->position(); }
 
@@ -40,21 +44,21 @@ void AudioEngine::setPosition(qint64 position) {
 
 qint64 AudioEngine::duration() const { return player->duration(); }
 
-bool AudioEngine::isPlaying() const { return player->state() == QMediaPlayer::PlayingState; }
+bool AudioEngine::isPlaying() const { return player->playbackState() == QMediaPlayer::PlayingState; }
 
 int AudioEngine::bitrate() const {
-    int b = player->metaData("AudioBitRate").toInt();
-    if (b <= 0) b = player->metaData("bitrate").toInt();
+    QMediaMetaData meta = player->metaData();
+    int b = meta.value(QMediaMetaData::AudioBitRate).toInt();
     return (b + 500) / 1000;
 }
 
 void AudioEngine::play(const QString& url) {
-    player->setMedia(QUrl(url));
+    player->setSource(QUrl(url));
     player->play();
 }
 
 void AudioEngine::load(const QString& url) {
-    player->setMedia(QUrl(url));
+    player->setSource(QUrl(url));
 }
 
 void AudioEngine::pause() { player->pause(); }

@@ -21,7 +21,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Core Quick Qml Network Multimedia DBus Widgets Svg REQUIRED)
+find_package(Qt6 COMPONENTS Core Quick Qml Network Multimedia DBus Widgets Svg Core5Compat REQUIRED)
 
 add_executable(morph
     resources.qrc
@@ -50,14 +50,15 @@ target_compile_definitions(morph PRIVATE
 )
 
 target_link_libraries(morph PRIVATE
-    Qt5::Core
-    Qt5::Quick
-    Qt5::Qml
-    Qt5::Network
-    Qt5::Multimedia
-    Qt5::DBus
-    Qt5::Widgets
-    Qt5::Svg
+    Qt6::Core
+    Qt6::Quick
+    Qt6::Qml
+    Qt6::Network
+    Qt6::Multimedia
+    Qt6::DBus
+    Qt6::Widgets
+    Qt6::Svg
+    Qt6::Core5Compat
 )
 
 include(Packaging.cmake)

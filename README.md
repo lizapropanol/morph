@@ -42,13 +42,13 @@
 
 ### Prerequisites
 - CMake (3.16 or higher)
-- Qt 5 (Core, Quick, Qml, Network, Multimedia, DBus, Svg)
+- Qt 6 (Core, Quick, Qml, Network, Multimedia, DBus, Svg, 5Compat)
 - C++17 compatible compiler (GCC/Clang)
 
 ### Runtime Dependencies (Arch Linux)
 For full functionality (audio codecs and icons), make sure to install:
 ```bash
-sudo pacman -S qt5-svg gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav
+sudo pacman -S qt6-svg qt6-5compat gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav
 ```
 
 ### Building from Source

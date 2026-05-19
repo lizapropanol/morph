@@ -2,6 +2,7 @@
 #include <QQmlContext>
 #include <QIcon>
 #include <QApplication>
+#include <QAction>
 #include <QQuickWindow>
 #include <QDebug>
 #include <QUrl>

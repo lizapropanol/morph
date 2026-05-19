@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMediaPlayer>
+#include <QAudioOutput>
 #include <QString>
 #include <QTimer>
 
@@ -45,6 +46,7 @@ signals:
 
 private:
     QMediaPlayer* player;
+    QAudioOutput* audioOutput;
     QTimer* pollTimer;
 };
 

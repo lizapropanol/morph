@@ -13,7 +13,7 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "lizapropanol")
 set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "qml-module-qtquick2, qml-module-qtquick-layouts, qml-module-qtquick-controls2, qml-module-qtquick-window2, qml-module-qtmultimedia, libqt5multimedia5-plugins")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "qml6-module-qtquick, qml6-module-qtquick-layouts, qml6-module-qtquick-controls, qml6-module-qtmultimedia, qt6-multimedia-plugins, qml6-module-qt5compat-graphicaleffects")
 set(CPACK_GENERATOR "DEB")
 
 include(CPack)
