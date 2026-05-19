@@ -336,7 +336,7 @@ ApplicationWindow {
 
     function forceRole(model) {
         if (model.count === 0) {
-            model.append({ "id": "", "title": "", "artist": "", "coverUrl": "", "service": "", "webUrl": "", "durationMs": 0 })
+            model.append({ "id": "", "title": "", "artist": "", "coverUrl": "", "service": "", "webUrl": "", "durationMs": 0, "album": "" })
             model.clear()
         }
     }
@@ -2406,7 +2406,34 @@ ApplicationWindow {
                     Image {
                         source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: systemTheme.text }
                         MouseArea { 
-                            anchors.fill: parent; onClicked: (mouse) => MorphSettings.toggleLike({ "id": model.id, "title": model.title, "artist": model.artist, "coverUrl": model.coverUrl, "service": model.service || "Yandex", "album": model.album || "", "webUrl": model.webUrl || "", "durationMs": model.durationMs || 0 }); cursorShape: Qt.PointingHandCursor 
+                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor 
+                            onClicked: (mouse) => {
+                                var trackObj;
+                                if (currentView === "search") {
+                                    var view = trackDelegateRoot.ListView.view
+                                    trackObj = view ? view.model.get(index) : (searchModel.count > 0 ? searchModel.get(index) : historyModel.get(index))
+                                } else {
+                                    trackObj = libraryModel.get(index)
+                                }
+                                if (!trackObj) return;
+                                
+                                var cleanTrack = {
+                                    "id": trackObj.id || "",
+                                    "title": trackObj.title || "Unknown Title",
+                                    "artist": trackObj.artist || "Unknown Artist",
+                                    "album": trackObj.album || "",
+                                    "coverUrl": trackObj.coverUrl || "",
+                                    "service": trackObj.service || "",
+                                    "webUrl": trackObj.webUrl || "",
+                                    "durationMs": trackObj.durationMs || 0
+                                }
+                                if (cleanTrack.service === "") {
+                                    if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("yandex") !== -1) cleanTrack.service = "Yandex"
+                                    else if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
+                                    else cleanTrack.service = "Yandex"
+                                }
+                                MorphSettings.toggleLike(cleanTrack)
+                            }
                         }
                     }
                 }
@@ -2565,6 +2592,8 @@ ApplicationWindow {
                 var item = results[i]
                 item.service = serviceName
                 if (item.durationMs === undefined) item.durationMs = 0
+                if (item.album === undefined) item.album = ""
+                if (item.webUrl === undefined) item.webUrl = ""
                 searchModel.append(item)
             }
         }
@@ -2579,6 +2608,8 @@ ApplicationWindow {
                 var item = results[i]
                 item.service = serviceName
                 if (item.durationMs === undefined) item.durationMs = 0
+                if (item.album === undefined) item.album = ""
+                if (item.webUrl === undefined) item.webUrl = ""
                 chartsModel.append(item)
             }
         }
@@ -2590,6 +2621,8 @@ ApplicationWindow {
                 var item = results[i]
                 item.service = serviceName
                 if (item.durationMs === undefined) item.durationMs = 0
+                if (item.album === undefined) item.album = ""
+                if (item.webUrl === undefined) item.webUrl = ""
                 tempTracks.push(item)
             }
             fullPlaylistTracks = tempTracks
@@ -2657,18 +2690,21 @@ ApplicationWindow {
         function onSettingsChanged() { window.settingsVersion++ }
         function onLikesChanged() { 
             window.likesVersion++
-            if (currentView === "library" && currentPlaylist === "") {
-                libraryModel.clear()
+            if (currentPlaylist === "") {
                 var likes = MorphSettings.getLikedTracks()
                 var temp = []
-                for(var i = likes.length - 1; i >= 0; i--) {
+                for(var i = 0; i < likes.length; i++) {
                     var item = likes[i]
                     if (item.durationMs === undefined) item.durationMs = 0
-                    libraryModel.append(item)
                     temp.push(item)
                 }
                 fullPlaylistTracks = temp
-                loadedTracksCount = temp.length
+                
+                if (currentView === "library") {
+                    libraryModel.clear()
+                    loadedTracksCount = 0
+                    loadNextChunk()
+                }
             }
         }
         function onPlaylistsChanged() {
