@@ -146,7 +146,11 @@ ApplicationWindow {
         }
     }
 
-    onClosing: {
+    onClosing: saveCurrentSession()
+    onCurrentTrackChanged: saveCurrentSession()
+    onRepeatOneChanged: saveCurrentSession()
+
+    function saveCurrentSession() {
         MorphSettings.saveSession({
             "track": currentTrack,
             "volume": MorphAudio.volume,
@@ -157,6 +161,13 @@ ApplicationWindow {
             "index": currentTrackIndex,
             "saveLastImport": saveLastImport
         })
+    }
+
+    Timer {
+        interval: 30000
+        running: true
+        repeat: true
+        onTriggered: saveCurrentSession()
     }
 
     function getServiceIcon(serviceName) {
@@ -1910,11 +1921,11 @@ ApplicationWindow {
                                                                 id: styleItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                                                                 onClicked: (mouse) => {
                                                                     if (parent.activeStyleName !== name) {
+                                                                        saveCurrentSession()
                                                                         MorphSettings.setActiveStyleName(name)
                                                                         MorphApp.reload()
                                                                     }
-                                                                }
-                                                            }
+                                                                }                                                            }
 
                                                             ColumnLayout {
                                                                 anchors.fill: parent; anchors.margins: 12; spacing: 10
