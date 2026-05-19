@@ -43,7 +43,7 @@
 ### Prerequisites
 - CMake (3.16 or higher)
 - Qt 6 (Core, Quick, Qml, Network, Multimedia, DBus, Svg, 5Compat)
-- C++17 compatible compiler (GCC/Clang)
+- C++23 compatible compiler (GCC 12+ / Clang 15+)
 
 ### Runtime Dependencies (Arch Linux)
 For full functionality (audio codecs and icons), make sure to install:
