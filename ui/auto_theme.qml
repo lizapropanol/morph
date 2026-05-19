@@ -532,8 +532,20 @@ ApplicationWindow {
                     radius: 18
                     clip: true
 
-                    StackLayout {
+                    Item {
+                        id: mainContentContainer
                         anchors.fill: parent
+                        layer.enabled: true
+                        layer.effect: OpacityMask {
+                            maskSource: Rectangle {
+                                width: mainContentContainer.width
+                                height: mainContentContainer.height
+                                radius: 18
+                            }
+                        }
+
+                        StackLayout {
+                            anchors.fill: parent
                         currentIndex: {
                             if (currentView === "search") return 0
                             if (currentView === "home") return 1
@@ -2126,6 +2138,7 @@ ApplicationWindow {
                                 }
                             }
                         }
+                    }
                     }
                 }
 
