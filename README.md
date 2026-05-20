@@ -26,6 +26,15 @@
 - **Search History**: Automatically keeps track of your 20 most recently played tracks from searches for quick access.
 - **Persistent Caching & Offline Support**: Automatically saves played tracks and viewed covers to local storage, enabling full playback without an internet connection.
 - **Advanced Cache Management**: Dedicated storage view with real-time size calculation and granular clearing options for tracks and covers.
+- **Security & Privacy**:
+  - **Hardware-Linked Encryption**: Authentication tokens are encrypted using a system-unique key derived from `/etc/machine-id`, ensuring your credentials remain secure and unusable if copied to another machine.
+- **System Integration**:
+  - **Discord Rich Presence**: Show your current track, artist, and playback status directly on your Discord profile.
+  - **MPRIS Support**: Full integration with Linux media controllers (playerctl, system tray, etc.) for remote playback control and metadata display.
+- **Extensible Styling Engine**:
+  - **Config Library**: A built-in library to manage, import, and export custom QML themes and configurations effortlessly.
+  - **Live "Run Preview"**: Instantly launch a separate window to test and visualize your style changes in real-time as you edit.
+  - **Integrated IDE**: Includes a custom QML syntax highlighter and live preview system for theme development.
 - **Modern UI/UX**:
   - Dark, minimalist aesthetic utilizing smooth gradients and QML animations.
   - Circular reveal splash screen synchronized with logo expansion.
