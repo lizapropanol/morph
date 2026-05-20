@@ -18,7 +18,7 @@
 - **Triple Service Integration**: Search and play tracks from Yandex Music, SoundCloud and YouTube Music in a single interface.
 - **My Vibe (Personalized Wave)**: Direct integration with Yandex Music's algorithmic radio, complete with listening telemetry so your recommendations keep improving.
 - **Top Charts**: Browse and play the top tracks from Yandex Music with a clean, dual-column ranked layout.
-- **Daily Mixes**: Access personalized daily playlists from both SoundCloud directly on the home screen.
+- **Daily Mixes**: Access personalized daily playlists from SoundCloud directly on the home screen.
 - **Advanced Playlist Management**:
   - Create, rename, and delete custom playlists.
   - Set custom cover images using external URLs (Imgur, Pinterest, etc.).
