@@ -48,7 +48,7 @@
 ### Runtime Dependencies (Arch Linux)
 For full functionality (audio codecs and icons), make sure to install:
 ```bash
-sudo pacman -S qt6-svg qt6-5compat gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav
+sudo pacman -S qt6-base qt6-declarative qt6-multimedia qt6-svg qt6-5compat gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav hicolor-icon-theme
 ```
 
 ### Building from Source
