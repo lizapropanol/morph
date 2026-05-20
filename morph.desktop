@@ -4,5 +4,5 @@ Exec=morph
 Icon=morph
 Type=Application
 Categories=AudioVideo;Audio;Player;
-Comment=Modern music player for Yandex Music and SoundCloud
+Comment=Modern music player for Yandex Music, SoundCloud and YouTube Music
 Terminal=false
