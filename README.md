@@ -109,4 +109,16 @@ This project is open-source. Please see the `LICENSE` file in the root directory
 
 ---
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=lizapropanol%2Fmorph&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lizapropanol/morph&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lizapropanol/morph&type=date&theme=dark&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lizapropanol/morph&type=date&theme=dark&legend=top-left" />
+ </picture>
+</a>
+
+---
+
 <p align="center">Developed with ❤️ by <a href="https://github.com/lizapropanol">lizapropanol</a></p>
