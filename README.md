@@ -40,6 +40,12 @@
 
 ## Installation & Setup
 
+### Arch User Repository (AUR)
+If you are on Arch Linux, you can easily install **morph** using an AUR helper like `yay`:
+```bash
+yay -S morph
+```
+
 ### Prerequisites
 - CMake (3.16 or higher)
 - Qt 6 (Core, Quick, Qml, Network, Multimedia, DBus, Svg, 5Compat)
