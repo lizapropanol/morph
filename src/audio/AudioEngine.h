@@ -26,6 +26,7 @@ public:
     qint64 duration() const;
     bool isPlaying() const;
     int bitrate() const;
+    void setBitrate(int bitrate);
 
 public slots:
     void play(const QString& url);
@@ -48,6 +49,7 @@ private:
     QMediaPlayer* player;
     QAudioOutput* audioOutput;
     QTimer* pollTimer;
+    int m_manualBitrate = 0;
 };
 
 #endif

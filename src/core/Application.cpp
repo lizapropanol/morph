@@ -8,6 +8,7 @@
 #include <QUrl>
 #include "utils/PathProvider.h"
 #include "services/TrackData.h"
+#include "services/YouTubeService.h"
 
 Application::Application(QObject *parent) : QObject(parent) {
     PathProvider::ensureConfigExists();
@@ -37,6 +38,14 @@ Application::Application(QObject *parent) : QObject(parent) {
     connect(watcher, &FileWatcher::directoryChanged, this, &Application::styleFilesChanged);
     connect(audio, &AudioEngine::stateChanged, this, &Application::updateTrayMenu);
     connect(mpris, &MprisManager::metadataChanged, this, &Application::updateTrayMenu);
+
+    YouTubeService* youtube = services->findChild<YouTubeService*>();
+    if (youtube) {
+        connect(youtube, &YouTubeService::bitrateReady, this, [this](const QString& trackId, int bitrate) {
+            Q_UNUSED(trackId);
+            audio->setBitrate(bitrate);
+        });
+    }
 }
 
 void Application::start() {

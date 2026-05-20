@@ -7,6 +7,7 @@
 #include "../utils/CacheManager.h"
 #include "../services/YandexService.h"
 #include "../services/SoundCloudService.h"
+#include "../services/YouTubeService.h"
 
 class ServiceManager : public QObject {
     Q_OBJECT
@@ -39,6 +40,7 @@ private:
     CacheManager* cache;
     YandexService* yandex;
     SoundCloudService* soundcloud;
+    YouTubeService* youtube;
 };
 
 #endif

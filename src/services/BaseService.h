@@ -16,6 +16,7 @@ public:
     virtual void getDailyMixes() = 0;
     virtual void reportPlay(const QString& trackId, const QString& albumId) = 0;
     virtual void importPlaylist(const QString& url) = 0;
+    virtual bool isTrackCached(const QString& trackId) { Q_UNUSED(trackId); return false; }
 
 signals:
     void searchResultsReady(const QString& serviceName, const QVariantList& results);

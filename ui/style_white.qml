@@ -177,6 +177,7 @@ ApplicationWindow {
     function getServiceIcon(serviceName) {
         if (serviceName === "Yandex") return "qrc:/assets/yandex_music_icon.svg"
         if (serviceName === "SoundCloud") return "qrc:/assets/soundcloud_icon.svg"
+        if (serviceName === "YouTube") return "qrc:/assets/youtube_music_icon.svg"
         return ""
     }
 
@@ -573,12 +574,12 @@ ApplicationWindow {
                                         RowLayout {
                                             Layout.alignment: Qt.AlignLeft; spacing: 8
                                             Repeater {
-                                                model: ["all", "yandex", "soundcloud"]
+                                                model: ["all", "yandex", "soundcloud", "youtube"]
                                                 Rectangle {
                                                     Layout.preferredHeight: 32; Layout.preferredWidth: filterText.width + 24
                                                     color: searchSource === modelData ? "#44ff44" : "#eeeeee"; radius: 16; border.color: searchSource === modelData ? "#44ff44" : "#dddddd"; border.width: 1
                                                     Text {
-                                                        id: filterText; anchors.centerIn: parent; text: modelData === "all" ? "All" : (modelData === "yandex" ? "Yandex Music" : "SoundCloud")
+                                                        id: filterText; anchors.centerIn: parent; text: modelData === "all" ? "All" : (modelData === "yandex" ? "Yandex Music" : (modelData === "soundcloud" ? "SoundCloud" : "YouTube"))
                                                         color: searchSource === modelData ? "#ffffff" : "#333333"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Medium
                                                     }
                                                     MouseArea {
@@ -2428,6 +2429,8 @@ ApplicationWindow {
                             MorphSettings.copyToClipboard("https://music.yandex.ru/track/" + targetContextTrack.id)
                         } else if (targetContextTrack && targetContextTrack.service === "SoundCloud") {
                             MorphSettings.copyToClipboard("https://soundcloud.com/tracks/" + targetContextTrack.id)
+                        } else if (targetContextTrack && targetContextTrack.service === "YouTube") {
+                            MorphSettings.copyToClipboard("https://www.youtube.com/watch?v=" + targetContextTrack.id)
                         }
                         trackContextMenu.close()
                     }
@@ -2810,7 +2813,7 @@ ApplicationWindow {
             
             TextField {
                 placeholderTextColor: "#999"
-                id: importUrlField; placeholderText: "YANDEX OR SOUNDCLOUD URL"; Layout.fillWidth: true
+                id: importUrlField; placeholderText: "YANDEX, SOUNDCLOUD OR YOUTUBE URL"; Layout.fillWidth: true
                 color: "#111111"; font.family: mainFont.name; font.pixelSize: 12; padding: 10; enabled: !importPlaylistPopup.isBusy
                 background: Rectangle { color: "#eeeeee"; radius: 6; border.color: "#cccccc" }
             }

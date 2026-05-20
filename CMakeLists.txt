@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(morph VERSION 0.2.0 LANGUAGES CXX)
+project(morph VERSION 0.2.1 LANGUAGES CXX)
 
 if(UNIX AND NOT APPLE AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "..." FORCE)
@@ -36,6 +36,7 @@ add_executable(morph
     src/services/BaseService.h
     src/services/YandexService.h src/services/YandexService.cpp
     src/services/SoundCloudService.h src/services/SoundCloudService.cpp
+    src/services/YouTubeService.h src/services/YouTubeService.cpp
     src/audio/AudioEngine.h src/audio/AudioEngine.cpp
     src/core/ServiceManager.h src/core/ServiceManager.cpp
     src/settings/SettingsManager.h src/settings/SettingsManager.cpp
