@@ -9,13 +9,13 @@
   <a href="https://www.donationalerts.com/r/lizapropanol"><img src="https://img.shields.io/badge/Donate-DonationAlerts-orange?style=for-the-badge&logo=donate&logoColor=white" alt="Donate" /></a>
 </p>
 
-**morph** is a sleek, modern desktop music player built with C++ and Qt/QML. It integrates seamlessly with **Yandex Music** and **SoundCloud**, providing a unified and aesthetically pleasing interface for your music library, charts, and personalized radio streams.
+**morph** is a sleek, modern desktop music player built with C++ and Qt/QML. It integrates seamlessly with **Yandex Music**, **SoundCloud** and **YouTube Music**, providing a unified and aesthetically pleasing interface for your music library, charts, and personalized radio streams.
 
 ---
 
 ## Key Features
 
-- **Dual Service Integration**: Search and play tracks from both Yandex Music and SoundCloud in a single interface.
+- **Triple Service Integration**: Search and play tracks from Yandex Music, SoundCloud and YouTube Music in a single interface.
 - **My Vibe (Personalized Wave)**: Direct integration with Yandex Music's algorithmic radio, complete with listening telemetry so your recommendations keep improving.
 - **Top Charts**: Browse and play the top tracks from Yandex Music with a clean, dual-column ranked layout.
 - **Daily Mixes**: Access personalized daily playlists from both Yandex Music and SoundCloud directly on the home screen.
