@@ -26,6 +26,7 @@
 - **Search History**: Automatically keeps track of your 20 most recently played tracks from searches for quick access.
 - **Persistent Caching & Offline Support**: Automatically saves played tracks and viewed covers to local storage, enabling full playback without an internet connection.
 - **Advanced Cache Management**: Dedicated storage view with real-time size calculation and granular clearing options for tracks and covers.
+- **Real-time Bitrate Display**: Shows current track quality and bitrate information directly in the interface for all supported services.
 - **Security & Privacy**:
   - **Hardware-Linked Encryption**: Authentication tokens are encrypted using a system-unique key derived from `/etc/machine-id`, ensuring your credentials remain secure and unusable if copied to another machine.
 - **System Integration**:
@@ -63,7 +64,7 @@ yay -S morph
 ### Runtime Dependencies (Arch Linux)
 For full functionality (audio codecs and icons), make sure to install:
 ```bash
-sudo pacman -S qt6-base qt6-declarative qt6-multimedia qt6-svg qt6-5compat gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav hicolor-icon-theme
+sudo pacman -S qt6-base qt6-declarative qt6-multimedia qt6-svg qt6-5compat gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav hicolor-icon-theme yt-dlp ffmpeg
 ```
 
 ### Building from Source
