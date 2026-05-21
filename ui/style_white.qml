@@ -459,7 +459,7 @@ ApplicationWindow {
                             width: 24
                             height: 24
                             anchors.verticalCenter: parent.verticalCenter
-                            x: sidebarRect.sidebarExpanded ? 15 : (parent.width - width) / 2
+                            x: sidebarRect.sidebarExpanded ? 15 : 8
                             Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                             smooth: true
                         }
@@ -496,6 +496,7 @@ ApplicationWindow {
                             id: navItem
                             Layout.fillWidth: true
                             Layout.preferredHeight: 48
+                            padding: 0
                             
                             property bool isActive: currentView === modelData.name.toLowerCase()
                             
@@ -515,10 +516,13 @@ ApplicationWindow {
                                 anchors.fill: parent
                                 
                                 Rectangle {
-                                    anchors.centerIn: parent
-                                    width: sidebarRect.sidebarExpanded ? parent.width : 48
+                                    id: bgRect
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: sidebarRect.sidebarExpanded ? 0 : -4
+                                    width: sidebarRect.sidebarExpanded ? 180 : 48
                                     height: 48
                                     radius: 12
+                                    Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                     Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                     color: navItem.isActive ? "#f0f0f0" : (navItem.hovered ? "#f9f9f9" : "transparent")
                                     Behavior on color { ColorAnimation { duration: 200 } }
@@ -530,17 +534,18 @@ ApplicationWindow {
                                         radius: 2
                                         color: "#44ff44"
                                         opacity: (navItem.isActive && sidebarRect.sidebarExpanded) ? 1.0 : 0.0
-                                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                                        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                         visible: opacity > 0
                                     }
                                 }
                                 
                                 Rectangle {
-                                    anchors.centerIn: parent
                                     width: 48
                                     height: 48
                                     radius: 12
                                     color: "transparent"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: -4
                                     border.color: (!sidebarRect.sidebarExpanded && navItem.isActive) ? "#00cc00" : "transparent"
                                     border.width: 2
                                     Behavior on border.color { ColorAnimation { duration: 200 } }
@@ -554,7 +559,7 @@ ApplicationWindow {
                                     source: modelData.icon
                                     width: 20; height: 20
                                     anchors.verticalCenter: parent.verticalCenter
-                                    x: sidebarRect.sidebarExpanded ? 20 : (parent.width - width) / 2
+                                    x: sidebarRect.sidebarExpanded ? 20 : 10
                                     Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                     opacity: navItem.isActive ? 1.0 : (navItem.hovered ? 0.7 : 0.4)
                                     layer.enabled: true
@@ -567,11 +572,11 @@ ApplicationWindow {
                                     font.family: mainFont.name
                                     font.pixelSize: 14
                                     font.weight: navItem.isActive ? Font.Bold : Font.Medium
-                                    opacity: navItem.isActive ? (sidebarRect.sidebarExpanded ? 1.0 : 0.0) : (navItem.hovered && sidebarRect.sidebarExpanded ? 0.7 : (sidebarRect.sidebarExpanded ? 0.4 : 0.0))
+                                    opacity: sidebarRect.sidebarExpanded ? (navItem.isActive ? 1.0 : (navItem.hovered ? 0.7 : 0.4)) : 0.0
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: navIcon.right
                                     anchors.leftMargin: 12
-                                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                                    Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                     visible: opacity > 0
                                 }
                             }
