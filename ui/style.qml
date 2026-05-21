@@ -2308,7 +2308,9 @@ ApplicationWindow {
                                     Layout.preferredWidth: playbackControls.width; Layout.fillHeight: true
                                     RowLayout {
                                         id: playbackControls
-                                        anchors.centerIn: parent; spacing: 25
+                                        anchors.centerIn: parent
+                                        spacing: (window.width - sidebarRect.width) > 420 ? 25 : 10
+                                        Behavior on spacing { NumberAnimation { duration: 150 } }
                                         Image {
                                             source: repeatOne ? "qrc:/assets/repeat-once.svg" : "qrc:/assets/repeat.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                             MouseArea { anchors.fill: parent; onClicked: (mouse) => repeatOne = !repeatOne; cursorShape: Qt.PointingHandCursor }
