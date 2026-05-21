@@ -2337,11 +2337,11 @@ ApplicationWindow {
                                     RowLayout {
                                         id: volumeRow
                                         anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                        spacing: window.width > 700 ? 12 : 8
+                                        spacing: (window.width - sidebarRect.width) > 500 ? 12 : 8
                                         
                                         Rectangle {
                                             id: bitrateRect
-                                            property bool shouldShow: MorphAudio.bitrate > 0 && window.width > 900
+                                            property bool shouldShow: MorphAudio.bitrate > 0 && (window.width - sidebarRect.width) > 700
                                             opacity: shouldShow ? 1 : 0
                                             visible: opacity > 0
                                             Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -2358,9 +2358,9 @@ ApplicationWindow {
                                             }
                                         }
 
-                                        Text { text: "VOL"; color: "#444"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; visible: window.width > 800 }
+                                        Text { text: "VOL"; color: "#444"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; visible: (window.width - sidebarRect.width) > 600 }
                                         Slider {
-                                            id: volumeSlider; Layout.preferredWidth: window.width > 700 ? 80 : 50; Layout.preferredHeight: 20; from: 0; to: 100; value: MorphAudio.volume; onMoved: MorphAudio.volume = value
+                                            id: volumeSlider; Layout.preferredWidth: (window.width - sidebarRect.width) > 500 ? 80 : 50; Layout.preferredHeight: 20; from: 0; to: 100; value: MorphAudio.volume; onMoved: MorphAudio.volume = value
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                             background: Rectangle { x: volumeSlider.leftPadding; y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2; width: volumeSlider.availableWidth; height: 3; radius: 1.5; color: "#333"
                                                 Rectangle { width: volumeSlider.visualPosition * parent.width; height: parent.height; color: "white"; radius: 1.5 } }
