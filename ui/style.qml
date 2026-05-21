@@ -430,27 +430,57 @@ ApplicationWindow {
             spacing: 0
 
             Rectangle {
+                id: sidebarRect
+                property bool sidebarExpanded: true
                 Layout.fillHeight: true
-                Layout.preferredWidth: 220
+                Layout.preferredWidth: sidebarExpanded ? 220 : 80
+                Behavior on Layout.preferredWidth { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                 color: "black"
-                
+                clip: true
+
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.topMargin: 40
                     anchors.bottomMargin: 30
-                    anchors.leftMargin: 20
-                    anchors.rightMargin: 20
+                    anchors.leftMargin: 26
+                    anchors.rightMargin: 14
                     spacing: 8
                     
-                    Text { 
-                        text: "MORPH"
-                        color: "white"
-                        font.family: mainFont.name
-                        font.pixelSize: 22
-                        font.weight: Font.Black
-                        Layout.leftMargin: 15
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 30
                         Layout.bottomMargin: 30
-                        opacity: 0.9
+                        
+                        Image {
+                            id: logoImg
+                            source: "qrc:/assets/logo.svg"
+                            width: 24
+                            height: 24
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: sidebarRect.sidebarExpanded ? 15 : (parent.width - width) / 2
+                            Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
+                            smooth: true
+                        }
+                        
+                        Text { 
+                            text: "MORPH"
+                            color: "white"
+                            font.family: mainFont.name
+                            font.pixelSize: 22
+                            font.weight: Font.Black
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: logoImg.right
+                            anchors.leftMargin: 10
+                            opacity: sidebarRect.sidebarExpanded ? 0.9 : 0.0
+                            Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
+                            visible: opacity > 0
+                        }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: sidebarRect.sidebarExpanded = !sidebarRect.sidebarExpanded
+                        }
                     }
                     
                     Repeater {
@@ -479,27 +509,51 @@ ApplicationWindow {
                                 }
                             }
 
-                            background: Rectangle {
-                                radius: 12
-                                color: navItem.isActive ? "#1a1a1a" : (navItem.hovered ? "#0d0d0d" : "transparent")
-                                Behavior on color { ColorAnimation { duration: 200 } }
+                            background: Item {
+                                anchors.fill: parent
                                 
                                 Rectangle {
-                                    anchors.left: parent.left
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: 4; height: 16
-                                    radius: 2
-                                    color: "#44ff44"
-                                    visible: navItem.isActive
+                                    anchors.centerIn: parent
+                                    width: sidebarRect.sidebarExpanded ? parent.width : 48
+                                    height: 48
+                                    radius: 12
+                                    Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
+                                    color: navItem.isActive ? "#1a1a1a" : (navItem.hovered ? "#0d0d0d" : "transparent")
+                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                    
+                                    Rectangle {
+                                        anchors.left: parent.left
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 4; height: 16
+                                        radius: 2
+                                        color: "#44ff44"
+                                        opacity: (navItem.isActive && sidebarRect.sidebarExpanded) ? 1.0 : 0.0
+                                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                                        visible: opacity > 0
+                                    }
+                                }
+                                
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 48
+                                    height: 48
+                                    radius: 12
+                                    color: "transparent"
+                                    border.color: (!sidebarRect.sidebarExpanded && navItem.isActive) ? "#44ff44" : "transparent"
+                                    border.width: 2
+                                    Behavior on border.color { ColorAnimation { duration: 200 } }
                                 }
                             }
 
-                            contentItem: RowLayout {
-                                spacing: 12
-                                Item { Layout.preferredWidth: 8 }
+                            contentItem: Item {
+                                anchors.fill: parent
                                 Image {
+                                    id: navIcon
                                     source: modelData.icon
-                                    Layout.preferredWidth: 20; Layout.preferredHeight: 20
+                                    width: 20; height: 20
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: sidebarRect.sidebarExpanded ? 20 : (parent.width - width) / 2
+                                    Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                     opacity: navItem.isActive ? 1.0 : (navItem.hovered ? 0.7 : 0.4)
                                     layer.enabled: true
                                     layer.effect: ColorOverlay { color: "white" }
@@ -511,10 +565,12 @@ ApplicationWindow {
                                     font.family: mainFont.name
                                     font.pixelSize: 14
                                     font.weight: navItem.isActive ? Font.Bold : Font.Medium
-                                    opacity: navItem.isActive ? 1.0 : (navItem.hovered ? 0.7 : 0.4)
-                                    verticalAlignment: Text.AlignVCenter
-                                    Layout.fillWidth: true
+                                    opacity: navItem.isActive ? (sidebarRect.sidebarExpanded ? 1.0 : 0.0) : (navItem.hovered && sidebarRect.sidebarExpanded ? 0.7 : (sidebarRect.sidebarExpanded ? 0.4 : 0.0))
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.left: navIcon.right
+                                    anchors.leftMargin: 12
                                     Behavior on opacity { NumberAnimation { duration: 200 } }
+                                    visible: opacity > 0
                                 }
                             }
                             
