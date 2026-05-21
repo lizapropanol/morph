@@ -405,6 +405,8 @@ ApplicationWindow {
             width: 80; height: 80
             scale: logoScale
             smooth: true
+            layer.enabled: true
+            layer.effect: ColorOverlay { color: "white" }
         }
         
         MouseArea { anchors.fill: parent; enabled: isStartup }
@@ -460,6 +462,8 @@ ApplicationWindow {
                             x: sidebarRect.sidebarExpanded ? 15 : 8
                             Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                             smooth: true
+                            layer.enabled: true
+                            layer.effect: ColorOverlay { color: "white" }
                         }
                         
                         Text { 

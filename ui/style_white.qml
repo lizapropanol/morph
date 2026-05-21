@@ -397,7 +397,6 @@ ApplicationWindow {
             maskSource: maskSource
             invert: true
         }
-
         Image {
             id: splashLogo
             anchors.centerIn: parent
@@ -462,6 +461,8 @@ ApplicationWindow {
                             x: sidebarRect.sidebarExpanded ? 15 : 8
                             Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                             smooth: true
+                            layer.enabled: true
+                            layer.effect: ColorOverlay { color: "#111111" }
                         }
                         
                         Text { 
