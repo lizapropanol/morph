@@ -2358,9 +2358,17 @@ ApplicationWindow {
                                             }
                                         }
 
-                                        Text { text: "VOL"; color: "#888888"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; visible: (window.width - sidebarRect.width) > 600 }
+                                        Text {
+                                            text: "VOL"; color: "#888888"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black
+                                            opacity: (window.width - sidebarRect.width) > 600 ? 1 : 0
+                                            Behavior on opacity { NumberAnimation { duration: 200 } }
+                                            visible: opacity > 0
+                                        }
                                         Slider {
-                                            id: volumeSlider; Layout.preferredWidth: (window.width - sidebarRect.width) > 500 ? 80 : 50; Layout.preferredHeight: 20; from: 0; to: 100; value: MorphAudio.volume; onMoved: MorphAudio.volume = value
+                                            id: volumeSlider
+                                            Layout.preferredWidth: (window.width - sidebarRect.width) > 500 ? 80 : 50
+                                            Behavior on Layout.preferredWidth { NumberAnimation { duration: 200 } }
+                                            Layout.preferredHeight: 20; from: 0; to: 100; value: MorphAudio.volume; onMoved: MorphAudio.volume = value
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                             background: Rectangle { x: volumeSlider.leftPadding; y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2; width: volumeSlider.availableWidth; height: 3; radius: 1.5; color: "#cccccc"
                                                 Rectangle { width: volumeSlider.visualPosition * parent.width; height: parent.height; color: "#111111"; radius: 1.5 } }
