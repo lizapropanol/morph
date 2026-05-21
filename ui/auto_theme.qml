@@ -2808,10 +2808,10 @@ ApplicationWindow {
         function onPlaylistImported(name, coverUrl, tracks) {
             if (saveLastImport) {
                 MorphSettings.createPlaylistWithTracks(name, coverUrl, tracks)
+                currentView = "library"
+                librarySubView = "tracks"
             }
             
-            currentView = "library"
-            librarySubView = "tracks"
             currentPlaylist = name
             
             var tempTracks = []
