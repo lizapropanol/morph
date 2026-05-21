@@ -51,6 +51,10 @@ public slots:
     QVariantList getSearchHistory();
     void clearSearchHistory();
 
+    void addVibeHistory(const QString& trackId);
+    bool isInVibeHistory(const QString& trackId);
+    void clearVibeHistory();
+
     void setAudioQuality(const QString& quality);
     QString getAudioQuality();
 

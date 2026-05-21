@@ -292,8 +292,11 @@ ApplicationWindow {
         MorphDiscord.updateMetadata(cleanTrack)
         preResolveNext()
         
-        if (currentPlaylist === "MY_VIBE" && index >= libraryModel.count - 3) {
-            MorphServices.getWave()
+        if (currentPlaylist === "MY_VIBE") {
+            MorphSettings.addVibeHistory(cleanTrack.id)
+            if (index >= libraryModel.count - 3) {
+                MorphServices.getWave()
+            }
         }
     }
 
@@ -2716,6 +2719,8 @@ ApplicationWindow {
             var tempTracks = []
             for (var i = 0; i < results.length; i++) {
                 var item = results[i]
+                if (MorphSettings.isInVibeHistory(item.id)) continue
+
                 item.service = serviceName
                 if (item.durationMs === undefined) item.durationMs = 0
                 if (item.album === undefined) item.album = ""
@@ -2723,6 +2728,11 @@ ApplicationWindow {
                 tempTracks.push(item)
             }
             
+            if (results.length > 0 && tempTracks.length === 0) {
+                MorphServices.getWave()
+                return
+            }
+
             if (currentPlaylist === "MY_VIBE" && fullPlaylistTracks.length > 0) {
                 for (var j = 0; j < tempTracks.length; j++) {
                     var duplicate = false

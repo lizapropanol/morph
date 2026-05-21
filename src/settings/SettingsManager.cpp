@@ -239,7 +239,33 @@ QVariantList SettingsManager::getSearchHistory() {
 }
 
 void SettingsManager::clearSearchHistory() {
-    m_data["history"] = QJsonArray();
+    m_data["search_history"] = QJsonArray();
+    save();
+}
+
+void SettingsManager::addVibeHistory(const QString& trackId) {
+    QJsonArray history = m_data["vibe_history"].toArray();
+    for (const QJsonValue& val : history) {
+        if (val.toString() == trackId) return;
+    }
+    history.append(trackId);
+
+    if (history.size() > 10000) history.removeFirst();
+
+    m_data["vibe_history"] = history;
+    save();
+}
+
+bool SettingsManager::isInVibeHistory(const QString& trackId) {
+    QJsonArray history = m_data["vibe_history"].toArray();
+    for (const QJsonValue& val : history) {
+        if (val.toString() == trackId) return true;
+    }
+    return false;
+}
+
+void SettingsManager::clearVibeHistory() {
+    m_data["vibe_history"] = QJsonArray();
     save();
 }
 
