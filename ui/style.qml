@@ -190,7 +190,11 @@ ApplicationWindow {
         var isLiked = (name === "LIKED")
         var targetName = isLiked ? "" : name
         
+        var pls = MorphSettings.getPlaylists()
+        var exists = (targetName !== "" && targetName !== "MY_VIBE" && pls[targetName] !== undefined)
+
         if (targetName === currentPlaylist && fullPlaylistTracks.length > 0) {
+            saveLastImport = exists
             libraryModel.clear()
             loadedTracksCount = 0
             loadNextChunk()
@@ -200,7 +204,7 @@ ApplicationWindow {
         }
 
         currentPlaylist = targetName
-        saveLastImport = !isLiked
+        saveLastImport = exists
         libraryModel.clear()
         var tempTracks = []
         loadedTracksCount = 0
@@ -508,11 +512,16 @@ ApplicationWindow {
                             
                             onClicked: (mouse) => {
                                 currentView = modelData.name.toLowerCase()
-                                saveLastImport = true
                                 if (currentView === "library") {
                                     librarySubView = "grid"
                                     refreshPlaylists()
+                                    
+                                    var pls = MorphSettings.getPlaylists()
+                                    saveLastImport = (currentPlaylist !== "" && currentPlaylist !== "MY_VIBE" && pls[currentPlaylist] !== undefined)
+                                } else {
+                                    saveLastImport = true
                                 }
+                                
                                 if (currentView === "settings") {
                                     settingsSubView = "main"
                                 }
