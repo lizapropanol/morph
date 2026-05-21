@@ -291,11 +291,19 @@ ApplicationWindow {
         MorphMpris.updateMetadata(cleanTrack)
         MorphDiscord.updateMetadata(cleanTrack)
         preResolveNext()
+        
+        if (currentPlaylist === "MY_VIBE" && index >= libraryModel.count - 3) {
+            MorphServices.getWave()
+        }
     }
 
     function playNext() {
         var model = currentView === "search" ? (searchModel.count > 0 ? searchModel : historyModel) : libraryModel
-        if (currentTrackIndex + 1 < model.count) playTrack(model.get(currentTrackIndex + 1), currentTrackIndex + 1)
+        if (currentTrackIndex + 1 < model.count) {
+            playTrack(model.get(currentTrackIndex + 1), currentTrackIndex + 1)
+        } else if (currentPlaylist === "MY_VIBE") {
+            MorphServices.getWave()
+        }
     }
 
     function playPrevious() {
@@ -2704,7 +2712,6 @@ ApplicationWindow {
             }
         }
         function onWaveReady(serviceName, results) {
-            currentPlaylist = "MY_VIBE"
             saveLastImport = false
             var tempTracks = []
             for (var i = 0; i < results.length; i++) {
@@ -2715,11 +2722,27 @@ ApplicationWindow {
                 if (item.webUrl === undefined) item.webUrl = ""
                 tempTracks.push(item)
             }
-            fullPlaylistTracks = tempTracks
-            libraryModel.clear()
-            loadedTracksCount = 0
-            loadNextChunk()
-            if (libraryModel.count > 0) playTrack(libraryModel.get(0), 0)
+            
+            if (currentPlaylist === "MY_VIBE" && fullPlaylistTracks.length > 0) {
+                for (var j = 0; j < tempTracks.length; j++) {
+                    var duplicate = false
+                    for (var k = 0; k < fullPlaylistTracks.length; k++) {
+                        if (fullPlaylistTracks[k].id === tempTracks[j].id) { duplicate = true; break }
+                    }
+                    if (!duplicate) {
+                        fullPlaylistTracks.push(tempTracks[j])
+                        libraryModel.append(tempTracks[j])
+                    }
+                }
+                loadedTracksCount = fullPlaylistTracks.length
+            } else {
+                currentPlaylist = "MY_VIBE"
+                fullPlaylistTracks = tempTracks
+                libraryModel.clear()
+                loadedTracksCount = 0
+                loadNextChunk()
+                if (libraryModel.count > 0) playTrack(libraryModel.get(0), 0)
+            }
         }
         function onDailyMixesReady(serviceName, results) {
             if (results.length > 0) dailyMixesModel.clear()
