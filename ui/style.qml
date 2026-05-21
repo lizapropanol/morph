@@ -49,6 +49,7 @@ ApplicationWindow {
     property bool isSearching: false
     property var streamUrlCache: ({})
     property real lastKnownPosition: 0
+    property bool sidebarExpanded: true
 
     function formatSize(bytes) {
         if (bytes < 1024) return bytes + " B"
@@ -148,6 +149,9 @@ ApplicationWindow {
                 loadedTracksCount = fullPlaylistTracks.length
             }
         }
+        if (session.sidebarExpanded !== undefined) {
+            sidebarExpanded = session.sidebarExpanded
+        }
     }
 
     onClosing: { saveCurrentSession() }
@@ -163,7 +167,8 @@ ApplicationWindow {
             "queue": fullPlaylistTracks,
             "playlist": currentPlaylist,
             "index": currentTrackIndex,
-            "saveLastImport": saveLastImport
+            "saveLastImport": saveLastImport,
+            "sidebarExpanded": sidebarExpanded
         })
     }
 
@@ -433,7 +438,6 @@ ApplicationWindow {
 
             Rectangle {
                 id: sidebarRect
-                property bool sidebarExpanded: true
                 Layout.fillHeight: true
                 Layout.preferredWidth: sidebarExpanded ? 220 : 80
                 Behavior on Layout.preferredWidth { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
@@ -459,7 +463,7 @@ ApplicationWindow {
                             width: 24
                             height: 24
                             anchors.verticalCenter: parent.verticalCenter
-                            x: sidebarRect.sidebarExpanded ? 15 : 8
+                            x: sidebarExpanded ? 15 : 8
                             Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                             smooth: true
                             layer.enabled: true
@@ -475,7 +479,7 @@ ApplicationWindow {
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.left: logoImg.right
                             anchors.leftMargin: 10
-                            opacity: sidebarRect.sidebarExpanded ? 0.9 : 0.0
+                            opacity: sidebarExpanded ? 0.9 : 0.0
                             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                             visible: opacity > 0
                         }
@@ -483,7 +487,7 @@ ApplicationWindow {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: sidebarRect.sidebarExpanded = !sidebarRect.sidebarExpanded
+                            onClicked: sidebarExpanded = !sidebarExpanded
                         }
                     }
                     
@@ -520,8 +524,8 @@ ApplicationWindow {
                                 Rectangle {
                                     id: bgRect
                                     anchors.verticalCenter: parent.verticalCenter
-                                    x: sidebarRect.sidebarExpanded ? 0 : -4
-                                    width: sidebarRect.sidebarExpanded ? 180 : 48
+                                    x: sidebarExpanded ? 0 : -4
+                                    width: sidebarExpanded ? 180 : 48
                                     height: 48
                                     radius: 12
                                     Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
@@ -535,7 +539,7 @@ ApplicationWindow {
                                         width: 4; height: 16
                                         radius: 2
                                         color: "#44ff44"
-                                        opacity: (navItem.isActive && sidebarRect.sidebarExpanded) ? 1.0 : 0.0
+                                        opacity: (navItem.isActive && sidebarExpanded) ? 1.0 : 0.0
                                         Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                         visible: opacity > 0
                                     }
@@ -548,7 +552,7 @@ ApplicationWindow {
                                     color: "transparent"
                                     anchors.verticalCenter: parent.verticalCenter
                                     x: -4
-                                    border.color: (!sidebarRect.sidebarExpanded && navItem.isActive) ? "#44ff44" : "transparent"
+                                    border.color: (!sidebarExpanded && navItem.isActive) ? "#44ff44" : "transparent"
                                     border.width: 2
                                     Behavior on border.color { ColorAnimation { duration: 200 } }
                                 }
@@ -561,7 +565,7 @@ ApplicationWindow {
                                     source: modelData.icon
                                     width: 20; height: 20
                                     anchors.verticalCenter: parent.verticalCenter
-                                    x: sidebarRect.sidebarExpanded ? 20 : 10
+                                    x: sidebarExpanded ? 20 : 10
                                     Behavior on x { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                     opacity: navItem.isActive ? 1.0 : (navItem.hovered ? 0.7 : 0.4)
                                     layer.enabled: true
@@ -574,7 +578,7 @@ ApplicationWindow {
                                     font.family: mainFont.name
                                     font.pixelSize: 14
                                     font.weight: navItem.isActive ? Font.Bold : Font.Medium
-                                    opacity: sidebarRect.sidebarExpanded ? (navItem.isActive ? 1.0 : (navItem.hovered ? 0.7 : 0.4)) : 0.0
+                                    opacity: sidebarExpanded ? (navItem.isActive ? 1.0 : (navItem.hovered ? 0.7 : 0.4)) : 0.0
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: navIcon.right
                                     anchors.leftMargin: 12
