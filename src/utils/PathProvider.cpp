@@ -47,23 +47,32 @@ void PathProvider::ensureConfigExists() {
         QFile::rename(oldSettings, newSettings);
     }
 
-    QString styleFile = getStyleFilePath();
-    if (!QFile::exists(styleFile)) {
-        QFile::copy(":/ui/style.qml", styleFile);
-        QFile::setPermissions(styleFile, QFile::WriteUser | QFile::ReadUser);
-    }
+    auto restoreIfChanged = [](const QString& resPath, const QString& diskPath) {
+        bool needsRestore = false;
+        QFile diskFile(diskPath);
+        if (!diskFile.exists()) {
+            needsRestore = true;
+        } else {
+            QFile resFile(resPath);
+            if (resFile.open(QIODevice::ReadOnly) && diskFile.open(QIODevice::ReadOnly)) {
+                if (resFile.readAll() != diskFile.readAll()) {
+                    needsRestore = true;
+                }
+                resFile.close();
+                diskFile.close();
+            }
+        }
 
-    QString lightStyleFile = getConfigPath() + "/style_white.qml";
-    if (!QFile::exists(lightStyleFile)) {
-        QFile::copy(":/ui/style_white.qml", lightStyleFile);
-        QFile::setPermissions(lightStyleFile, QFile::WriteUser | QFile::ReadUser);
-    }
+        if (needsRestore) {
+            if (QFile::exists(diskPath)) QFile::remove(diskPath);
+            QFile::copy(resPath, diskPath);
+            QFile::setPermissions(diskPath, QFile::WriteUser | QFile::ReadUser);
+        }
+    };
 
-    QString autoStyleFile = getConfigPath() + "/auto_theme.qml";
-    if (!QFile::exists(autoStyleFile)) {
-        QFile::copy(":/ui/auto_theme.qml", autoStyleFile);
-        QFile::setPermissions(autoStyleFile, QFile::WriteUser | QFile::ReadUser);
-    }
+    restoreIfChanged(":/ui/style.qml", getStyleFilePath());
+    restoreIfChanged(":/ui/style_white.qml", getConfigPath() + "/style_white.qml");
+    restoreIfChanged(":/ui/auto_theme.qml", getConfigPath() + "/auto_theme.qml");
 
     QStringList assets = {
         "logo.svg", "home-circle.svg", "music-circle.svg", "cog.svg", "heart-outline.svg", "heart.svg", "magnify.svg", "pause-circle.svg",
