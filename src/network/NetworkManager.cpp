@@ -6,6 +6,7 @@ NetworkManager::NetworkManager(QObject* parent) : QObject(parent) {
 
 void NetworkManager::get(const QUrl& url, const QString& token, std::function<void(QNetworkReply*)> callback) {
     QNetworkRequest request(url);
+    request.setTransferTimeout(10000);
     
     request.setHeader(QNetworkRequest::UserAgentHeader, "Yandex-Music-Desktop/5.92.1");
     request.setRawHeader("X-Yandex-Music-Client", "WindowsDesktop/5.92.1");
@@ -18,7 +19,10 @@ void NetworkManager::get(const QUrl& url, const QString& token, std::function<vo
     }
     
     QNetworkReply* reply = manager->get(request);
-    connect(reply, &QNetworkReply::finished, [reply, callback, url]() {
+    connect(reply, &QNetworkReply::finished, [this, reply, callback, url]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            emit errorOccurred(QString("Network Error: %1 (%2)").arg(reply->errorString(), url.toString()));
+        }
         callback(reply);
         reply->deleteLater();
     });
@@ -26,13 +30,17 @@ void NetworkManager::get(const QUrl& url, const QString& token, std::function<vo
 
 void NetworkManager::rawGet(const QUrl& url, std::function<void(QNetworkReply*)> callback) {
     QNetworkRequest request(url);
+    request.setTransferTimeout(10000);
     request.setHeader(QNetworkRequest::UserAgentHeader, "Yandex-Music-Desktop/5.92.1");
     request.setRawHeader("X-Yandex-Music-Client", "WindowsDesktop/5.92.1");
     request.setRawHeader("X-Retpath-Y", "https://music.yandex.ru/");
     request.setRawHeader("Accept", "*/*");
     
     QNetworkReply* reply = manager->get(request);
-    connect(reply, &QNetworkReply::finished, [reply, callback]() {
+    connect(reply, &QNetworkReply::finished, [this, reply, callback, url]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            emit errorOccurred(QString("Network Error: %1 (%2)").arg(reply->errorString(), url.toString()));
+        }
         callback(reply);
         reply->deleteLater();
     });
@@ -40,6 +48,7 @@ void NetworkManager::rawGet(const QUrl& url, std::function<void(QNetworkReply*)>
 
 void NetworkManager::post(const QUrl& url, const QByteArray& data, const QString& token, std::function<void(QNetworkReply*)> callback) {
     QNetworkRequest request(url);
+    request.setTransferTimeout(10000);
     
     request.setHeader(QNetworkRequest::UserAgentHeader, "Yandex-Music-Desktop/5.92.1");
     request.setRawHeader("X-Yandex-Music-Client", "WindowsDesktop/5.92.1");
@@ -51,7 +60,10 @@ void NetworkManager::post(const QUrl& url, const QByteArray& data, const QString
     }
     
     QNetworkReply* reply = manager->post(request, data);
-    connect(reply, &QNetworkReply::finished, [reply, callback, url]() {
+    connect(reply, &QNetworkReply::finished, [this, reply, callback, url]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            emit errorOccurred(QString("Network Error: %1 (%2)").arg(reply->errorString(), url.toString()));
+        }
         callback(reply);
         reply->deleteLater();
     });

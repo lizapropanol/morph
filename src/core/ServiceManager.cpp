@@ -2,6 +2,7 @@
 
 ServiceManager::ServiceManager(CacheManager* cache, QObject* parent) : QObject(parent), cache(cache) {
     net = new NetworkManager(this);
+    connect(net, &NetworkManager::errorOccurred, this, &ServiceManager::errorOccurred);
     yandex = new YandexService(net, this);
     soundcloud = new SoundCloudService(net, this);
     youtube = new YouTubeService(this);

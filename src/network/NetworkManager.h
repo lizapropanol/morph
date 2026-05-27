@@ -13,6 +13,9 @@ public:
     void rawGet(const QUrl& url, std::function<void(QNetworkReply*)> callback);
     void post(const QUrl& url, const QByteArray& data, const QString& token, std::function<void(QNetworkReply*)> callback);
 
+signals:
+    void errorOccurred(const QString& message);
+
 private:
     QNetworkAccessManager* manager;
 };

@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QUrl>
 #include <QFile>
+#include <QTimer>
 
 YouTubeService::YouTubeService(QObject* parent) : BaseService(parent) {}
 
@@ -54,9 +55,20 @@ void YouTubeService::importPlaylist(const QString& url) {
 void YouTubeService::runYtDlp(const QStringList& args, const QString& type, const QString& id) {
     QProcess* process = new QProcess(this);
     process->setWorkingDirectory(PathProvider::getTrackCachePath());
-    process->start("yt-dlp", args);
+    
+    QTimer* timer = new QTimer(process);
+    timer->setSingleShot(true);
+    connect(timer, &QTimer::timeout, [process]() {
+        if (process->state() != QProcess::NotRunning) {
+            process->kill();
+        }
+    });
 
-    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [this, process, type, id]() {
+    process->start("yt-dlp", args);
+    timer->start(20000);
+
+    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [this, process, timer, type, id]() {
+        timer->stop();
         if (process->exitStatus() == QProcess::NormalExit && process->exitCode() == 0) {
             QString output = process->readAllStandardOutput();
             if (type == "search" || type == "charts" || type == "import") {
@@ -83,7 +95,6 @@ void YouTubeService::runYtDlp(const QStringList& args, const QString& type, cons
                 }
             }
         } else {
-            emit errorOccurred(process->readAllStandardError());
         }
         process->deleteLater();
     });

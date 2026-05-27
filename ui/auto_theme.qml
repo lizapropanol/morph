@@ -89,6 +89,20 @@ ApplicationWindow {
     property bool isRestoringSession: false
     property bool isRecovering: false
     property bool isSearching: false
+    property string toastMessage: ""
+    property bool toastVisible: false
+
+    function showToast(message) {
+        toastMessage = message
+        toastVisible = true
+        toastTimer.restart()
+    }
+
+    Timer {
+        id: toastTimer
+        interval: 3000
+        onTriggered: toastVisible = false
+    }
     property var streamUrlCache: ({})
     property real lastKnownPosition: 0
     property bool sidebarExpanded: true
@@ -154,6 +168,16 @@ ApplicationWindow {
         }
     }
 
+    Timer {
+        id: startupTimer
+        interval: 500
+        running: true
+        onTriggered: {
+            MorphServices.getCharts()
+            MorphServices.getDailyMixes()
+        }
+    }
+
     Component.onCompleted: {
         var yToken = MorphSettings.getYandexToken()
         var sToken = MorphSettings.getSoundCloudToken()
@@ -162,7 +186,7 @@ ApplicationWindow {
 
         refreshPlaylists()
         refreshStyleFiles()
-        MorphServices.getCharts(); MorphServices.getDailyMixes()
+        
         var hist = MorphSettings.getSearchHistory()
         for (var i = 0; i < hist.length; i++) historyModel.append(hist[i])
         
@@ -2762,6 +2786,7 @@ ApplicationWindow {
             isSearching = false
             importPlaylistPopup.isBusy = false
             importPlaylistPopup.errorMsg = message
+            showToast(message)
         }
         function onChartsReady(serviceName, results) {
             if (results.length > 0) chartsModel.clear()
@@ -3364,6 +3389,51 @@ ApplicationWindow {
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                 contentItem: Text { text: parent.text; color: systemTheme.background; font.family: mainFont.name; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                 background: Rectangle { color: systemTheme.text; radius: 6 }
+            }
+        }
+    }
+
+    Rectangle {
+        id: toastRoot
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.rightMargin: toastVisible ? -10 : -width
+        anchors.topMargin: toastVisible ? -10 : -height
+        width: 300
+        height: 64
+        color: systemTheme.background
+        radius: 12
+        z: 1000
+
+        Behavior on anchors.rightMargin {
+            NumberAnimation { duration: 500; easing.type: Easing.OutQuart }
+        }
+        Behavior on anchors.topMargin {
+            NumberAnimation { duration: 500; easing.type: Easing.OutQuart }
+        }
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 15
+            anchors.topMargin: 20
+            anchors.rightMargin: 20
+            spacing: 12
+            Rectangle {
+                width: 32; height: 32; color: systemTheme.card; radius: 8
+                Image {
+                    anchors.centerIn: parent
+                    source: "qrc:/assets/information.svg"; width: 16; height: 16
+                    layer.enabled: true; layer.effect: ColorOverlay { color: "#ff4444" }
+                }
+            }
+            ColumnLayout {
+                spacing: 2
+                Text { text: "SYSTEM ERROR"; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 8; font.weight: Font.Black }
+                Text {
+                    id: toastText
+                    text: toastMessage; color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold
+                    Layout.fillWidth: true; elide: Text.ElideRight
+                }
             }
         }
     }
