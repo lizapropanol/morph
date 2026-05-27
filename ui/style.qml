@@ -14,7 +14,7 @@ ApplicationWindow {
     Connections {
         target: MorphApp
         function onStyleFilesChanged() { refreshStyleFiles() }
-        function onConfigRestored(message) { showToast(message) }
+        function onConfigRestored(message) { showToast(message, "CONFIG RESTORED") }
     }
     width: 1075
     height: 700
@@ -49,10 +49,14 @@ ApplicationWindow {
     property bool isRecovering: false
     property bool isSearching: false
     property string toastMessage: ""
+    property string toastTitle: "MORPH SYSTEM"
+    property bool toastIsError: false
     property bool toastVisible: false
 
-    function showToast(message) {
+    function showToast(message, title, isError) {
+        toastTitle = title || "MORPH SYSTEM"
         toastMessage = message
+        toastIsError = !!isError
         toastVisible = true
         toastTimer.restart()
     }
@@ -366,6 +370,7 @@ ApplicationWindow {
         onAccepted: {
             if (MorphSettings.importStyleFile(selectedFile)) {
                 refreshStyleFiles()
+                showToast("Config imported")
                 MorphApp.reload()
             }
         }
@@ -378,6 +383,7 @@ ApplicationWindow {
         nameFilters: ["QML files (*.qml)"]
         onAccepted: {
             MorphSettings.exportStyleFile(configContent.exportTargetFile, selectedFile)
+            showToast("Config exported")
         }
     }
 
@@ -756,7 +762,7 @@ ApplicationWindow {
                                             Text { text: "Recent searches"; color: "white"; font.family: mainFont.name; font.pixelSize: 18; font.weight: Font.Bold; Layout.fillWidth: true }
                                             Text { 
                                                 text: "Clear all"; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; visible: historyModel.count > 0
-                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: (mouse) => { MorphSettings.clearSearchHistory(); historyModel.clear() } }
+                                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: (mouse) => { MorphSettings.clearSearchHistory(); historyModel.clear(); showToast("Search history cleared") } }
                                             }
                                         }
                                         Rectangle {
@@ -1288,6 +1294,7 @@ ApplicationWindow {
                                                 onEditingFinished: {
                                                     MorphSettings.setYandexToken(text)
                                                     MorphServices.setYandexToken(text)
+                                                    showToast("Yandex token saved")
                                                 }
                                             }
                                         }
@@ -1309,6 +1316,7 @@ ApplicationWindow {
                                                 onEditingFinished: {
                                                     MorphSettings.setSoundCloudToken(text)
                                                     MorphServices.setSoundCloudClientId(text)
+                                                    showToast("SoundCloud token saved")
                                                 }
                                             }
                                         }
@@ -1324,6 +1332,7 @@ ApplicationWindow {
                                                         MorphSettings.setAudioQuality("low")
                                                         MorphServices.setAudioQuality("low")
                                                         streamUrlCache = ({})
+                                                        showToast("Quality set to 192k")
                                                         if (currentTrack && currentTrack.service === "Yandex") {
                                                             lastKnownPosition = MorphAudio.position
                                                             MorphServices.resolve(currentTrack.service, currentTrack.id)
@@ -1341,6 +1350,7 @@ ApplicationWindow {
                                                         MorphSettings.setAudioQuality("medium")
                                                         MorphServices.setAudioQuality("medium")
                                                         streamUrlCache = ({})
+                                                        showToast("Quality set to 320k")
                                                         if (currentTrack && currentTrack.service === "Yandex") {
                                                             lastKnownPosition = MorphAudio.position
                                                             MorphServices.resolve(currentTrack.service, currentTrack.id)
@@ -1358,6 +1368,7 @@ ApplicationWindow {
                                                         MorphSettings.setAudioQuality("high")
                                                         MorphServices.setAudioQuality("high")
                                                         streamUrlCache = ({})
+                                                        showToast("Quality set to LOSSLESS")
                                                         if (currentTrack && currentTrack.service === "Yandex") {
                                                             lastKnownPosition = MorphAudio.position
                                                             MorphServices.resolve(currentTrack.service, currentTrack.id)
@@ -1427,7 +1438,11 @@ ApplicationWindow {
 
                                         Button {
                                             Layout.fillWidth: true; Layout.preferredHeight: 50
-                                            onClicked: (mouse) => MorphSettings.setDiscordRpcEnabled(!MorphSettings.getDiscordRpcEnabled())
+                                            onClicked: (mouse) => {
+                                                var newState = !MorphSettings.getDiscordRpcEnabled()
+                                                MorphSettings.setDiscordRpcEnabled(newState)
+                                                showToast("Discord RPC " + (newState ? "enabled" : "disabled"))
+                                            }
                                             background: Rectangle { color: "#1a1a1a"; radius: 10; border.color: "#333" }
                                             contentItem: RowLayout {
                                                 anchors.left: parent.left; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
@@ -1441,7 +1456,10 @@ ApplicationWindow {
                                                 Switch {
                                                     id: discordRpcSwitch; Layout.alignment: Qt.AlignVCenter; Layout.preferredHeight: 20; padding: 0
                                                     checked: (window.settingsVersion, MorphSettings.getDiscordRpcEnabled())
-                                                    onToggled: MorphSettings.setDiscordRpcEnabled(checked)
+                                                    onToggled: {
+                                                        MorphSettings.setDiscordRpcEnabled(checked)
+                                                        showToast("Discord RPC " + (checked ? "enabled" : "disabled"))
+                                                    }
                                                     indicator: Rectangle {
                                                         implicitWidth: 36; implicitHeight: 20; radius: 10
                                                         color: discordRpcSwitch.checked ? "#5865f2" : "#222"
@@ -1845,6 +1863,7 @@ ApplicationWindow {
                                                 if (cacheContent.clearTracks) { 
                                                     MorphCache.clearTrackCache()
                                                     anyCleared = true
+                                                    showToast("Track cache cleared")
                                                     currentTrackDeleted = true
                                                     for (var key in streamUrlCache) {
                                                         if (streamUrlCache[key].toString().startsWith("file://")) {
@@ -1872,7 +1891,11 @@ ApplicationWindow {
                                                     }
                                                 }
                                                 
-                                                if (cacheContent.clearCovers) { MorphCache.clearCoverCache(); anyCleared = true }
+                                                if (cacheContent.clearCovers) { 
+                                                    MorphCache.clearCoverCache()
+                                                    anyCleared = true 
+                                                    showToast("Cover cache cleared")
+                                                }
                                                 else {
                                                     for(var j=detailedCoversModel.count-1; j>=0; j--) {
                                                         if(detailedCoversModel.get(j).selected) {
@@ -1883,6 +1906,7 @@ ApplicationWindow {
                                                 }
 
                                                 if (anyCleared) {
+                                                    if (cacheContent.clearTracks && cacheContent.clearCovers) showToast("All cache cleared")
                                                     window.cacheVersion++
                                                     refreshDetailedCache()
                                                     cacheContent.showSuccess = true
@@ -2028,6 +2052,7 @@ ApplicationWindow {
                                                         text: "DELETE"; Layout.fillWidth: true; Layout.preferredHeight: 36
                                                         onClicked: (mouse) => {
                                                             if (MorphSettings.deleteStyleFile(configContent.deleteTargetFile)) {
+                                                                showToast("Config deleted")
                                                                 refreshStyleFiles()
                                                                 deleteStylePopup.close()
                                                             }
@@ -2108,6 +2133,7 @@ ApplicationWindow {
                                                                     if (parent.activeStyleName !== name) {
                                                                         saveCurrentSession()
                                                                         MorphSettings.setActiveStyleName(name)
+                                                                        showToast("Style " + name + " applied")
                                                                         MorphApp.reload()
                                                                     }
                                                                 }                                                            }
@@ -2223,6 +2249,7 @@ ApplicationWindow {
                                                                         Layout.preferredHeight: 28; Layout.preferredWidth: 28
                                                                         onClicked: (mouse) => {
                                                                             if (MorphSettings.savePreviewFromClipboard(name)) {
+                                                                                showToast("Preview updated")
                                                                                 refreshStyleFiles()
                                                                             }
                                                                         }
@@ -2375,7 +2402,16 @@ ApplicationWindow {
                                         }
                                         Image {
                                             source: (window.likesVersion, currentTrack && MorphSettings.isLiked(currentTrack.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 22; Layout.preferredHeight: 22; sourceSize: Qt.size(64, 64); layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                            MouseArea { anchors.fill: parent; onClicked: (mouse) => { if(currentTrack) MorphSettings.toggleLike(currentTrack) }; cursorShape: Qt.PointingHandCursor }
+                                            MouseArea { 
+                                                anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                onClicked: (mouse) => { 
+                                                    if(currentTrack) {
+                                                        var isL = MorphSettings.isLiked(currentTrack.id)
+                                                        MorphSettings.toggleLike(currentTrack)
+                                                        showToast(isL ? "Removed from Liked" : "Added to Liked")
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -2559,12 +2595,13 @@ ApplicationWindow {
                                     else if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
                                     else cleanTrack.service = "Yandex"
                                 }
+                                var isL = MorphSettings.isLiked(cleanTrack.id)
                                 MorphSettings.toggleLike(cleanTrack)
-                            }
-                        }
-                    }
-                }
-            }
+                                showToast(isL ? "Removed from Liked" : "Added to Liked")
+                                }
+                                }
+                                }
+                                }            }
         }
     }
 
@@ -2643,6 +2680,7 @@ ApplicationWindow {
                     onClicked: (mouse) => {
                         if (targetContextTrack && currentPlaylist !== "") {
                             MorphSettings.removeFromPlaylist(currentPlaylist, targetContextTrack.id)
+                            showToast("Removed from " + currentPlaylist)
                         }
                         trackContextMenu.close()
                     }
@@ -2699,6 +2737,7 @@ ApplicationWindow {
                     onClicked: (mouse) => {
                         if (targetContextTrack && targetContextTrack.id !== "") {
                             MorphSettings.addToPlaylist(model.name, targetContextTrack)
+                            showToast("Added to " + model.name)
                         }
                         playlistPickerPopup.close()
                         trackContextMenu.close()
@@ -2730,7 +2769,7 @@ ApplicationWindow {
             isSearching = false
             importPlaylistPopup.isBusy = false
             importPlaylistPopup.errorMsg = message
-            showToast(message)
+            showToast(message, "SYSTEM ERROR", true)
         }
         function onChartsReady(serviceName, results) {
             if (results.length > 0) chartsModel.clear()
@@ -2814,7 +2853,7 @@ ApplicationWindow {
                 currentView = "library"
                 librarySubView = "tracks"
             }
-            
+            showToast("Playlist imported successfully")
             currentPlaylist = name
             
             var tempTracks = []
@@ -2941,8 +2980,10 @@ ApplicationWindow {
                         if (isEditingPlaylist) {
                             MorphSettings.renamePlaylist(oldPlaylistName, plNameField.text, plCoverField.text)
                             currentPlaylist = plNameField.text
+                            showToast("Playlist renamed")
                         } else {
                             MorphSettings.createPlaylist(plNameField.text, plCoverField.text)
+                            showToast("Playlist " + plNameField.text + " created")
                         }
                         plNameField.text = ""; plCoverField.text = ""; createPlaylistPopup.close()
                     }
@@ -2977,6 +3018,7 @@ ApplicationWindow {
                     text: "DELETE"; Layout.fillWidth: true; Layout.preferredHeight: 36
                     onClicked: (mouse) => {
                         MorphSettings.deletePlaylist(currentPlaylist)
+                        showToast("Playlist deleted")
                         librarySubView = "grid"
                         deleteConfirmationPopup.close()
                     }
@@ -3119,6 +3161,7 @@ ApplicationWindow {
                         Layout.preferredHeight: 32; Layout.preferredWidth: 80
                         onClicked: (mouse) => {
                             if (MorphSettings.writeStyleContentByName(editingFileName, styleEditorArea.text)) {
+                                showToast("Config saved")
                                 refreshStyleFiles()
                             }
                         }
@@ -3320,6 +3363,7 @@ ApplicationWindow {
                         var fileName = newStyleNameField.text + ".qml"
                         var content = createStylePopup.useTemplate ? MorphSettings.getStyleContentByName("style.qml") : ""
                         if (MorphSettings.writeStyleContentByName(fileName, content)) {
+                            showToast("Config created")
                             createStylePopup.close()
                             editingFileName = fileName
                             isEditorMode = true
@@ -3365,12 +3409,12 @@ ApplicationWindow {
                 Image {
                     anchors.centerIn: parent
                     source: "qrc:/assets/information.svg"; width: 16; height: 16
-                    layer.enabled: true; layer.effect: ColorOverlay { color: "#888888" }
+                    layer.enabled: true; layer.effect: ColorOverlay { color: toastIsError ? "#ff4444" : "#888888" }
                 }
             }
             ColumnLayout {
                 spacing: 2
-                Text { text: "SYSTEM ERROR"; color: "#444"; font.family: mainFont.name; font.pixelSize: 8; font.weight: Font.Black }
+                Text { text: toastTitle; color: toastIsError ? "#ff4444" : "#444"; font.family: mainFont.name; font.pixelSize: 8; font.weight: Font.Black }
                 Text {
                     id: toastText
                     text: toastMessage; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold
