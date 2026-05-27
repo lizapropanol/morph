@@ -6,12 +6,16 @@
 #include <QQuickWindow>
 #include <QDebug>
 #include <QUrl>
+#include <QTimer>
 #include "utils/PathProvider.h"
 #include "services/TrackData.h"
 #include "services/YouTubeService.h"
 
 Application::Application(QObject *parent) : QObject(parent) {
-    PathProvider::ensureConfigExists();
+    connect(&PathProvider::instance(), &PathProvider::configRestored, this, [this](const QString& msg) {
+        pendingNotifications.append(msg);
+    });
+    PathProvider::instance().ensureConfigExists();
     
     engine = new QQmlApplicationEngine(this);
     net = new NetworkManager(this);
@@ -52,6 +56,15 @@ void Application::start() {
     connect(engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *obj, const QUrl &objUrl) {
         if (!obj && objUrl == QUrl::fromLocalFile(settings->getActiveStylePath())) {
             qCritical() << "MORPH_ERROR: Could not load QML file!" << objUrl;
+        } else if (obj) {
+            QTimer::singleShot(5000, this, [this]() {
+                for (const QString& msg : pendingNotifications) {
+                    emit configRestored(msg);
+                }
+                pendingNotifications.clear();
+            });
+            
+            connect(&PathProvider::instance(), &PathProvider::configRestored, this, &Application::configRestored);
         }
     });
 

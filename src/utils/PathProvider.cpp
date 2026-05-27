@@ -30,6 +30,11 @@ QString PathProvider::getCoverCachePath() {
     return getDataPath() + "/cache/covers";
 }
 
+PathProvider& PathProvider::instance() {
+    static PathProvider inst;
+    return inst;
+}
+
 void PathProvider::ensureConfigExists() {
     QString configPath = getConfigPath();
     QString dataPath = getDataPath();
@@ -47,7 +52,7 @@ void PathProvider::ensureConfigExists() {
         QFile::rename(oldSettings, newSettings);
     }
 
-    auto restoreIfChanged = [](const QString& resPath, const QString& diskPath) {
+    auto restoreIfChanged = [this](const QString& resPath, const QString& diskPath) {
         bool needsRestore = false;
         QFile diskFile(diskPath);
         if (!diskFile.exists()) {
@@ -64,9 +69,11 @@ void PathProvider::ensureConfigExists() {
         }
 
         if (needsRestore) {
-            if (QFile::exists(diskPath)) QFile::remove(diskPath);
+            bool existed = QFile::exists(diskPath);
+            if (existed) QFile::remove(diskPath);
             QFile::copy(resPath, diskPath);
             QFile::setPermissions(diskPath, QFile::WriteUser | QFile::ReadUser);
+            if (existed) emit configRestored(QString("Config restored: %1").arg(QFileInfo(diskPath).fileName()));
         }
     };
 

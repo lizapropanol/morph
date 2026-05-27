@@ -28,6 +28,7 @@ public slots:
 
 signals:
     void styleFilesChanged();
+    void configRestored(const QString& message);
 
 private:
     void setupTray();
@@ -45,6 +46,7 @@ private:
     QMenu* trayMenu;
     QAction* trackInfoAction;
     QAction* playPauseAction;
+    QStringList pendingNotifications;
 };
 
 #endif

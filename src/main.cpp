@@ -19,8 +19,6 @@ int main(int argc, char *argv[]) {
         app.setFont(QFont(family));
     }
     
-    PathProvider::ensureConfigExists();
-    
     Application morph;
     morph.start();
     

@@ -14,6 +14,7 @@ ApplicationWindow {
     Connections {
         target: MorphApp
         function onStyleFilesChanged() { refreshStyleFiles() }
+        function onConfigRestored(message) { showToast(message) }
     }
     width: 1075
     height: 700
@@ -3340,8 +3341,8 @@ ApplicationWindow {
         id: toastRoot
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.rightMargin: toastVisible ? -10 : -width
-        anchors.topMargin: toastVisible ? -10 : -height
+        anchors.rightMargin: toastVisible ? 0 : -width
+        anchors.topMargin: toastVisible ? 0 : -height
         width: 300
         height: 64
         color: "black"
@@ -3358,15 +3359,13 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent
             anchors.margins: 15
-            anchors.topMargin: 20
-            anchors.rightMargin: 20
             spacing: 12
             Rectangle {
                 width: 32; height: 32; color: "#0a0a0a"; radius: 8
                 Image {
                     anchors.centerIn: parent
                     source: "qrc:/assets/information.svg"; width: 16; height: 16
-                    layer.enabled: true; layer.effect: ColorOverlay { color: "#ff4444" }
+                    layer.enabled: true; layer.effect: ColorOverlay { color: "#888888" }
                 }
             }
             ColumnLayout {
