@@ -3511,11 +3511,43 @@ ApplicationWindow {
             }
             ColumnLayout {
                 spacing: 2
-                Text { text: toastTitle; color: toastIsError ? "#ff4444" : systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 8; font.weight: Font.Black }
-                Text {
-                    id: toastText
-                    text: toastMessage; color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold
-                    Layout.fillWidth: true; elide: Text.ElideRight
+                Item {
+                    Layout.fillWidth: true; implicitHeight: 12
+                    Text {
+                        id: titleGhost; width: parent.width; color: titleMain.color; font: titleMain.font; opacity: 0
+                        NumberAnimation on opacity { id: titleGhostAnim; from: 1; to: 0; duration: 250; running: false }
+                    }
+                    Text {
+                        id: titleMain
+                        text: toastTitle; color: toastIsError ? "#ff4444" : systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 8; font.weight: Font.Black
+                        property string oldText: text
+                        onTextChanged: {
+                            titleGhost.text = oldText
+                            titleGhostAnim.restart()
+                            titleFadeIn.restart()
+                            oldText = titleMain.text
+                        }
+                        NumberAnimation on opacity { id: titleFadeIn; from: 0; to: 1; duration: 250; running: false }
+                    }
+                }
+                Item {
+                    Layout.fillWidth: true; implicitHeight: 16
+                    Text {
+                        id: msgGhost; width: parent.width; color: msgMain.color; font: msgMain.font; elide: msgMain.elide; opacity: 0
+                        NumberAnimation on opacity { id: msgGhostAnim; from: 1; to: 0; duration: 250; running: false }
+                    }
+                    Text {
+                        id: msgMain
+                        text: toastMessage; color: systemTheme.text; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; width: parent.width; elide: Text.ElideRight
+                        property string oldText: text
+                        onTextChanged: {
+                            msgGhost.text = oldText
+                            msgGhostAnim.restart()
+                            msgFadeIn.restart()
+                            oldText = msgMain.text
+                        }
+                        NumberAnimation on opacity { id: msgFadeIn; from: 0; to: 1; duration: 250; running: false }
+                    }
                 }
             }
         }
