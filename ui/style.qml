@@ -677,7 +677,7 @@ ApplicationWindow {
                             
                             Behavior on anchors.topMargin { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
 
-                            MouseArea { anchors.fill: parent; hoverEnabled: true; onPressed: (mouse) => mouse.accepted = true }
+                            MouseArea { anchors.fill: parent; hoverEnabled: true; onPressed: (mouse) => mouse.accepted = true; onWheel: (wheel) => wheel.accepted = true }
 
                             Item {
                                 width: 18; height: 18; anchors.right: parent.left; anchors.top: parent.top; clip: true
@@ -749,22 +749,26 @@ ApplicationWindow {
                                             isEditingPlaylist = true
                                             createPlaylistPopup.open()
                                         }
-                                        background: Rectangle { color: "#1a1a1a"; radius: 8; border.color: "#333" }
-                                        contentItem: Image {
-                                            source: "qrc:/assets/pencil.svg"
-                                            anchors.centerIn: parent; width: 14; height: 14
-                                            layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                        background: Rectangle { color: "#1a1a1a"; radius: 16 }
+                                        contentItem: Item {
+                                            Image {
+                                                source: "qrc:/assets/pencil.svg"
+                                                anchors.centerIn: parent; width: 16; height: 16
+                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            }
                                         }
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                     }
                                     Button {
                                         Layout.preferredWidth: 32; Layout.preferredHeight: 32
                                         onClicked: (mouse) => deleteConfirmationPopup.open()
-                                        background: Rectangle { color: "#220000"; radius: 8; border.color: "#441111" }
-                                        contentItem: Image {
-                                            source: "qrc:/assets/delete.svg"
-                                            anchors.centerIn: parent; width: 14; height: 14
-                                            layer.enabled: true; layer.effect: ColorOverlay { color: "#ff4444" }
+                                        background: Rectangle { color: "#1a1a1a"; radius: 16 }
+                                        contentItem: Item {
+                                            Image {
+                                                source: "qrc:/assets/delete.svg"
+                                                anchors.centerIn: parent; width: 16; height: 16
+                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            }
                                         }
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                     }
