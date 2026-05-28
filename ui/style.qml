@@ -662,6 +662,98 @@ ApplicationWindow {
                     Item {
                         id: mainContentContainer
                         anchors.fill: parent
+
+                        Rectangle {
+                            id: playlistInfoFrame
+                            anchors.top: parent.top
+                            anchors.topMargin: (currentView === "library" && librarySubView === "tracks") ? 0 : -height - 10
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: Math.min(parent.width - 120, 600)
+                            height: 54
+                            color: "black"
+                            radius: 18
+                            z: 100
+                            visible: anchors.topMargin > -height
+                            
+                            Behavior on anchors.topMargin { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+
+                            MouseArea { anchors.fill: parent; hoverEnabled: true; onPressed: (mouse) => mouse.accepted = true }
+
+                            Item {
+                                width: 18; height: 18; anchors.right: parent.left; anchors.top: parent.top; clip: true
+                                Rectangle { width: 72; height: 72; radius: 36; color: "transparent"; border.color: "black"; border.width: 18; x: -36; y: -18 }
+                            }
+                            Item {
+                                width: 18; height: 18; anchors.left: parent.right; anchors.top: parent.top; clip: true
+                                Rectangle { width: 72; height: 72; radius: 36; color: "transparent"; border.color: "black"; border.width: 18; x: -18; y: -18 }
+                            }
+                            Rectangle { width: parent.width; height: 18; anchors.top: parent.top; color: parent.color }
+
+                            RowLayout {
+                                anchors.fill: parent; anchors.margins: 15; spacing: 15
+                                Button {
+                                    text: "← BACK"
+                                    onClicked: (mouse) => librarySubView = "grid"
+                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                    contentItem: Text { text: parent.text; color: "#888"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold }
+                                    background: Item {}
+                                }
+                                Rectangle {
+                                    visible: currentPlaylist !== ""
+                                    Layout.preferredWidth: 32; Layout.preferredHeight: 32; color: "#1a1a1a"; radius: 8
+                                    Image {
+                                        id: playlistHeaderImage
+                                        anchors.fill: parent
+                                        source: {
+                                            if (currentPlaylist === "") return ""
+                                            var pls = MorphSettings.getPlaylists()
+                                            var url = (pls[currentPlaylist] && pls[currentPlaylist].coverUrl) ? pls[currentPlaylist].coverUrl : ""
+                                            return MorphCache.getCachedCover(url)
+                                        }
+                                        fillMode: Image.PreserveAspectCrop
+                                        layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 32; height: 32; radius: 8 } }
+                                    }
+                                    Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 16; visible: playlistHeaderImage.status !== Image.Ready }
+                                }
+                                Text { 
+                                    text: currentPlaylist === "" ? "LIKED TRACKS" : currentPlaylist.toUpperCase()
+                                    color: "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold 
+                                }
+                                Text {
+                                    text: fullPlaylistTracks.length + " TRACKS"
+                                    color: "#666"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Bold
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+                                Item { Layout.fillWidth: true }
+                                
+                                RowLayout {
+                                    visible: currentPlaylist !== "" && saveLastImport
+                                    spacing: 10
+                                    Button {
+                                        text: "EDIT"
+                                        onClicked: (mouse) => {
+                                            var pls = MorphSettings.getPlaylists()
+                                            plNameField.text = currentPlaylist
+                                            oldPlaylistName = currentPlaylist
+                                            plCoverField.text = pls[currentPlaylist].coverUrl || ""
+                                            isEditingPlaylist = true
+                                            createPlaylistPopup.open()
+                                        }
+                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                        background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333" }
+                                    }
+                                    Button {
+                                        text: "DELETE"
+                                        onClicked: (mouse) => deleteConfirmationPopup.open()
+                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                        contentItem: Text { text: parent.text; color: "#ff4444"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                        background: Rectangle { color: "#220000"; radius: 6; border.color: "#441111" }
+                                    }
+                                }
+                            }
+                        }
+
                         layer.enabled: true
                         layer.effect: OpacityMask {
                             maskSource: Rectangle {
@@ -1167,69 +1259,7 @@ ApplicationWindow {
                                         ColumnLayout {
                                             id: libraryTracksColumn
                                             spacing: 20
-                                            RowLayout {
-                                                Layout.fillWidth: true; spacing: 15
-                                                Button {
-                                                    text: "← BACK"
-                                                    onClicked: (mouse) => librarySubView = "grid"
-                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: "#888"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold }
-                                                    background: Item {}
-                                                }
-                                                Rectangle {
-                                                    visible: currentPlaylist !== ""
-                                                    Layout.preferredWidth: 40; Layout.preferredHeight: 40; color: "#333"; radius: 8
-                                                    Image {
-                                                        id: playlistHeaderImage
-                                                        anchors.fill: parent
-                                                        source: {
-                                                            if (currentPlaylist === "") return ""
-                                                            var pls = MorphSettings.getPlaylists()
-                                                            var url = (pls[currentPlaylist] && pls[currentPlaylist].coverUrl) ? pls[currentPlaylist].coverUrl : ""
-                                                            return MorphCache.getCachedCover(url)
-                                                        }
-                                                        fillMode: Image.PreserveAspectCrop
-                                                        layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 40; height: 40; radius: 8 } }
-                                                    }
-                                                    Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 20; visible: playlistHeaderImage.status !== Image.Ready }
-                                                }
-                                                Text { 
-                                                    text: currentPlaylist === "" ? "LIKED TRACKS" : currentPlaylist.toUpperCase()
-                                                    color: "white"; font.family: mainFont.name; font.pixelSize: 16; font.weight: Font.Bold 
-                                                }
-                                                Text {
-                                                    text: fullPlaylistTracks.length + " TRACKS"
-                                                    color: "#666"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold
-                                                    Layout.alignment: Qt.AlignVCenter
-                                                }
-                                                Item { Layout.fillWidth: true }
-                                                
-                                                RowLayout {
-                                                    visible: currentPlaylist !== "" && saveLastImport
-                                                    spacing: 10
-                                                    Button {
-                                                        text: "EDIT"
-                                                        onClicked: (mouse) => {
-                                                            var pls = MorphSettings.getPlaylists()
-                                                            plNameField.text = currentPlaylist
-                                                            oldPlaylistName = currentPlaylist
-                                                            plCoverField.text = pls[currentPlaylist].coverUrl || ""
-                                                            isEditingPlaylist = true
-                                                            createPlaylistPopup.open()
-                                                        }
-                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                        contentItem: Text { text: parent.text; color: "white"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                        background: Rectangle { color: "#333"; radius: 4; border.color: "#444" }
-                                                    }
-                                                    Button {
-                                                        text: "DELETE"
-                                                        onClicked: (mouse) => deleteConfirmationPopup.open()
-                                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                        contentItem: Text { text: parent.text; color: "#ff4444"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                                        background: Rectangle { color: "#220000"; radius: 4; border.color: "#441111" }
-                                                    }
-                                                }
-                                            }
+                                            Item { Layout.preferredHeight: (currentView === "library" && librarySubView === "tracks") ? 60 : 0 }
                                             Rectangle {
                                                 Layout.fillWidth: true; Layout.preferredHeight: libraryTracksList.contentHeight + 20; color: "#1a1a1a"
                                                 radius: 12
