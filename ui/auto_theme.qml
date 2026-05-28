@@ -3438,26 +3438,64 @@ ApplicationWindow {
         }
     }
 
-    Rectangle {
-        id: toastRoot
+    Item {
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.rightMargin: toastVisible ? 0 : -width
-        anchors.topMargin: toastVisible ? 0 : -height
-        width: 300
-        height: 64
-        color: systemTheme.background
-        radius: 12
+        anchors.topMargin: 12
+        anchors.rightMargin: 12
+        width: 312
+        height: 76
+        clip: true
         z: 1000
 
-        Behavior on anchors.rightMargin {
-            NumberAnimation { duration: 500; easing.type: Easing.OutQuart }
-        }
-        Behavior on anchors.topMargin {
-            NumberAnimation { duration: 500; easing.type: Easing.OutQuart }
+        Item {
+            property int r: 12
+            width: r; height: r
+            x: toastRoot.x - r; y: 0
+            clip: true
+            visible: toastRoot.x < parent.width - r
+            Rectangle {
+                width: parent.r * 4; height: width; radius: width / 2
+                color: "transparent"; border.color: toastRoot.color; border.width: parent.r
+                x: -parent.r * 2; y: -parent.r
+            }
         }
 
-        RowLayout {
+        Item {
+            property int r: 12
+            width: r; height: r
+            x: parent.width - r; y: toastRoot.y + toastRoot.height
+            clip: true
+            visible: toastRoot.y > -toastRoot.height + r
+            Rectangle {
+                width: parent.r * 4; height: width; radius: width / 2
+                color: "transparent"; border.color: toastRoot.color; border.width: parent.r
+                x: -parent.r * 2; y: -parent.r
+            }
+        }
+
+        Rectangle {
+            id: toastRoot
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.rightMargin: toastVisible ? 0 : -width
+            anchors.topMargin: toastVisible ? 0 : -height
+            width: 300
+            height: 64
+            color: systemTheme.background
+            radius: 12
+
+            Rectangle { x: 0; y: 0; width: parent.radius; height: parent.radius; color: parent.color }
+            Rectangle { anchors.bottom: parent.bottom; anchors.right: parent.right; width: parent.radius; height: parent.radius; color: parent.color }
+
+            Behavior on anchors.rightMargin {
+                NumberAnimation { duration: 500; easing.type: Easing.OutQuart }
+            }
+            Behavior on anchors.topMargin {
+                NumberAnimation { duration: 500; easing.type: Easing.OutQuart }
+            }
+
+            RowLayout {
             anchors.fill: parent
             anchors.margins: 15
             spacing: 12
@@ -3480,4 +3518,5 @@ ApplicationWindow {
             }
         }
     }
+}
 }
