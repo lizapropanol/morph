@@ -3384,13 +3384,14 @@ ApplicationWindow {
         anchors.right: parent.right
         anchors.topMargin: 12
         anchors.rightMargin: 12
-        width: 312
-        height: 76
-        clip: true
+        width: 400
+        height: 200
         z: 1000
 
+        clip: true
+
         Item {
-            property int r: 12
+            property int r: 18
             width: r; height: r
             x: toastRoot.x - r; y: 0
             clip: true
@@ -3403,7 +3404,7 @@ ApplicationWindow {
         }
 
         Item {
-            property int r: 12
+            property int r: 18
             width: r; height: r
             x: parent.width - r; y: toastRoot.y + toastRoot.height
             clip: true
@@ -3424,10 +3425,11 @@ ApplicationWindow {
             width: 300
             height: 64
             color: "#ffffff"
-            radius: 12
+            radius: 18
 
             Rectangle { x: 0; y: 0; width: parent.radius; height: parent.radius; color: parent.color }
             Rectangle { anchors.bottom: parent.bottom; anchors.right: parent.right; width: parent.radius; height: parent.radius; color: parent.color }
+            Rectangle { anchors.top: parent.top; anchors.right: parent.right; width: parent.radius; height: parent.radius; color: parent.color }
 
             Behavior on anchors.rightMargin {
                 NumberAnimation { duration: 500; easing.type: Easing.OutQuart }
@@ -3457,6 +3459,20 @@ ApplicationWindow {
                     Layout.fillWidth: true; elide: Text.ElideRight
                 }
             }
+        }
+    }
+
+    Item {
+        anchors.top: parent.top
+        anchors.right: parent.right
+        width: 18; height: 18
+        clip: true
+        Rectangle {
+            width: 72; height: 72; radius: 36
+            color: "transparent"
+            border.color: "#ffffff"
+            border.width: 18
+            x: -36; y: -18
         }
     }
 }
