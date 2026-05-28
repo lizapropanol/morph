@@ -1341,7 +1341,7 @@ ApplicationWindow {
                                         ColumnLayout {
                                             id: libraryTracksColumn
                                             spacing: 20
-                                            Item { Layout.preferredHeight: (currentView === "library" && librarySubView === "tracks") ? 60 : 0 }
+                                            Item { Layout.preferredHeight: (currentView === "library" && librarySubView === "tracks") ? 20 : 0 }
                                             Rectangle {
                                                 Layout.fillWidth: true; Layout.preferredHeight: libraryTracksList.contentHeight + 20; color: systemTheme.card
                                                 radius: 12
