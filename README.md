@@ -110,7 +110,7 @@ To unlock full functionality, you need to provide your authentication tokens in 
 ## Project Structure
 
 - `src/core/`: Application initialization and service management.
-- `src/services/`: Specific API implementations (`YandexService`, `SoundCloudService`) and base interfaces.
+- `src/services/`: Specific API implementations (`YandexService`, `SoundCloudService`, `YouTubeService`) and base interfaces.
 - `src/utils/`: Cache management, path resolution, and file system utilities.
 - `src/network/`: HTTP wrappers for API communication.
 - `src/settings/`: JSON-based local storage management for playlists, likes, tokens, and history.
