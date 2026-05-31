@@ -969,12 +969,33 @@ ApplicationWindow {
                                         Rectangle {
                                             anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; anchors.margins: 30
                                             width: 64; height: 64; radius: 32; color: "#333"
-                                            Image {
-                                                anchors.centerIn: parent; 
-                                                source: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "qrc:/assets/pause.svg" : "qrc:/assets/play.svg"
-                                                Layout.preferredWidth: 32; Layout.preferredHeight: 32
-                                                layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                            
+                                            Item {
+                                                anchors.centerIn: parent; width: 32; height: 32
+                                                
+                                                Image {
+                                                    id: vibePlayIcon
+                                                    anchors.fill: parent; source: "qrc:/assets/play.svg"; smooth: true
+                                                    sourceSize: Qt.size(64, 64)
+                                                    opacity: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 0 : 1
+                                                    rotation: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 45 : 0
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                                                    Behavior on rotation { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                                                }
+
+                                                Image {
+                                                    id: vibePauseIcon
+                                                    anchors.fill: parent; source: "qrc:/assets/pause.svg"; smooth: true
+                                                    sourceSize: Qt.size(64, 64)
+                                                    opacity: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 1 : 0
+                                                    rotation: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 0 : -45
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                                                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                                                    Behavior on rotation { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                                                }
                                             }
+
                                             MouseArea { 
                                                 anchors.fill: parent; cursorShape: Qt.PointingHandCursor; 
                                                 onClicked: (mouse) => {
@@ -2451,9 +2472,37 @@ ApplicationWindow {
                                             source: "qrc:/assets/skip-previous.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                             MouseArea { anchors.fill: parent; onClicked: (mouse) => playPrevious(); cursorShape: Qt.PointingHandCursor }
                                         }
-                                        Image {
-                                            source: MorphAudio.isPlaying ? "qrc:/assets/pause-circle.svg" : "qrc:/assets/play-circle.svg"; Layout.preferredWidth: 50; Layout.preferredHeight: 50; sourceSize: Qt.size(128, 128); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
-                                            MouseArea { anchors.fill: parent; onClicked: (mouse) => MorphAudio.isPlaying ? MorphAudio.pause() : MorphAudio.resume(); cursorShape: Qt.PointingHandCursor }
+                                        Rectangle {
+                                            Layout.preferredWidth: 42; Layout.preferredHeight: 42; radius: 21; color: "white"
+                                            
+                                            Item {
+                                                anchors.centerIn: parent; width: 24; height: 24
+                                                
+                                                Image {
+                                                    id: playIcon
+                                                    anchors.fill: parent; source: "qrc:/assets/play.svg"; smooth: true
+                                                    opacity: MorphAudio.isPlaying ? 0 : 1
+                                                    rotation: MorphAudio.isPlaying ? 45 : 0
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "black" }
+                                                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                                                    Behavior on rotation { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                                                }
+
+                                                Image {
+                                                    id: pauseIcon
+                                                    anchors.fill: parent; source: "qrc:/assets/pause.svg"; smooth: true
+                                                    opacity: MorphAudio.isPlaying ? 1 : 0
+                                                    rotation: MorphAudio.isPlaying ? 0 : -45
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: "black" }
+                                                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                                                    Behavior on rotation { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                                                }
+                                            }
+
+                                            MouseArea { 
+                                                anchors.fill: parent; cursorShape: Qt.PointingHandCursor 
+                                                onClicked: (mouse) => MorphAudio.isPlaying ? MorphAudio.pause() : MorphAudio.resume()
+                                            }
                                         }
                                         Image {
                                             source: "qrc:/assets/skip-next.svg"; Layout.preferredWidth: 26; Layout.preferredHeight: 26; sourceSize: Qt.size(64, 64); smooth: true; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
