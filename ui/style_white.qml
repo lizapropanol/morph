@@ -2445,7 +2445,7 @@ ApplicationWindow {
                                     anchors.bottom: parent.bottom; anchors.bottomMargin: 1; width: parent.width; height: 4; radius: 16; color: "#f0f0f0"
                                     Rectangle { 
                                         width: progressSlider.visualPosition * parent.width; height: parent.height; color: "#111111"; radius: 16 
-                                        Behavior on width { enabled: !progressSlider.pressed; NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+                                        Behavior on width { enabled: !progressSlider.pressed; NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                                     } 
                                 }
                                 handle: Item {}
@@ -2595,9 +2595,14 @@ ApplicationWindow {
                                             Layout.preferredWidth: (window.width - sidebarRect.width) > 500 ? 80 : 50
                                             Behavior on Layout.preferredWidth { NumberAnimation { duration: 200 } }
                                             Layout.preferredHeight: 20; from: 0; to: 100; value: MorphAudio.volume; onMoved: MorphAudio.volume = value
+                                            Behavior on value { enabled: !volumeSlider.pressed; NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                            background: Rectangle { x: volumeSlider.leftPadding; y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2; width: volumeSlider.availableWidth; height: 3; radius: 1.5; color: "#cccccc"
-                                                Rectangle { width: volumeSlider.visualPosition * parent.width; height: parent.height; color: "#111111"; radius: 1.5 } }
+                                            background: Rectangle { 
+                                                x: volumeSlider.leftPadding; y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2; width: volumeSlider.availableWidth; height: 3; radius: 1.5; color: "#cccccc"
+                                                Rectangle { 
+                                                    width: volumeSlider.visualPosition * parent.width; height: parent.height; color: "#111111"; radius: 1.5 
+                                                } 
+                                            }
                                             handle: Rectangle { x: volumeSlider.leftPadding + volumeSlider.visualPosition * (volumeSlider.availableWidth - width); y: volumeSlider.topPadding + volumeSlider.availableHeight / 2 - height / 2; width: 10; height: 10; radius: 5; color: "#111111" }
                                         }
                                     }
