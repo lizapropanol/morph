@@ -23,6 +23,42 @@ ApplicationWindow {
     title: "morph"
     color: "black"
 
+    Shortcut {
+        sequences: ["Space", "K"]
+        enabled: !searchField.activeFocus
+        onActivated: MorphAudio.isPlaying ? MorphAudio.pause() : MorphAudio.resume()
+    }
+    Shortcut {
+        sequence: "J"
+        enabled: !searchField.activeFocus
+        onActivated: MorphAudio.position = Math.max(0, MorphAudio.position - 5000)
+    }
+    Shortcut {
+        sequence: "L"
+        enabled: !searchField.activeFocus
+        onActivated: MorphAudio.position = Math.min(MorphAudio.duration, MorphAudio.position + 5000)
+    }
+    Shortcut {
+        sequence: "="
+        enabled: !searchField.activeFocus
+        onActivated: MorphAudio.volume = Math.min(100, MorphAudio.volume + 5)
+    }
+    Shortcut {
+        sequence: "-"
+        enabled: !searchField.activeFocus
+        onActivated: MorphAudio.volume = Math.max(0, MorphAudio.volume - 5)
+    }
+    Shortcut {
+        sequence: ","
+        enabled: !searchField.activeFocus
+        onActivated: playPrevious()
+    }
+    Shortcut {
+        sequence: "."
+        enabled: !searchField.activeFocus
+        onActivated: playNext()
+    }
+
     FontLoader { id: mainFont; source: "qrc:/assets/fonts/interblack.otf" }
 
     property var currentTrack: null
