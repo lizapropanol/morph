@@ -2371,6 +2371,7 @@ ApplicationWindow {
                                         var maxX = progressSlider.width - durationLabel.width - width - 10
                                         return Math.max(0, Math.min(desiredX, maxX))
                                     }
+                                    Behavior on x { enabled: !progressSlider.pressed; NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
                                 }
 
                                 Text {
@@ -2382,7 +2383,13 @@ ApplicationWindow {
                                     anchors.right: parent.right; y: -12
                                 }
 
-                                background: Rectangle { anchors.bottom: parent.bottom; anchors.bottomMargin: 1; width: parent.width; height: 4; radius: 16; color: "#f0f0f0"; Rectangle { width: progressSlider.visualPosition * parent.width; height: parent.height; color: "#111111"; radius: 16 } }
+                                background: Rectangle { 
+                                    anchors.bottom: parent.bottom; anchors.bottomMargin: 1; width: parent.width; height: 4; radius: 16; color: "#f0f0f0"
+                                    Rectangle { 
+                                        width: progressSlider.visualPosition * parent.width; height: parent.height; color: "#111111"; radius: 16 
+                                        Behavior on width { enabled: !progressSlider.pressed; NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+                                    } 
+                                }
                                 handle: Item {}
                             }
                         }
