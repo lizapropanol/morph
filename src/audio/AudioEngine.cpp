@@ -40,11 +40,31 @@ AudioEngine::AudioEngine(QObject* parent) : QObject(parent) {
     });
     
     connect(pollTimer, &QTimer::timeout, this, &AudioEngine::positionChanged);
+
+    m_targetVolume = audioOutput->volume();
+
+    fadeAnimation = new QVariantAnimation(this);
+    fadeAnimation->setDuration(200);
+    fadeAnimation->setEasingCurve(QEasingCurve::OutCubic);
+    connect(fadeAnimation, &QVariantAnimation::valueChanged, [this](const QVariant &value) {
+        audioOutput->setVolume(value.toFloat());
+    });
+    connect(fadeAnimation, &QVariantAnimation::finished, [this]() {
+        if (m_isPausing) {
+            player->pause();
+            m_isPausing = false;
+        }
+    });
 }
 
-int AudioEngine::volume() const { return qRound(audioOutput->volume() * 100); }
+int AudioEngine::volume() const { return qRound(m_targetVolume * 100); }
 
-void AudioEngine::setVolume(int volume) { audioOutput->setVolume(volume / 100.0f); }
+void AudioEngine::setVolume(int volume) { 
+    m_targetVolume = volume / 100.0f;
+    if (fadeAnimation->state() != QAbstractAnimation::Running) {
+        audioOutput->setVolume(m_targetVolume);
+    }
+}
 
 qint64 AudioEngine::position() const { return player->position(); }
 
@@ -55,7 +75,7 @@ void AudioEngine::setPosition(qint64 position) {
 
 qint64 AudioEngine::duration() const { return player->duration(); }
 
-bool AudioEngine::isPlaying() const { return player->playbackState() == QMediaPlayer::PlayingState; }
+bool AudioEngine::isPlaying() const { return !m_isInternalPaused && player->playbackState() == QMediaPlayer::PlayingState; }
 
 int AudioEngine::bitrate() const {
     if (m_manualBitrate > 0) return m_manualBitrate;
@@ -74,6 +94,10 @@ void AudioEngine::setBitrate(int bitrate) {
 
 void AudioEngine::play(const QString& url) {
     m_manualBitrate = 0;
+    m_isInternalPaused = false;
+    m_isPausing = false;
+    fadeAnimation->stop();
+    audioOutput->setVolume(m_targetVolume);
     player->setSource(QUrl(url));
     player->play();
     
@@ -103,8 +127,35 @@ void AudioEngine::load(const QString& url) {
     player->setSource(QUrl(url));
 }
 
-void AudioEngine::pause() { player->pause(); }
+void AudioEngine::pause() { 
+    if (m_isInternalPaused || player->playbackState() != QMediaPlayer::PlayingState) return;
+    
+    m_isInternalPaused = true;
+    m_isPausing = true;
+    emit stateChanged(); 
+    
+    fadeAnimation->stop();
+    fadeAnimation->setStartValue(audioOutput->volume());
+    fadeAnimation->setEndValue(0.0f);
+    fadeAnimation->start();
+}
 
-void AudioEngine::resume() { player->play(); }
+void AudioEngine::resume() { 
+    m_isPausing = false;
+    m_isInternalPaused = false;
+    emit stateChanged(); 
+    
+    fadeAnimation->stop();
+    player->play();
+    
+    fadeAnimation->setStartValue(audioOutput->volume());
+    fadeAnimation->setEndValue(m_targetVolume);
+    fadeAnimation->start();
+}
 
-void AudioEngine::stop() { player->stop(); }
+void AudioEngine::stop() { 
+    m_isInternalPaused = false;
+    fadeAnimation->stop();
+    player->stop(); 
+    audioOutput->setVolume(m_targetVolume);
+}

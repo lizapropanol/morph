@@ -6,6 +6,7 @@
 #include <QAudioOutput>
 #include <QString>
 #include <QTimer>
+#include <QVariantAnimation>
 
 class AudioEngine : public QObject {
     Q_OBJECT
@@ -49,7 +50,11 @@ private:
     QMediaPlayer* player;
     QAudioOutput* audioOutput;
     QTimer* pollTimer;
+    QVariantAnimation* fadeAnimation;
     int m_manualBitrate = 0;
+    float m_targetVolume = 1.0f;
+    bool m_isPausing = false;
+    bool m_isInternalPaused = false;
 };
 
 #endif
