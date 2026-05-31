@@ -2492,7 +2492,7 @@ ApplicationWindow {
                                         var maxX = progressSlider.width - durationLabel.width - width - 10
                                         return Math.max(0, Math.min(desiredX, maxX))
                                     }
-                                    Behavior on x { enabled: !progressSlider.pressed; NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
+                                    Behavior on x { enabled: !progressSlider.pressed; NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                                 }
 
                                 Text {
