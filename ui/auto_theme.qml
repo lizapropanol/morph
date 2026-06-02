@@ -355,15 +355,6 @@ ApplicationWindow {
         loadedTracksCount = limit
     }
 
-    function findTrackIndex(model, track) {
-        if (!track || !model) return -1
-        for (var i = 0; i < model.count; i++) {
-            var item = model.get(i)
-            if (item && item.id === track.id && (item.service === track.service || (!item.service && track.service === "Yandex"))) return i
-        }
-        return -1
-    }
-
     function playTrack(track, index) {
         var service = track.service || (track.coverUrl && track.coverUrl.indexOf("yandex") !== -1 ? "Yandex" : "SoundCloud")
         if (currentTrack && currentTrack.id === track.id && currentTrack.service === service) {
@@ -972,17 +963,7 @@ ApplicationWindow {
                                         }
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.preferredHeight: historyList.contentHeight + 20; color: systemTheme.card; radius: 12; border.color: systemTheme.border; border.width: 1; clip: true; visible: historyModel.count > 0
-                                            ListView { 
-                                                id: historyList; anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true; model: historyModel; delegate: trackDelegate
-                                                currentIndex: findTrackIndex(model, currentTrack)
-                                                highlight: Rectangle { 
-                                                    color: systemTheme.button; radius: 6
-                                                    opacity: (historyList.currentIndex >= 0 && historyList.currentItem && historyList.currentItem.isCurrent) ? 1.0 : 0.0
-                                                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                                                }
-                                                highlightMoveDuration: 250
-                                                highlightResizeDuration: 0
-                                            }
+                                            ListView { id: historyList; anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true; model: historyModel; delegate: trackDelegate }
                                         }
                                         Text { text: "Your recent searches will appear here"; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 14; visible: historyModel.count === 0; Layout.alignment: Qt.AlignHCenter; Layout.topMargin: 40 }
                                     }
@@ -993,17 +974,7 @@ ApplicationWindow {
                                         spacing: 20
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.preferredHeight: searchResultsList.contentHeight + 20; color: systemTheme.card; radius: 12; border.color: systemTheme.border; border.width: 1; clip: true
-                                            ListView { 
-                                                id: searchResultsList; anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true; model: searchModel; delegate: trackDelegate
-                                                currentIndex: findTrackIndex(model, currentTrack)
-                                                highlight: Rectangle { 
-                                                    color: systemTheme.button; radius: 6
-                                                    opacity: (searchResultsList.currentIndex >= 0 && searchResultsList.currentItem && searchResultsList.currentItem.isCurrent) ? 1.0 : 0.0
-                                                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                                                }
-                                                highlightMoveDuration: 250
-                                                highlightResizeDuration: 0
-                                            }
+                                            ListView { id: searchResultsList; anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true; model: searchModel; delegate: trackDelegate }
                                         }
                                     }
 
@@ -1199,42 +1170,31 @@ ApplicationWindow {
                                                     property var leftTrack: chartsModel.get(index)
                                                     property var rightTrack: (index + 10 < chartsModel.count) ? chartsModel.get(index + 10) : null
                                                 
-                                                    Rectangle {
-                                                        Layout.fillWidth: true
-                                                        Layout.preferredWidth: 1
-                                                        height: 54
-                                                        color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? systemTheme.button : (leftChartsMouseArea.containsMouse ? systemTheme.container : "transparent")
-                                                        radius: 6
-                                                        Behavior on color { ColorAnimation { duration: 250 } }
-                                                        RowLayout {
-                                                            anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                            Text { 
-                                                                text: (index + 1).toString(); 
-                                                                color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? systemTheme.accent : systemTheme.subtext; 
-                                                                font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight
-                                                                Behavior on color { ColorAnimation { duration: 250 } }
+                                                Rectangle {
+                                                    Layout.fillWidth: true
+                                                    Layout.preferredWidth: 1
+                                                    height: 54
+                                                    color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? systemTheme.button : (leftChartsMouseArea.containsMouse ? systemTheme.container : "transparent")
+                                                    radius: 6
+                                                    RowLayout {
+                                                        anchors.fill: parent; anchors.margins: 10; spacing: 15
+                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? systemTheme.accent : systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Rectangle {
+                                                            Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: systemTheme.card; radius: 6
+                                                            Image { 
+                                                                id: leftTrackImage
+                                                                anchors.fill: parent
+                                                                source: leftTrack ? MorphCache.getCachedCover(leftTrack.coverUrl || "") : ""; fillMode: Image.PreserveAspectCrop; asynchronous: true
+                                                                layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                                                onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                             }
-                                                            Rectangle {
-                                                                Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: systemTheme.card; radius: 6
-                                                                Image { 
-                                                                    id: leftTrackImage
-                                                                    anchors.fill: parent
-                                                                    source: leftTrack ? MorphCache.getCachedCover(leftTrack.coverUrl || "") : ""; fillMode: Image.PreserveAspectCrop; asynchronous: true
-                                                                    layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
-                                                                    onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
-                                                                }
-                                                                Text { anchors.centerIn: parent; text: "♪"; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 18; visible: leftTrackImage.status !== Image.Ready }
-                                                            }
-                                                            ColumnLayout {
-                                                                Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                                Text { 
-                                                                    Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; 
-                                                                    color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? systemTheme.accent : systemTheme.text; 
-                                                                    font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
-                                                                    Behavior on color { ColorAnimation { duration: 250 } }
-                                                                }
-                                                                Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
-                                                            }
+                                                            Text { anchors.centerIn: parent; text: "♪"; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 18; visible: leftTrackImage.status !== Image.Ready }
+                                                        }
+                                                        ColumnLayout {
+                                                            Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? systemTheme.accent : systemTheme.text; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
+                                                        }
                                                         Rectangle {
                                                             width: 6; height: 6; radius: 3; color: systemTheme.accent; visible: (window.cacheVersion, leftTrack ? MorphCache.isTrackCached(leftTrack.id) : false)
                                                             Layout.alignment: Qt.AlignVCenter
@@ -1268,15 +1228,9 @@ ApplicationWindow {
                                                     visible: rightTrack !== null
                                                     color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? systemTheme.button : (rightChartsMouseArea.containsMouse ? systemTheme.container : "transparent")
                                                     radius: 6
-                                                    Behavior on color { ColorAnimation { duration: 250 } }
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                        Text { 
-                                                            text: (index + 11).toString(); 
-                                                            color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? systemTheme.accent : systemTheme.subtext; 
-                                                            font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight
-                                                            Behavior on color { ColorAnimation { duration: 250 } }
-                                                        }
+                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? systemTheme.accent : systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Rectangle {
                                                             Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: systemTheme.card; radius: 6
                                                             Image { 
@@ -1290,12 +1244,7 @@ ApplicationWindow {
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                            Text { 
-                                                                Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; 
-                                                                color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? systemTheme.accent : systemTheme.text; 
-                                                                font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
-                                                                Behavior on color { ColorAnimation { duration: 250 } }
-                                                            }
+                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? systemTheme.accent : systemTheme.text; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                                             Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: systemTheme.subtext; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                                                         }
                                                         Rectangle {
@@ -1459,14 +1408,6 @@ ApplicationWindow {
                                                     id: libraryTracksList
                                                     anchors.fill: parent; anchors.margins: 10; interactive: false; clip: true
                                                     model: libraryModel; delegate: trackDelegate
-                                                    currentIndex: findTrackIndex(model, currentTrack)
-                                                    highlight: Rectangle { 
-                                                        color: systemTheme.button; radius: 6
-                                                        opacity: (libraryTracksList.currentIndex >= 0 && libraryTracksList.currentItem && libraryTracksList.currentItem.isCurrent) ? 1.0 : 0.0
-                                                        Behavior on opacity { NumberAnimation { duration: 150 } }
-                                                    }
-                                                    highlightMoveDuration: 250
-                                                    highlightResizeDuration: 0
                                                 }
                                             }
                                         }
@@ -2743,8 +2684,7 @@ ApplicationWindow {
             id: trackDelegateRoot
             width: ListView.view ? ListView.view.width : 500
             height: 54
-            property bool isCurrent: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex")))
-            color: (trackMouseArea.containsMouse && !isCurrent) ? systemTheme.container : "transparent"
+            color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? systemTheme.button : (trackMouseArea.containsMouse ? systemTheme.container : "transparent")
             radius: 6
 
             MouseArea {
@@ -2772,19 +2712,24 @@ ApplicationWindow {
                             var view = ListView.view
                             m = view ? view.model : (searchModel.count > 0 ? searchModel : historyModel)
                             trackObj = m.get(index)
+
                             var tObj = { "id": trackObj.id, "title": trackObj.title, "artist": trackObj.artist, "coverUrl": trackObj.coverUrl, "service": trackObj.service, "webUrl": trackObj.webUrl || "", "durationMs": trackObj.durationMs || 0 }
-                            
-                            var tempTracks = []
-                            for (var i = 0; i < m.count; i++) tempTracks.push(m.get(i))
-                            
+                            MorphSettings.addSearchHistory(tObj)
+
+                            historyModel.clear()
+                            var hist = MorphSettings.getSearchHistory()
+                            for (var i = 0; i < hist.length; i++) historyModel.append(hist[i])
+
                             currentPlaylist = (searchModel.count > 0 ? "SEARCH_RESULTS" : "HISTORY")
                             saveLastImport = false
+                            var tempTracks = []
+                            for (var i = 0; i < m.count; i++) tempTracks.push(m.get(i))
                             fullPlaylistTracks = tempTracks
                             libraryModel.clear()
                             loadedTracksCount = 0
                             loadNextChunk()
+
                             playTrack(tObj, index)
-                            MorphSettings.addSearchHistory(tObj)
                         } else {
                             trackObj = libraryModel.get(index)
                             playTrack(trackObj, index)
@@ -2812,12 +2757,7 @@ ApplicationWindow {
                 }
                 ColumnLayout {
                     Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                    Text { 
-                        Layout.fillWidth: true; text: title || ""; 
-                        color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? systemTheme.accent : systemTheme.text; 
-                        font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
-                        Behavior on color { ColorAnimation { duration: 250 } }
-                    }
+                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? systemTheme.accent : systemTheme.text; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
                         Image { source: getServiceIcon(model.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
