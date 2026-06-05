@@ -4078,42 +4078,6 @@ ApplicationWindow {
                                 model: selectedArtist ? selectedArtist.albums : []
                                 boundsBehavior: Flickable.StopAtBounds
                                 
-                                header: Rectangle {
-                                    width: 100
-                                    height: 100
-                                    radius: 12
-                                    color: selectedAlbum === null ? "#252525" : "#151515"
-                                    border.color: selectedAlbum === null ? "#44ff44" : "#333"
-                                    border.width: 1
-                                    
-                                    ColumnLayout {
-                                        anchors.centerIn: parent
-                                        spacing: 6
-                                        Image {
-                                            source: "qrc:/assets/music-circle.svg"
-                                            Layout.preferredWidth: 28
-                                            Layout.preferredHeight: 28
-                                            Layout.alignment: Qt.AlignHCenter
-                                            layer.enabled: true
-                                            layer.effect: ColorOverlay { color: "white" }
-                                        }
-                                        Text {
-                                            text: "Show All"
-                                            color: "white"
-                                            font.family: mainFont.name
-                                            font.pixelSize: 11
-                                            font.weight: Font.Bold
-                                            Layout.alignment: Qt.AlignHCenter
-                                        }
-                                    }
-                                    
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: selectedAlbum = null
-                                    }
-                                }
-                                
                                 delegate: Item {
                                     width: 100
                                     height: 100
@@ -4122,7 +4086,7 @@ ApplicationWindow {
                                         anchors.fill: parent
                                         radius: 12
                                         color: "#1a1a1a"
-                                        border.color: selectedAlbum === modelData ? "#44ff44" : "#333"
+                                        border.color: (selectedAlbum && selectedAlbum.title === modelData.title) ? "#44ff44" : "#333"
                                         border.width: 1
                                         clip: true
                                         
@@ -4154,7 +4118,7 @@ ApplicationWindow {
                                         Rectangle {
                                             anchors.fill: parent
                                             color: "#cc000000"
-                                            visible: albumMouseArea.containsMouse || selectedAlbum === modelData
+                                            visible: albumMouseArea.containsMouse || (selectedAlbum && selectedAlbum.title === modelData.title)
                                             radius: 12
                                             
                                             Text {
@@ -4176,7 +4140,13 @@ ApplicationWindow {
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
                                             hoverEnabled: true
-                                            onClicked: selectedAlbum = modelData
+                                            onClicked: {
+                                                if (selectedAlbum && selectedAlbum.title === modelData.title) {
+                                                    selectedAlbum = null
+                                                } else {
+                                                    selectedAlbum = modelData
+                                                }
+                                            }
                                         }
                                     }
                                 }
