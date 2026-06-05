@@ -19,6 +19,7 @@
 - **My Vibe (Personalized Wave)**: Direct integration with Yandex Music's algorithmic radio, complete with listening telemetry so your recommendations keep improving.
 - **Top Charts**: Browse and play the top tracks from Yandex Music with a clean, dual-column ranked layout.
 - **Daily Mixes**: Access personalized daily playlists from SoundCloud directly on the home screen.
+- **Artist Profiles**: Browse detailed artist profiles displaying a biography, high-resolution avatar, list of albums, and tracks directly from the player.
 - **Advanced Playlist Management**:
   - Create, rename, and delete custom playlists.
   - Set custom cover images using external URLs (Imgur, Pinterest, etc.).
