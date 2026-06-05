@@ -43,10 +43,12 @@ QVariantList YandexService::parseYandexTracks(const QJsonArray& tracks) {
         
         QJsonArray albums = trackObj["albums"].toArray();
         if (!albums.isEmpty()) {
-            track.album = QString::number(albums[0].toObject()["id"].toInt());
+            QString albumId = QString::number(albums[0].toObject()["id"].toInt());
+            track.album = albums[0].toObject()["title"].toString();
+            if (track.album.isEmpty()) track.album = albumId;
             QString coverUri = albums[0].toObject()["coverUri"].toString();
             if (!coverUri.isEmpty()) track.coverUrl = "https://" + coverUri.replace("%%", "400x400");
-            track.webUrl = "https://music.yandex.ru/album/" + track.album + "/track/" + track.id;
+            track.webUrl = "https://music.yandex.ru/album/" + albumId + "/track/" + track.id;
         } else if (trackObj.contains("coverUri")) {
             track.coverUrl = "https://" + trackObj["coverUri"].toString().replace("%%", "400x400");
             track.webUrl = "https://music.yandex.ru/track/" + track.id;
@@ -80,7 +82,7 @@ void YandexService::search(const QString& query) {
     q.addQueryItem("text", query);
     q.addQueryItem("type", "track");
     q.addQueryItem("page", "0");
-    q.addQueryItem("pageSize", "20");
+    q.addQueryItem("pageSize", "100");
     url.setQuery(q);
 
     net->get(url, m_token, [this](QNetworkReply* reply) {

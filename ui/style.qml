@@ -72,6 +72,65 @@ ApplicationWindow {
     property string oldPlaylistName: ""
     property string librarySubView: "grid"
     property string settingsSubView: "main"
+    property var selectedArtist: null
+    property var selectedAlbum: null
+    property bool isSearchingForArtistProfile: false
+    property string selectedArtistName: ""
+    property var predefinedArtists: [
+        {
+            name: "Daft Punk",
+            image: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=500&auto=format&fit=crop&q=60",
+            bio: "Daft Punk were a French electronic music duo formed in 1993 in Paris by Guy-Manuel de Homem-Christo and Thomas Bangalter.",
+            albums: [
+                {
+                    title: "Random Access Memories",
+                    coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg",
+                    tracks: [
+                        { id: "5NV6Rdv1a3I", title: "Get Lucky", durationMs: 249000, service: "YouTube", artist: "Daft Punk", album: "Random Access Memories", coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg" },
+                        { id: "a5uQMwRM24A", title: "Instant Crush", durationMs: 337000, service: "YouTube", artist: "Daft Punk", album: "Random Access Memories", coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg" }
+                    ]
+                },
+                {
+                    title: "Discovery",
+                    coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/ae/Daft_Punk_-_Discovery.jpg",
+                    tracks: [
+                        { id: "FGBhQakFDES", title: "One More Time", durationMs: 320000, service: "YouTube", artist: "Daft Punk", album: "Discovery", coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/ae/Daft_Punk_-_Discovery.jpg" },
+                        { id: "gAjR4_CbPpQ", title: "Harder, Better, Faster, Stronger", durationMs: 224000, service: "YouTube", artist: "Daft Punk", album: "Discovery", coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/ae/Daft_Punk_-_Discovery.jpg" }
+                    ]
+                }
+            ]
+        },
+        {
+            name: "The Weeknd",
+            image: "https://images.unsplash.com/photo-1601042879364-f3947d3f9c16?w=500&auto=format&fit=crop&q=60",
+            bio: "Abel Makkonen Tesfaye, known professionally as the Weeknd, is a Canadian singer-songwriter and record producer.",
+            albums: [
+                {
+                    title: "After Hours",
+                    coverUrl: "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Weeknd_-_After_Hours.png",
+                    tracks: [
+                        { id: "4NRXx6U8ABQ", title: "Blinding Lights", durationMs: 200000, service: "YouTube", artist: "The Weeknd", album: "After Hours", coverUrl: "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Weeknd_-_After_Hours.png" },
+                        { id: "XXYlSF61608", title: "Save Your Tears", durationMs: 215000, service: "YouTube", artist: "The Weeknd", album: "After Hours", coverUrl: "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Weeknd_-_After_Hours.png" }
+                    ]
+                }
+            ]
+        },
+        {
+            name: "Billie Eilish",
+            image: "https://images.unsplash.com/photo-1598387181032-a3103a2db5b3?w=500&auto=format&fit=crop&q=60",
+            bio: "Billie Eilish Pirate Baird O'Connell is an American singer-songwriter.",
+            albums: [
+                {
+                    title: "WHEN WE ALL FALL ASLEEP",
+                    coverUrl: "https://upload.wikimedia.org/wikipedia/en/3/38/When_We_All_Fall_Asleep%2C_Where_Do_We_Go%3F.png",
+                    tracks: [
+                        { id: "DyDfgMOUjCI", title: "Bad Guy", durationMs: 194000, service: "YouTube", artist: "Billie Eilish", album: "WHEN WE ALL FALL ASLEEP", coverUrl: "https://upload.wikimedia.org/wikipedia/en/3/38/When_We_All_Fall_Asleep%2C_Where_Do_We_Go%3F.png" },
+                        { id: "HUHC9tJgOPU", title: "bury a friend", durationMs: 193000, service: "YouTube", artist: "Billie Eilish", album: "WHEN WE ALL FALL ASLEEP", coverUrl: "https://upload.wikimedia.org/wikipedia/en/3/38/When_We_All_Fall_Asleep%2C_Where_Do_We_Go%3F.png" }
+                    ]
+                }
+            ]
+        }
+    ]
     property bool isEditingPlaylist: false
     property bool saveLastImport: true
     property int likesVersion: 0
@@ -311,6 +370,41 @@ ApplicationWindow {
             libraryModel.append(fullPlaylistTracks[i])
         }
         loadedTracksCount = limit
+    }
+
+    function showArtistProfile(artistName, currentTrackObj) {
+        var cleanName = artistName ? artistName.trim() : "Unknown Artist"
+        var matched = null
+        for (var i = 0; i < predefinedArtists.length; i++) {
+            if (predefinedArtists[i].name.toLowerCase() === cleanName.toLowerCase()) {
+                matched = predefinedArtists[i]
+                break
+            }
+        }
+        if (matched) {
+            selectedArtist = matched
+            selectedAlbum = null
+            artistProfilePopup.open()
+        } else {
+            selectedArtistName = cleanName
+            isSearchingForArtistProfile = true
+            var service = (currentTrackObj && currentTrackObj.service) ? currentTrackObj.service.toLowerCase() : "all"
+            if (service !== "yandex" && service !== "soundcloud" && service !== "youtube") {
+                service = "all"
+            }
+            var cover = (currentTrackObj && currentTrackObj.coverUrl) ? currentTrackObj.coverUrl : ""
+            
+            selectedArtist = {
+                name: cleanName,
+                image: cover,
+                bio: "Loading albums and tracks...",
+                albums: []
+            }
+            selectedAlbum = null
+            artistProfilePopup.open()
+            
+            MorphServices.search(cleanName, service)
+        }
     }
 
     function playTrack(track, index) {
@@ -1142,7 +1236,7 @@ ApplicationWindow {
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
                                                             Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: leftArtistMouseArea.containsMouse ? "white" : "#888"; font.family: mainFont.name; font.pixelSize: 12; font.underline: leftArtistMouseArea.containsMouse; elide: Text.ElideRight; MouseArea { id: leftArtistMouseArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: (mouse) => { mouse.accepted = true; showArtistProfile(leftTrack.artist, leftTrack) } } }
                                                         }
                                                         Rectangle {
                                                             width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, leftTrack ? MorphCache.isTrackCached(leftTrack.id) : false)
@@ -1189,7 +1283,7 @@ ApplicationWindow {
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
                                                             Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: rightArtistMouseArea.containsMouse ? "white" : "#888"; font.family: mainFont.name; font.pixelSize: 12; font.underline: rightArtistMouseArea.containsMouse; elide: Text.ElideRight; MouseArea { id: rightArtistMouseArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: (mouse) => { mouse.accepted = true; showArtistProfile(rightTrack.artist, rightTrack) } } }
                                                         }
                                                         Rectangle {
                                                             id: rightCacheDot
@@ -2487,7 +2581,7 @@ ApplicationWindow {
                                             RowLayout {
                                                 width: parent.width; spacing: 6
                                                 Image { source: currentTrack ? getServiceIcon(currentTrack.service) : ""; Layout.preferredWidth: 10; Layout.preferredHeight: 10 }
-                                                Text { Layout.fillWidth: true; text: currentTrack ? currentTrack.artist : ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
+                                                Text { Layout.fillWidth: true; text: currentTrack ? currentTrack.artist : ""; color: nowPlayingArtistMouse.containsMouse ? "white" : "#888"; font.family: mainFont.name; font.pixelSize: 12; font.underline: nowPlayingArtistMouse.containsMouse; elide: Text.ElideRight; MouseArea { id: nowPlayingArtistMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { if (currentTrack) { showArtistProfile(currentTrack.artist, currentTrack) } } } }
                                             }
                                         }
                                     }
@@ -2700,7 +2794,36 @@ ApplicationWindow {
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
                         Image { source: getServiceIcon(model.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
-                        Text { Layout.fillWidth: true; text: artist || ""; color: "#888"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
+                        Text {
+                            id: artistTextText
+                            Layout.fillWidth: true
+                            text: artist || ""
+                            color: artistTextMouseArea.containsMouse ? "white" : "#888"
+                            font.family: mainFont.name
+                            font.pixelSize: 12
+                            font.underline: artistTextMouseArea.containsMouse
+                            elide: Text.ElideRight
+                            MouseArea {
+                                id: artistTextMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: (mouse) => {
+                                    mouse.accepted = true
+                                    var tObj = {
+                                        "id": model.id,
+                                        "title": model.title,
+                                        "artist": model.artist,
+                                        "album": model.album || "",
+                                        "coverUrl": model.coverUrl,
+                                        "service": model.service || "Yandex",
+                                        "webUrl": model.webUrl || "",
+                                        "durationMs": model.durationMs || 0
+                                    }
+                                    showArtistProfile(model.artist, tObj)
+                                }
+                            }
+                        }
                     }
                 }
                 RowLayout {
@@ -2904,18 +3027,89 @@ ApplicationWindow {
     Connections {
         target: MorphServices
         function onSearchResultsReady(serviceName, results) {
-            isSearching = false
-            for (var i = 0; i < results.length; i++) {
-                var item = results[i]
-                item.service = serviceName
-                if (item.durationMs === undefined) item.durationMs = 0
-                if (item.album === undefined) item.album = ""
-                if (item.webUrl === undefined) item.webUrl = ""
-                searchModel.append(item)
+            if (isSearchingForArtistProfile) {
+                isSearchingForArtistProfile = false
+                var artistTracks = []
+                var albumsMap = {}
+                var albumsList = []
+                for (var i = 0; i < results.length; i++) {
+                    var item = results[i]
+                    item.service = serviceName
+                    if (item.durationMs === undefined) item.durationMs = 0
+                    if (item.album === undefined) item.album = ""
+                    if (item.webUrl === undefined) item.webUrl = ""
+                    if (item.artist && item.artist.toLowerCase().indexOf(selectedArtistName.toLowerCase()) !== -1) {
+                        artistTracks.push(item)
+                        var albumTitle = item.album || "Single"
+                        if (!albumsMap[albumTitle]) {
+                            albumsMap[albumTitle] = {
+                                title: albumTitle,
+                                coverUrl: item.coverUrl || "",
+                                tracks: []
+                            }
+                            albumsList.push(albumsMap[albumTitle])
+                        }
+                        albumsMap[albumTitle].tracks.push(item)
+                    }
+                }
+                if (artistTracks.length === 0) {
+                    for (var j = 0; j < results.length; j++) {
+                        var item2 = results[j]
+                        item2.service = serviceName
+                        if (item2.durationMs === undefined) item2.durationMs = 0
+                        if (item2.album === undefined) item2.album = ""
+                        if (item2.webUrl === undefined) item2.webUrl = ""
+                        artistTracks.push(item2)
+                        var albumTitle2 = item2.album || "Single"
+                        if (!albumsMap[albumTitle2]) {
+                            albumsMap[albumTitle2] = {
+                                title: albumTitle2,
+                                coverUrl: item2.coverUrl || "",
+                                tracks: []
+                            }
+                            albumsList.push(albumsMap[albumTitle2])
+                        }
+                        albumsMap[albumTitle2].tracks.push(item2)
+                    }
+                }
+                
+                var svcNameLower = serviceName.toLowerCase()
+                if (svcNameLower === "soundcloud" || svcNameLower === "youtube" || 
+                    (albumsList.length === 1 && (albumsList[0].title === "Single" || albumsList[0].title === "Tracks"))) {
+                    albumsList = []
+                }
+                
+                selectedArtist = {
+                    name: selectedArtistName,
+                    image: (artistTracks.length > 0) ? artistTracks[0].coverUrl : "",
+                    bio: selectedArtistName + " is a featured artist on " + serviceName + ".",
+                    albums: albumsList,
+                    tracks: artistTracks
+                }
+                selectedAlbum = null
+            } else {
+                isSearching = false
+                for (var k = 0; k < results.length; k++) {
+                    var item3 = results[k]
+                    item3.service = serviceName
+                    if (item3.durationMs === undefined) item3.durationMs = 0
+                    if (item3.album === undefined) item3.album = ""
+                    if (item3.webUrl === undefined) item3.webUrl = ""
+                    searchModel.append(item3)
+                }
             }
         }
         function onErrorOccurred(message) {
             isSearching = false
+            if (isSearchingForArtistProfile) {
+                isSearchingForArtistProfile = false
+                selectedArtist = {
+                    name: selectedArtistName,
+                    image: selectedArtist ? selectedArtist.image : "",
+                    bio: "Error loading profile details.",
+                    albums: []
+                }
+            }
             importPlaylistPopup.isBusy = false
             importPlaylistPopup.errorMsg = message
             showToast(message, "SYSTEM ERROR", true)
@@ -3656,6 +3850,513 @@ ApplicationWindow {
             border.color: "black"
             border.width: 18
             x: -36; y: -18
+        }
+    }
+
+    Popup {
+        id: artistProfilePopup
+        parent: Overlay.overlay
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        width: 600
+        height: 520
+        modal: true
+        focus: true
+        background: Rectangle {
+            color: "#1a1a1a"
+            radius: 12
+            border.color: "#333"
+            border.width: 1
+        }
+        
+        property int visibleTracksCount: 20
+        
+        Connections {
+            target: window
+            function onSelectedArtistChanged() {
+                artistProfilePopup.visibleTracksCount = 20
+            }
+            function onSelectedAlbumChanged() {
+                artistProfilePopup.visibleTracksCount = 20
+            }
+        }
+        
+        function getFullTracksList() {
+            if (!selectedArtist) return []
+            if (selectedAlbum) return selectedAlbum.tracks || []
+            if (selectedArtist.tracks && selectedArtist.tracks.length > 0) {
+                return selectedArtist.tracks
+            }
+            var allTracks = []
+            if (selectedArtist.albums) {
+                for (var i = 0; i < selectedArtist.albums.length; i++) {
+                    var album = selectedArtist.albums[i]
+                    if (album.tracks) {
+                        for (var j = 0; j < album.tracks.length; j++) {
+                            allTracks.push(album.tracks[j])
+                        }
+                    }
+                }
+            }
+            return allTracks
+        }
+        
+        onClosed: {
+            selectedArtist = null
+            selectedAlbum = null
+            isSearchingForArtistProfile = false
+            visibleTracksCount = 20
+        }
+        
+        Item {
+            id: popupHeader
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 120
+            
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 20
+                
+                Rectangle {
+                    Layout.preferredWidth: 80
+                    Layout.preferredHeight: 80
+                    color: "#222"
+                    radius: 40
+                    border.color: "#333"
+                    border.width: 1
+                    clip: true
+                    
+                    Image {
+                        id: artistProfilePopupImage
+                        anchors.fill: parent
+                        source: (selectedArtist && selectedArtist.image) ? MorphCache.getCachedCover(selectedArtist.image) : ""
+                        fillMode: Image.PreserveAspectCrop
+                        smooth: true
+                        layer.enabled: true
+                        layer.smooth: true
+                        sourceSize: Qt.size(160, 160)
+                        layer.effect: OpacityMask {
+                            maskSource: Rectangle { width: 80; height: 80; radius: 40 }
+                        }
+                        onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
+                    }
+                }
+                
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 4
+                    
+                    Text {
+                        text: selectedArtist ? selectedArtist.name : ""
+                        color: "white"
+                        font.family: mainFont.name
+                        font.pixelSize: 24
+                        font.weight: Font.Bold
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    
+                    Text {
+                        text: selectedArtist ? selectedArtist.bio : ""
+                        color: "#888"
+                        font.family: mainFont.name
+                        font.pixelSize: 12
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        maximumLineCount: 2
+                    }
+                }
+            }
+        }
+        
+        ColumnLayout {
+            anchors.centerIn: parent
+            visible: isSearchingForArtistProfile
+            spacing: 12
+            
+            BusyIndicator {
+                Layout.alignment: Qt.AlignHCenter
+                running: parent.visible
+            }
+            
+            Text {
+                text: "Loading..."
+                color: "#666"
+                font.family: mainFont.name
+                font.pixelSize: 12
+                Layout.alignment: Qt.AlignHCenter
+            }
+        }
+        
+        ColumnLayout {
+            anchors.centerIn: parent
+            visible: !isSearchingForArtistProfile && (!selectedArtist || !selectedArtist.albums || (selectedArtist.albums.length === 0 && (!selectedArtist.tracks || selectedArtist.tracks.length === 0)))
+            spacing: 12
+            
+            Image {
+                source: "qrc:/assets/magnify.svg"
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 32
+                Layout.alignment: Qt.AlignHCenter
+                layer.enabled: true
+                layer.effect: ColorOverlay { color: "#444" }
+            }
+            
+            Text {
+                text: "No tracks found"
+                color: "#555"
+                font.family: mainFont.name
+                font.pixelSize: 12
+                Layout.alignment: Qt.AlignHCenter
+            }
+        }
+        
+        Flickable {
+            id: artistProfileFlickable
+            anchors.top: popupHeader.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: 20
+            anchors.topMargin: 0
+            contentHeight: artistProfileContent.implicitHeight + 10
+            clip: true
+            visible: !!(selectedArtist && !isSearchingForArtistProfile && ((selectedArtist.albums && selectedArtist.albums.length > 0) || (selectedArtist.tracks && selectedArtist.tracks.length > 0)))
+            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+            
+            onContentYChanged: {
+                if (contentHeight > height && contentY >= contentHeight - height - 100) {
+                    var fullList = artistProfilePopup.getFullTracksList()
+                    if (artistProfilePopup.visibleTracksCount < fullList.length) {
+                        artistProfilePopup.visibleTracksCount = Math.min(artistProfilePopup.visibleTracksCount + 20, fullList.length)
+                    }
+                }
+            }
+            
+            ColumnLayout {
+                id: artistProfileContent
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.rightMargin: 15
+                spacing: 20
+                
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    visible: selectedArtist && selectedArtist.albums && selectedArtist.albums.length > 0
+                    
+                    Text {
+                        text: "ALBUMS"
+                        color: "#888"
+                        font.family: mainFont.name
+                        font.pixelSize: 12
+                        font.weight: Font.Bold
+                    }
+                    
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 120
+                        color: "#1a1a1a"
+                        radius: 12
+                        border.color: "#333"
+                        border.width: 1
+                        clip: true
+                        
+                        Item {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            
+                            ListView {
+                                id: albumsListView
+                                anchors.fill: parent
+                                orientation: ListView.Horizontal
+                                spacing: 15
+                                model: selectedArtist ? selectedArtist.albums : []
+                                boundsBehavior: Flickable.StopAtBounds
+                                
+                                header: Rectangle {
+                                    width: 100
+                                    height: 100
+                                    radius: 12
+                                    color: selectedAlbum === null ? "#252525" : "#151515"
+                                    border.color: selectedAlbum === null ? "#44ff44" : "#333"
+                                    border.width: 1
+                                    
+                                    ColumnLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+                                        Image {
+                                            source: "qrc:/assets/music-circle.svg"
+                                            Layout.preferredWidth: 28
+                                            Layout.preferredHeight: 28
+                                            Layout.alignment: Qt.AlignHCenter
+                                            layer.enabled: true
+                                            layer.effect: ColorOverlay { color: "white" }
+                                        }
+                                        Text {
+                                            text: "Show All"
+                                            color: "white"
+                                            font.family: mainFont.name
+                                            font.pixelSize: 11
+                                            font.weight: Font.Bold
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
+                                    }
+                                    
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: selectedAlbum = null
+                                    }
+                                }
+                                
+                                delegate: Item {
+                                    width: 100
+                                    height: 100
+                                    
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: 12
+                                        color: "#1a1a1a"
+                                        border.color: selectedAlbum === modelData ? "#44ff44" : "#333"
+                                        border.width: 1
+                                        clip: true
+                                        
+                                        Image {
+                                            id: albumImage
+                                            anchors.fill: parent
+                                            source: MorphCache.getCachedCover(modelData.coverUrl || "")
+                                            fillMode: Image.PreserveAspectCrop
+                                            asynchronous: true
+                                            smooth: true
+                                            layer.enabled: true
+                                            layer.smooth: true
+                                            sourceSize: Qt.size(200, 200)
+                                            layer.effect: OpacityMask {
+                                                maskSource: Rectangle { width: 100; height: 100; radius: 12 }
+                                            }
+                                            onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
+                                        }
+                                        
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "♪"
+                                            color: "#333"
+                                            font.family: mainFont.name
+                                            font.pixelSize: 32
+                                            visible: albumImage.status !== Image.Ready
+                                        }
+                                        
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            color: "#cc000000"
+                                            visible: albumMouseArea.containsMouse || selectedAlbum === modelData
+                                            radius: 12
+                                            
+                                            Text {
+                                                anchors.fill: parent
+                                                anchors.margins: 8
+                                                text: modelData.title
+                                                color: "white"
+                                                font.family: mainFont.name
+                                                font.pixelSize: 10
+                                                font.weight: Font.Bold
+                                                wrapMode: Text.Wrap
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                            }
+                                        }
+                                        
+                                        MouseArea {
+                                            id: albumMouseArea
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
+                                            onClicked: selectedAlbum = modelData
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    
+                    Text {
+                        text: selectedAlbum ? "TRACKS IN " + selectedAlbum.title.toUpperCase() : "TRACKS"
+                        color: "#888"
+                        font.family: mainFont.name
+                        font.pixelSize: 12
+                        font.weight: Font.Bold
+                    }
+                    
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+                        
+                        Repeater {
+                            id: popupTracksRepeater
+                            model: artistProfilePopup.getFullTracksList().slice(0, artistProfilePopup.visibleTracksCount)
+                            
+                            delegate: Rectangle {
+                                id: trackRow
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 54
+                                radius: 6
+                                color: (currentTrack && currentTrack.id === modelData.id) ? "#252525" : (trackRowMouse.containsMouse ? "#222" : "transparent")
+                                
+                                MouseArea {
+                                    id: trackRowMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        var tracksList = artistProfilePopup.getFullTracksList()
+                                        
+                                        currentPlaylist = "ARTIST_" + selectedArtist.name.toUpperCase().replace(" ", "_")
+                                        saveLastImport = false
+                                        fullPlaylistTracks = tracksList
+                                        
+                                        libraryModel.clear()
+                                        for (var j = 0; j < tracksList.length; j++) {
+                                            libraryModel.append(tracksList[j])
+                                        }
+                                        loadedTracksCount = tracksList.length
+                                        
+                                        playTrack(modelData, index)
+                                    }
+                                }
+                                
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 10
+                                    anchors.rightMargin: 10
+                                    spacing: 15
+                                    
+                                    Rectangle {
+                                        Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
+                                        Image {
+                                            id: popupTrackImage
+                                            anchors.fill: parent
+                                            source: MorphCache.getCachedCover(modelData.coverUrl || "")
+                                            fillMode: Image.PreserveAspectCrop
+                                            smooth: true
+                                            layer.enabled: true
+                                            layer.smooth: true
+                                            sourceSize: Qt.size(72, 72)
+                                            layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                            onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
+                                        }
+                                        Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: popupTrackImage.status !== Image.Ready }
+                                    }
+                                    
+                                    ColumnLayout {
+                                        Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: modelData.title || ""
+                                            color: (currentTrack && currentTrack.id === modelData.id) ? "#44ff44" : "white"
+                                            font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
+                                        }
+                                        RowLayout {
+                                            Layout.fillWidth: true; spacing: 6
+                                            Image { source: getServiceIcon(modelData.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: modelData.artist || ""
+                                                color: "#888"
+                                                font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight
+                                            }
+                                        }
+                                    }
+                                    
+                                    RowLayout {
+                                        spacing: 6
+                                        Layout.alignment: Qt.AlignVCenter
+                                        
+                                        Rectangle {
+                                            width: 6; height: 6; radius: 3; color: "#44ff44"
+                                            visible: (window.cacheVersion, MorphCache.isTrackCached(modelData.id))
+                                        }
+                                        Text {
+                                            text: formatTime(modelData.durationMs || 0)
+                                            color: "#666"; font.family: mainFont.name; font.pixelSize: 12; visible: (modelData.durationMs || 0) > 0
+                                        }
+                                        Image {
+                                            source: (window.likesVersion, MorphSettings.isLiked(modelData.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"
+                                            Layout.preferredWidth: 18
+                                            Layout.preferredHeight: 18
+                                            Layout.leftMargin: 4
+                                            sourceSize: Qt.size(36, 36)
+                                            fillMode: Image.PreserveAspectFit
+                                            smooth: true
+                                            layer.enabled: true
+                                            layer.smooth: true
+                                            layer.effect: ColorOverlay { color: "white" }
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    if (MorphSettings.isLiked(modelData.id)) {
+                                                        MorphSettings.removeLike(modelData.id)
+                                                    } else {
+                                                        var tObj = {
+                                                            "id": modelData.id,
+                                                            "title": modelData.title,
+                                                            "artist": modelData.artist,
+                                                            "coverUrl": modelData.coverUrl || "",
+                                                            "service": modelData.service || "Yandex",
+                                                            "webUrl": modelData.webUrl || "",
+                                                            "durationMs": modelData.durationMs || 0
+                                                        }
+                                                        MorphSettings.addLike(tObj)
+                                                    }
+                                                    likesVersion++
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        Button {
+            id: closeArtistProfileBtn
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.margins: 15
+            width: 28
+            height: 28
+            background: Rectangle {
+                radius: 14
+                color: closeArtistProfileBtn.hovered ? "#333" : "#222"
+                border.color: "#444"
+                border.width: 1
+            }
+            contentItem: Image {
+                source: "qrc:/assets/close.svg"
+                sourceSize.width: 36
+                sourceSize.height: 36
+                fillMode: Image.PreserveAspectFit
+                opacity: closeArtistProfileBtn.hovered ? 1.0 : 0.7
+                smooth: true
+                layer.enabled: true
+                layer.smooth: true
+                layer.effect: ColorOverlay { color: "white" }
+            }
+            onClicked: artistProfilePopup.close()
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
         }
     }
 }

@@ -80,7 +80,7 @@ void SoundCloudService::search(const QString& query) {
     if (authHeader.isEmpty()) {
         q.addQueryItem("client_id", m_token);
     }
-    q.addQueryItem("limit", "20");
+    q.addQueryItem("limit", "100");
     url.setQuery(q);
 
     net->get(url, authHeader, [this](QNetworkReply* reply) {
