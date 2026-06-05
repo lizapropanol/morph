@@ -76,61 +76,7 @@ ApplicationWindow {
     property var selectedAlbum: null
     property bool isSearchingForArtistProfile: false
     property string selectedArtistName: ""
-    property var predefinedArtists: [
-        {
-            name: "Daft Punk",
-            image: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=500&auto=format&fit=crop&q=60",
-            bio: "Daft Punk were a French electronic music duo formed in 1993 in Paris by Guy-Manuel de Homem-Christo and Thomas Bangalter.",
-            albums: [
-                {
-                    title: "Random Access Memories",
-                    coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg",
-                    tracks: [
-                        { id: "5NV6Rdv1a3I", title: "Get Lucky", durationMs: 249000, service: "YouTube", artist: "Daft Punk", album: "Random Access Memories", coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg" },
-                        { id: "a5uQMwRM24A", title: "Instant Crush", durationMs: 337000, service: "YouTube", artist: "Daft Punk", album: "Random Access Memories", coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg" }
-                    ]
-                },
-                {
-                    title: "Discovery",
-                    coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/ae/Daft_Punk_-_Discovery.jpg",
-                    tracks: [
-                        { id: "FGBhQakFDES", title: "One More Time", durationMs: 320000, service: "YouTube", artist: "Daft Punk", album: "Discovery", coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/ae/Daft_Punk_-_Discovery.jpg" },
-                        { id: "gAjR4_CbPpQ", title: "Harder, Better, Faster, Stronger", durationMs: 224000, service: "YouTube", artist: "Daft Punk", album: "Discovery", coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/ae/Daft_Punk_-_Discovery.jpg" }
-                    ]
-                }
-            ]
-        },
-        {
-            name: "The Weeknd",
-            image: "https://images.unsplash.com/photo-1601042879364-f3947d3f9c16?w=500&auto=format&fit=crop&q=60",
-            bio: "Abel Makkonen Tesfaye, known professionally as the Weeknd, is a Canadian singer-songwriter and record producer.",
-            albums: [
-                {
-                    title: "After Hours",
-                    coverUrl: "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Weeknd_-_After_Hours.png",
-                    tracks: [
-                        { id: "4NRXx6U8ABQ", title: "Blinding Lights", durationMs: 200000, service: "YouTube", artist: "The Weeknd", album: "After Hours", coverUrl: "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Weeknd_-_After_Hours.png" },
-                        { id: "XXYlSF61608", title: "Save Your Tears", durationMs: 215000, service: "YouTube", artist: "The Weeknd", album: "After Hours", coverUrl: "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Weeknd_-_After_Hours.png" }
-                    ]
-                }
-            ]
-        },
-        {
-            name: "Billie Eilish",
-            image: "https://images.unsplash.com/photo-1598387181032-a3103a2db5b3?w=500&auto=format&fit=crop&q=60",
-            bio: "Billie Eilish Pirate Baird O'Connell is an American singer-songwriter.",
-            albums: [
-                {
-                    title: "WHEN WE ALL FALL ASLEEP",
-                    coverUrl: "https://upload.wikimedia.org/wikipedia/en/3/38/When_We_All_Fall_Asleep%2C_Where_Do_We_Go%3F.png",
-                    tracks: [
-                        { id: "DyDfgMOUjCI", title: "Bad Guy", durationMs: 194000, service: "YouTube", artist: "Billie Eilish", album: "WHEN WE ALL FALL ASLEEP", coverUrl: "https://upload.wikimedia.org/wikipedia/en/3/38/When_We_All_Fall_Asleep%2C_Where_Do_We_Go%3F.png" },
-                        { id: "HUHC9tJgOPU", title: "bury a friend", durationMs: 193000, service: "YouTube", artist: "Billie Eilish", album: "WHEN WE ALL FALL ASLEEP", coverUrl: "https://upload.wikimedia.org/wikipedia/en/3/38/When_We_All_Fall_Asleep%2C_Where_Do_We_Go%3F.png" }
-                    ]
-                }
-            ]
-        }
-    ]
+
     property bool isEditingPlaylist: false
     property bool saveLastImport: true
     property int likesVersion: 0
@@ -374,37 +320,24 @@ ApplicationWindow {
 
     function showArtistProfile(artistName, currentTrackObj) {
         var cleanName = artistName ? artistName.trim() : "Unknown Artist"
-        var matched = null
-        for (var i = 0; i < predefinedArtists.length; i++) {
-            if (predefinedArtists[i].name.toLowerCase() === cleanName.toLowerCase()) {
-                matched = predefinedArtists[i]
-                break
-            }
+        selectedArtistName = cleanName
+        isSearchingForArtistProfile = true
+        var service = (currentTrackObj && currentTrackObj.service) ? currentTrackObj.service.toLowerCase() : "all"
+        if (service !== "yandex" && service !== "soundcloud" && service !== "youtube") {
+            service = "all"
         }
-        if (matched) {
-            selectedArtist = matched
-            selectedAlbum = null
-            artistProfilePopup.open()
-        } else {
-            selectedArtistName = cleanName
-            isSearchingForArtistProfile = true
-            var service = (currentTrackObj && currentTrackObj.service) ? currentTrackObj.service.toLowerCase() : "all"
-            if (service !== "yandex" && service !== "soundcloud" && service !== "youtube") {
-                service = "all"
-            }
-            var cover = (currentTrackObj && currentTrackObj.coverUrl) ? currentTrackObj.coverUrl : ""
-            
-            selectedArtist = {
-                name: cleanName,
-                image: cover,
-                bio: "Loading albums and tracks...",
-                albums: []
-            }
-            selectedAlbum = null
-            artistProfilePopup.open()
-            
-            MorphServices.search(cleanName, service)
+        var cover = (currentTrackObj && currentTrackObj.coverUrl) ? currentTrackObj.coverUrl : ""
+        
+        selectedArtist = {
+            name: cleanName,
+            image: cover,
+            bio: "Loading albums and tracks...",
+            albums: []
         }
+        selectedAlbum = null
+        artistProfilePopup.open()
+        
+        MorphServices.search(cleanName, service)
     }
 
     function playTrack(track, index) {
@@ -3937,7 +3870,7 @@ ApplicationWindow {
                         smooth: true
                         layer.enabled: true
                         layer.smooth: true
-                        sourceSize: Qt.size(160, 160)
+                        layer.mipmap: true
                         layer.effect: OpacityMask {
                             maskSource: Rectangle { width: 80; height: 80; radius: 40 }
                         }
@@ -4099,7 +4032,7 @@ ApplicationWindow {
                                             smooth: true
                                             layer.enabled: true
                                             layer.smooth: true
-                                            sourceSize: Qt.size(200, 200)
+                                            layer.mipmap: true
                                             layer.effect: OpacityMask {
                                                 maskSource: Rectangle { width: 100; height: 100; radius: 12 }
                                             }
@@ -4220,7 +4153,7 @@ ApplicationWindow {
                                             smooth: true
                                             layer.enabled: true
                                             layer.smooth: true
-                                            sourceSize: Qt.size(72, 72)
+                                            layer.mipmap: true
                                             layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                             onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                         }
