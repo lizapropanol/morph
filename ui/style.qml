@@ -340,7 +340,36 @@ ApplicationWindow {
         MorphServices.search(cleanName, service)
     }
 
-    function playTrack(track, index) {
+        function getArtistsRichText(artistStr, hoveredArtist, availableWidth) {
+        if (!artistStr) return "";
+        var avgCharWidth = 7.0;
+        var maxChars = Math.floor(availableWidth / avgCharWidth);
+        var displayStr = artistStr;
+        if (maxChars > 5 && artistStr.length > maxChars) {
+            displayStr = artistStr.substring(0, maxChars - 3) + "...";
+        }
+        var parts = displayStr.split(/(\s*,\s*|\s*&\s*|\s+feat\.\s+|\s+ft\.\s+|\s+Feat\.\s+|\s+Ft\.\s+)/i);
+        var richText = "";
+        for (var i = 0; i < parts.length; i++) {
+            var part = parts[i];
+            if (i % 2 === 0) {
+                var cleanArtist = part.trim();
+                if (cleanArtist === "") continue;
+                var isTruncatedEnd = cleanArtist.endsWith("...");
+                var linkArtist = isTruncatedEnd ? cleanArtist.substring(0, cleanArtist.length - 3) : cleanArtist;
+                var isHovered = (hoveredArtist !== "" && hoveredArtist.toLowerCase() === linkArtist.toLowerCase());
+                var color = isHovered ? "#ffffff" : "#888888";
+                var escapedArtist = cleanArtist.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                richText += "<a href=\"" + linkArtist + "\" style=\"color: " + color + "; text-decoration: none;\">" + escapedArtist + "</a>";
+            } else {
+                var escapedSep = part.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                richText += "<span style=\"color: #666666;\">" + escapedSep + "</span>";
+            }
+        }
+        return richText;
+    }
+
+function playTrack(track, index) {
         var service = track.service || (track.coverUrl && track.coverUrl.indexOf("yandex") !== -1 ? "Yandex" : "SoundCloud")
         if (currentTrack && currentTrack.id === track.id && currentTrack.service === service) {
             if (MorphAudio.isPlaying) MorphAudio.pause()
@@ -1169,7 +1198,17 @@ ApplicationWindow {
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
                                                             Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: leftArtistMouseArea.containsMouse ? "white" : "#888"; font.family: mainFont.name; font.pixelSize: 12; font.underline: leftArtistMouseArea.containsMouse; elide: Text.ElideRight; MouseArea { id: leftArtistMouseArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: (mouse) => { mouse.accepted = true; showArtistProfile(leftTrack.artist, leftTrack) } } }
+                                                            Text {
+                                                                id: leftArtistText
+                                                                Layout.preferredWidth: contentWidth
+                                                                textFormat: Text.RichText
+                                                                property string hoveredArtist: ""
+                                                                text: leftTrack ? getArtistsRichText(leftTrack.artist, hoveredArtist, leftChartsMouseArea.width - 120) : ""
+                                                                font.family: mainFont.name
+                                                                font.pixelSize: 12
+                                                                onLinkHovered: (link) => { hoveredArtist = link }
+                                                                onLinkActivated: (link) => { if (leftTrack) showArtistProfile(link, leftTrack) }
+                                                            }
                                                         }
                                                         Rectangle {
                                                             width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, leftTrack ? MorphCache.isTrackCached(leftTrack.id) : false)
@@ -1177,24 +1216,24 @@ ApplicationWindow {
                                                         }
                                                     }
                                                     MouseArea { 
-                                                        id: leftChartsMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                                        onClicked: (mouse) => { if (leftTrack) {
-                                                            if (mouse.button === Qt.RightButton) { 
-                                                                trackContextMenu.openAt(mouse.x, mouse.y, leftChartsMouseArea, leftTrack)
-                                                            }
-                                                            else {
-                                                                currentPlaylist = "CHARTS"
-                                                                saveLastImport = false
-                                                                var tempTracks = []
-                                                                for(var i=0; i<chartsModel.count; i++) tempTracks.push(chartsModel.get(i))
-                                                                fullPlaylistTracks = tempTracks
-                                                                libraryModel.clear()
-                                                                loadedTracksCount = 0
-                                                                loadNextChunk()
-                                                                playTrack(libraryModel.get(index), index)
-                                                            }
-                                                        } }
-                                                    }
+                         id: leftChartsMouseArea; anchors.fill: parent; cursorShape: (leftArtistText.hoveredArtist !== "") ? Qt.PointingHandCursor : Qt.ArrowCursor; hoverEnabled: true; acceptedButtons: Qt.LeftButton | Qt.RightButton
+                         onClicked: (mouse) => { if (leftTrack) {
+                             if (mouse.button === Qt.RightButton) { 
+                                 trackContextMenu.openAt(mouse.x, mouse.y, leftChartsMouseArea, leftTrack)
+                             }
+                             else {
+                                 currentPlaylist = "CHARTS"
+                                 saveLastImport = false
+                                 var tempTracks = []
+                                 for(var i=0; i<chartsModel.count; i++) tempTracks.push(chartsModel.get(i))
+                                 fullPlaylistTracks = tempTracks
+                                 libraryModel.clear()
+                                 loadedTracksCount = 0
+                                 loadNextChunk()
+                                 playTrack(libraryModel.get(index), index)
+                             }
+                         } }
+                    }
                                                 }
 
                                                 Rectangle {
@@ -1216,7 +1255,17 @@ ApplicationWindow {
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
                                                             Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
-                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: rightArtistMouseArea.containsMouse ? "white" : "#888"; font.family: mainFont.name; font.pixelSize: 12; font.underline: rightArtistMouseArea.containsMouse; elide: Text.ElideRight; MouseArea { id: rightArtistMouseArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: (mouse) => { mouse.accepted = true; showArtistProfile(rightTrack.artist, rightTrack) } } }
+                                                            Text {
+                                                                id: rightArtistText
+                                                                Layout.preferredWidth: contentWidth
+                                                                textFormat: Text.RichText
+                                                                property string hoveredArtist: ""
+                                                                text: rightTrack ? getArtistsRichText(rightTrack.artist, hoveredArtist, rightChartsMouseArea.width - 120) : ""
+                                                                font.family: mainFont.name
+                                                                font.pixelSize: 12
+                                                                onLinkHovered: (link) => { hoveredArtist = link }
+                                                                onLinkActivated: (link) => { if (rightTrack) showArtistProfile(link, rightTrack) }
+                                                            }
                                                         }
                                                         Rectangle {
                                                             id: rightCacheDot
@@ -1225,24 +1274,24 @@ ApplicationWindow {
                                                         }
                                                     }
                                                     MouseArea { 
-                                                        id: rightChartsMouseArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true; acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                                        onClicked: (mouse) => { if (rightTrack) {
-                                                            if (mouse.button === Qt.RightButton) { 
-                                                                trackContextMenu.openAt(mouse.x, mouse.y, rightChartsMouseArea, rightTrack)
-                                                            }
-                                                            else {
-                                                                currentPlaylist = "CHARTS"
-                                                                saveLastImport = false
-                                                                var tempTracks = []
-                                                                for(var i=0; i<chartsModel.count; i++) tempTracks.push(chartsModel.get(i))
-                                                                fullPlaylistTracks = tempTracks
-                                                                libraryModel.clear()
-                                                                loadedTracksCount = 0
-                                                                loadNextChunk()
-                                                                playTrack(libraryModel.get(index + 10), index + 10)
-                                                            }
-                                                        } }
-                                                    }
+                         id: rightChartsMouseArea; anchors.fill: parent; cursorShape: (rightArtistText.hoveredArtist !== "") ? Qt.PointingHandCursor : Qt.ArrowCursor; hoverEnabled: true; acceptedButtons: Qt.LeftButton | Qt.RightButton
+                         onClicked: (mouse) => { if (rightTrack) {
+                             if (mouse.button === Qt.RightButton) { 
+                                 trackContextMenu.openAt(mouse.x, mouse.y, rightChartsMouseArea, rightTrack)
+                             }
+                             else {
+                                 currentPlaylist = "CHARTS"
+                                 saveLastImport = false
+                                 var tempTracks = []
+                                 for(var i=0; i<chartsModel.count; i++) tempTracks.push(chartsModel.get(i))
+                                 fullPlaylistTracks = tempTracks
+                                 libraryModel.clear()
+                                 loadedTracksCount = 0
+                                 loadNextChunk()
+                                 playTrack(libraryModel.get(index + 10), index + 10)
+                             }
+                         } }
+                    }
                                                 }
                                                 
                                                 Item { Layout.fillWidth: true; Layout.preferredWidth: 1; visible: rightTrack === null }
@@ -2514,7 +2563,22 @@ ApplicationWindow {
                                             RowLayout {
                                                 width: parent.width; spacing: 6
                                                 Image { source: currentTrack ? getServiceIcon(currentTrack.service) : ""; Layout.preferredWidth: 10; Layout.preferredHeight: 10 }
-                                                Text { Layout.fillWidth: true; text: currentTrack ? currentTrack.artist : ""; color: nowPlayingArtistMouse.containsMouse ? "white" : "#888"; font.family: mainFont.name; font.pixelSize: 12; font.underline: nowPlayingArtistMouse.containsMouse; elide: Text.ElideRight; MouseArea { id: nowPlayingArtistMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { if (currentTrack) { showArtistProfile(currentTrack.artist, currentTrack) } } } }
+                                                Text {
+                                                    id: nowPlayingArtistText
+                                                    Layout.fillWidth: true
+                                                    textFormat: Text.RichText
+                                                    property string hoveredArtist: ""
+                                                    text: currentTrack ? getArtistsRichText(currentTrack.artist, hoveredArtist, trackInfoRow.width - 80) : ""
+                                                    font.family: mainFont.name
+                                                    font.pixelSize: 12
+                                                    onLinkHovered: (link) => { hoveredArtist = link }
+                                                    onLinkActivated: (link) => { if (currentTrack) showArtistProfile(link, currentTrack) }
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        acceptedButtons: Qt.NoButton
+                                                        cursorShape: parent.hoveredArtist !== "" ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -2729,32 +2793,25 @@ ApplicationWindow {
                         Image { source: getServiceIcon(model.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
                         Text {
                             id: artistTextText
-                            Layout.fillWidth: true
-                            text: artist || ""
-                            color: artistTextMouseArea.containsMouse ? "white" : "#888"
+                            Layout.preferredWidth: contentWidth
+                            textFormat: Text.RichText
+                            property string hoveredArtist: ""
+                            text: artist ? getArtistsRichText(artist, hoveredArtist, trackDelegateRoot.width - 190) : ""
                             font.family: mainFont.name
                             font.pixelSize: 12
-                            font.underline: artistTextMouseArea.containsMouse
-                            elide: Text.ElideRight
-                            MouseArea {
-                                id: artistTextMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: (mouse) => {
-                                    mouse.accepted = true
-                                    var tObj = {
-                                        "id": model.id,
-                                        "title": model.title,
-                                        "artist": model.artist,
-                                        "album": model.album || "",
-                                        "coverUrl": model.coverUrl,
-                                        "service": model.service || "Yandex",
-                                        "webUrl": model.webUrl || "",
-                                        "durationMs": model.durationMs || 0
-                                    }
-                                    showArtistProfile(model.artist, tObj)
+                            onLinkHovered: (link) => { hoveredArtist = link }
+                            onLinkActivated: (link) => {
+                                var tObj = {
+                                    "id": model.id,
+                                    "title": model.title,
+                                    "artist": model.artist,
+                                    "album": model.album || "",
+                                    "coverUrl": model.coverUrl,
+                                    "service": model.service || "Yandex",
+                                    "webUrl": model.webUrl || "",
+                                    "durationMs": model.durationMs || 0
                                 }
+                                showArtistProfile(link, tObj)
                             }
                         }
                     }
@@ -4114,26 +4171,26 @@ ApplicationWindow {
                                 color: (currentTrack && currentTrack.id === modelData.id) ? "#252525" : (trackRowMouse.containsMouse ? "#222" : "transparent")
                                 
                                 MouseArea {
-                                    id: trackRowMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        var tracksList = artistProfilePopup.getFullTracksList()
-                                        
-                                        currentPlaylist = "ARTIST_" + selectedArtist.name.toUpperCase().replace(" ", "_")
-                                        saveLastImport = false
-                                        fullPlaylistTracks = tracksList
-                                        
-                                        libraryModel.clear()
-                                        for (var j = 0; j < tracksList.length; j++) {
-                                            libraryModel.append(tracksList[j])
-                                        }
-                                        loadedTracksCount = tracksList.length
-                                        
-                                        playTrack(modelData, index)
-                                    }
-                                }
+                                     id: trackRowMouse
+                                     anchors.fill: parent
+                                     hoverEnabled: true
+                                     cursorShape: Qt.PointingHandCursor
+                                     onClicked: {
+                                         var tracksList = artistProfilePopup.getFullTracksList()
+                                         
+                                         currentPlaylist = "ARTIST_" + selectedArtist.name.toUpperCase().replace(" ", "_")
+                                         saveLastImport = false
+                                         fullPlaylistTracks = tracksList
+                                         
+                                         libraryModel.clear()
+                                         for (var j = 0; j < tracksList.length; j++) {
+                                             libraryModel.append(tracksList[j])
+                                         }
+                                         loadedTracksCount = tracksList.length
+                                         
+                                         playTrack(modelData, index)
+                                     }
+                                 }
                                 
                                 RowLayout {
                                     anchors.fill: parent
@@ -4169,11 +4226,18 @@ ApplicationWindow {
                                             Layout.fillWidth: true; spacing: 6
                                             Image { source: getServiceIcon(modelData.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
                                             Text {
-                                                Layout.fillWidth: true
-                                                text: modelData.artist || ""
-                                                color: "#888"
-                                                font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight
-                                            }
+                                                      id: popupTrackArtistText
+                                                      Layout.preferredWidth: contentWidth
+                                                      textFormat: Text.RichText
+                                                      property string hoveredArtist: ""
+                                                      text: modelData.artist ? getArtistsRichText(modelData.artist, hoveredArtist, trackRow.width - 180) : ""
+                                                      font.family: mainFont.name
+                                                      font.pixelSize: 12
+                                                      onLinkHovered: (link) => { hoveredArtist = link }
+                                                      onLinkActivated: (link) => {
+                                                          showArtistProfile(link, modelData)
+                                                      }
+                                                 }
                                         }
                                     }
                                     
