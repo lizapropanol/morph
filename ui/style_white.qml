@@ -624,7 +624,7 @@ ApplicationWindow {
                                         anchors.verticalCenter: parent.verticalCenter
                                         width: 4; height: 16
                                         radius: 2
-                                        color: "#44ff44"
+                                        color: "#b57339"
                                         opacity: (navItem.isActive && sidebarExpanded) ? 1.0 : 0.0
                                         Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                         visible: opacity > 0
@@ -638,7 +638,7 @@ ApplicationWindow {
                                     color: "transparent"
                                     anchors.verticalCenter: parent.verticalCenter
                                     x: -4
-                                    border.color: (!sidebarExpanded && navItem.isActive) ? "#00cc00" : "transparent"
+                                    border.color: (!sidebarExpanded && navItem.isActive) ? "#7e5028" : "transparent"
                                     border.width: 2
                                     Behavior on border.color { ColorAnimation { duration: 200 } }
                                 }
@@ -856,12 +856,12 @@ ApplicationWindow {
                                         Layout.fillWidth: true; spacing: 15
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.preferredHeight: 52
-                                            color: "#eeeeee"; radius: 14; border.color: searchField.activeFocus ? "#44ff44" : "#dddddd"; border.width: 1
+                                            color: "#eeeeee"; radius: 14; border.color: searchField.activeFocus ? "#b57339" : "#dddddd"; border.width: 1
                                             RowLayout {
                                                 anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 16; spacing: 12
                                                 Image {
                                                     source: "qrc:/assets/magnify.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20
-                                                    layer.enabled: true; layer.effect: ColorOverlay { color: searchField.activeFocus ? "#44ff44" : "#777777" }
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: searchField.activeFocus ? "#b57339" : "#777777" }
                                                 }
                                                 TextField {
                 placeholderTextColor: "#999"
@@ -887,7 +887,7 @@ ApplicationWindow {
                                                 model: ["all", "yandex", "soundcloud", "youtube"]
                                                 Rectangle {
                                                     Layout.preferredHeight: 32; Layout.preferredWidth: filterText.width + 24
-                                                    color: searchSource === modelData ? "#44ff44" : "#eeeeee"; radius: 16; border.color: searchSource === modelData ? "#44ff44" : "#dddddd"; border.width: 1
+                                                    color: searchSource === modelData ? "#b57339" : "#eeeeee"; radius: 16; border.color: searchSource === modelData ? "#b57339" : "#dddddd"; border.width: 1
                                                     Text {
                                                         id: filterText; anchors.centerIn: parent; text: modelData === "all" ? "All" : (modelData === "yandex" ? "Yandex Music" : (modelData === "soundcloud" ? "SoundCloud" : "YouTube"))
                                                         color: searchSource === modelData ? "#ffffff" : "#333333"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Medium
@@ -972,7 +972,7 @@ ApplicationWindow {
                                         Rectangle {
                                             id: greetingDot
                                             width: 8; height: 8; radius: 4
-                                            property color dotColor: (new Date().getHours() >= 4 && new Date().getHours() < 18) ? "#44ff44" : "#bb66ff"
+                                            property color dotColor: (new Date().getHours() >= 4 && new Date().getHours() < 18) ? "#b57339" : "#bb66ff"
                                             color: dotColor
                                             layer.enabled: true; layer.effect: DropShadow { transparentBorder: true; radius: 8; samples: 17; color: greetingDot.dotColor }
                                         }
@@ -994,7 +994,7 @@ ApplicationWindow {
                                             Text { text: "MY VIBE"; color: "#111111"; font.family: mainFont.name; font.pixelSize: 28; font.weight: Font.Black }
                                             Text { 
                                                 text: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "PLAYING NOW" : "PERSONALIZED WAVE"
-                                                color: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "#44ff44" : "#111111"
+                                                color: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "#b57339" : "#111111"
                                                 font.family: mainFont.name; font.pixelSize: 14; opacity: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 1.0 : 0.8 
                                                 font.weight: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? Font.Bold : Font.Normal
                                             }
@@ -1126,7 +1126,7 @@ ApplicationWindow {
                                                     Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#252525" : (leftChartsMouseArea.containsMouse ? "#dddddd" : "transparent"); radius: 6
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#555555"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#555555"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Rectangle {
                                                             Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#cccccc"; radius: 6
                                                             Image { 
@@ -1140,11 +1140,11 @@ ApplicationWindow {
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#111111"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#111111"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                                             Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.artist : ""; color: "#555555"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                                                         }
                                                         Rectangle {
-                                                            width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, leftTrack ? MorphCache.isTrackCached(leftTrack.id) : false)
+                                                            width: 6; height: 6; radius: 3; color: "#b57339"; visible: (window.cacheVersion, leftTrack ? MorphCache.isTrackCached(leftTrack.id) : false)
                                                             Layout.alignment: Qt.AlignVCenter
                                                         }
                                                     }
@@ -1173,7 +1173,7 @@ ApplicationWindow {
                                                     Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; visible: rightTrack !== null; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#252525" : (rightChartsMouseArea.containsMouse ? "#dddddd" : "transparent"); radius: 6
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#555555"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#555555"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Rectangle {
                                                             Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#cccccc"; radius: 6
                                                             Image { 
@@ -1187,12 +1187,12 @@ ApplicationWindow {
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#111111"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#111111"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                                             Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.artist : ""; color: "#555555"; font.family: mainFont.name; font.pixelSize: 12; elide: Text.ElideRight }
                                                         }
                                                         Rectangle {
                                                             id: rightCacheDot
-                                                            width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, rightTrack ? MorphCache.isTrackCached(rightTrack.id) : false)
+                                                            width: 6; height: 6; radius: 3; color: "#b57339"; visible: (window.cacheVersion, rightTrack ? MorphCache.isTrackCached(rightTrack.id) : false)
                                                             Layout.alignment: Qt.AlignVCenter
                                                         }
                                                     }
@@ -1728,10 +1728,10 @@ ApplicationWindow {
                                                     Rectangle { anchors.fill: parent; color: "#dddddd"; radius: 4 }
                                                     Rectangle { 
                                                         id: trackBar
-                                                        height: parent.height; color: "#44ff44"; radius: 4
+                                                        height: parent.height; color: "#b57339"; radius: 4
                                                         width: parent.width * (window.cacheVersion, (MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())))
                                                         Rectangle {
-                                                            anchors.right: parent.right; width: 4; height: parent.height; color: "#44ff44"
+                                                            anchors.right: parent.right; width: 4; height: parent.height; color: "#b57339"
                                                             visible: coverBar.visible && parent.width > 4
                                                         }
                                                     }
@@ -1750,7 +1750,7 @@ ApplicationWindow {
                                                 RowLayout {
                                                     spacing: 15
                                                     RowLayout {
-                                                        Rectangle { width: 8; height: 8; radius: 4; color: "#44ff44" }
+                                                        Rectangle { width: 8; height: 8; radius: 4; color: "#b57339" }
                                                         Text { text: "Tracks (" + Math.round((window.cacheVersion, MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())) * 100) + "%)"; color: "#777777"; font.family: mainFont.name; font.pixelSize: 11 }
                                                     }
                                                     RowLayout {
@@ -1776,7 +1776,7 @@ ApplicationWindow {
                                                         RowLayout {
                                                             anchors.fill: parent; anchors.margins: 15; spacing: 15
                                                             Rectangle { 
-                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#cccccc"; Layout.alignment: Qt.AlignVCenter
+                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#b57339" : "#cccccc"; Layout.alignment: Qt.AlignVCenter
                                                                 Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks; layer.enabled: true; layer.effect: ColorOverlay { color: "#ffffff" } }
                                                             }
                                                             Text { text: "Track Cache"; color: "#111111"; font.family: mainFont.name; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
@@ -1832,7 +1832,7 @@ ApplicationWindow {
                                                                     RowLayout {
                                                                         anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
-                                                                            width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#44ff44" : "#dddddd"
+                                                                            width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#b57339" : "#dddddd"
                                                                             Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "#ffffff" } }
                                                                         }
                                                                         Text { text: model.id; color: "#333333"; font.family: mainFont.name; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
@@ -2027,7 +2027,7 @@ ApplicationWindow {
                                             }
                                             contentItem: Text { 
                                                 text: cacheContent.showSuccess ? "CLEARED SUCCESSFULLY!" : "CLEAR SELECTED DATA"
-                                                color: cacheContent.showSuccess ? "#44ff44" : (clearBtn.enabled ? "#111111" : "#888888")
+                                                color: cacheContent.showSuccess ? "#b57339" : (clearBtn.enabled ? "#111111" : "#888888")
                                                 font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Black
                                                 horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                                             }
@@ -2051,7 +2051,7 @@ ApplicationWindow {
                                                     }
                                                     indicator: Rectangle {
                                                         implicitWidth: 36; implicitHeight: 20; radius: 10
-                                                        color: saveTrackSwitch.checked ? "#44ff44" : "#dddddd"
+                                                        color: saveTrackSwitch.checked ? "#b57339" : "#dddddd"
                                                         Behavior on color { ColorAnimation { duration: 150 } }
                                                         Rectangle {
                                                             x: saveTrackSwitch.checked ? parent.width - width - 2 : 2; y: 2
@@ -2232,7 +2232,7 @@ ApplicationWindow {
                                                             id: configTile
                                                             width: 240; height: 250
                                                             color: (activeStyleName === name) ? "#dddddd" : (styleItemMouse.containsMouse ? "#e0e0e0" : "#f5f5f5")
-                                                            radius: 12; border.color: (activeStyleName === name) ? "#44ff44" : "#cccccc"; border.width: 1
+                                                            radius: 12; border.color: (activeStyleName === name) ? "#b57339" : "#cccccc"; border.width: 1
                                                             property string activeStyleName: (window.settingsVersion, MorphSettings.getActiveStyleName())
                                                             
                                                             MouseArea {
@@ -2265,7 +2265,7 @@ ApplicationWindow {
                                                                     Image {
                                                                         anchors.centerIn: parent
                                                                         source: "qrc:/assets/notebook-outline.svg"; width: 48; height: 48; sourceSize: Qt.size(128, 128)
-                                                                        layer.enabled: true; layer.effect: ColorOverlay { color: (activeStyleName === name) ? "#44ff44" : "#888888" }
+                                                                        layer.enabled: true; layer.effect: ColorOverlay { color: (activeStyleName === name) ? "#b57339" : "#888888" }
                                                                         visible: model.preview === ""
                                                                     }
                                                                 }                                                                    
@@ -2579,7 +2579,7 @@ ApplicationWindow {
                                             Text {
                                                 id: bitrateText; anchors.centerIn: parent
                                                 text: MorphAudio.bitrate + " kbps"
-                                                color: MorphAudio.bitrate <= 128 ? "#ff4444" : (MorphAudio.bitrate <= 256 ? "#ffcc00" : "#44ff44")
+                                                color: MorphAudio.bitrate <= 128 ? "#ff4444" : (MorphAudio.bitrate <= 256 ? "#ffcc00" : "#b57339")
                                                 font.family: mainFont.name; font.pixelSize: 9; font.weight: Font.Bold
                                             }
                                         }
@@ -2694,7 +2694,7 @@ ApplicationWindow {
                 }
                 ColumnLayout {
                     Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#44ff44" : "#111111"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#b57339" : "#111111"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
                         Image { source: getServiceIcon(model.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
@@ -2706,7 +2706,7 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignVCenter
                     
                     Rectangle {
-                        width: 6; height: 6; radius: 3; color: "#44ff44"
+                        width: 6; height: 6; radius: 3; color: "#b57339"
                         visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
                     }
                     Text {
@@ -3300,7 +3300,7 @@ ApplicationWindow {
                             MorphApp.clearQmlCache()
                             previewLoader.source = Qt.resolvedUrl(finalUrl)                        }
                         background: Rectangle { color: "#f0f0f0"; radius: 6; border.color: isPreviewRunning ? "#ff4444" : "#cccccc" }
-                        contentItem: Text { text: parent.text; color: isPreviewRunning ? "#ff4444" : "#44ff44"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        contentItem: Text { text: parent.text; color: isPreviewRunning ? "#ff4444" : "#b57339"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                     }
                     Button {
@@ -3312,7 +3312,7 @@ ApplicationWindow {
                                 refreshStyleFiles()
                             }
                         }
-                        background: Rectangle { color: "#44ff44"; radius: 6 }
+                        background: Rectangle { color: "#b57339"; radius: 6 }
                         contentItem: Text { text: parent.text; color: "#ffffff"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                     }
@@ -3390,7 +3390,7 @@ ApplicationWindow {
                             width: parent.width
                             height: styleEditorArea.contentHeight > 0 ? (editorScrollView.height / styleEditorArea.contentHeight) * minimapText.height : parent.height
                             y: minimapContainer.height < minimapText.height ? minimapContainer.scrollProgress * (minimapContainer.height - height) : 0
-                            color: "#44ff44"
+                            color: "#b57339"
                             opacity: 0.1
                         }
 
@@ -3492,7 +3492,7 @@ ApplicationWindow {
                     onToggled: createStylePopup.useTemplate = checked
                     indicator: Rectangle {
                         implicitWidth: 36; implicitHeight: 20; radius: 10
-                        color: useTemplateSwitch.checked ? "#44ff44" : "white"
+                        color: useTemplateSwitch.checked ? "#b57339" : "white"
                         Behavior on color { ColorAnimation { duration: 150 } }
                         Rectangle {
                             x: useTemplateSwitch.checked ? parent.width - width - 2 : 2; y: 2

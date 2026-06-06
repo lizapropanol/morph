@@ -720,7 +720,7 @@ function playTrack(track, index) {
                                         anchors.verticalCenter: parent.verticalCenter
                                         width: 4; height: 16
                                         radius: 2
-                                        color: "#44ff44"
+                                        color: "#b57339"
                                         opacity: (navItem.isActive && sidebarExpanded) ? 1.0 : 0.0
                                         Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.InOutQuart } }
                                         visible: opacity > 0
@@ -734,7 +734,7 @@ function playTrack(track, index) {
                                     color: "transparent"
                                     anchors.verticalCenter: parent.verticalCenter
                                     x: -4
-                                    border.color: (!sidebarExpanded && navItem.isActive) ? "#44ff44" : "transparent"
+                                    border.color: (!sidebarExpanded && navItem.isActive) ? "#b57339" : "transparent"
                                     border.width: 2
                                     Behavior on border.color { ColorAnimation { duration: 200 } }
                                 }
@@ -953,12 +953,12 @@ function playTrack(track, index) {
                                         Layout.fillWidth: true; spacing: 15
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.preferredHeight: 52
-                                            color: "#111"; radius: 14; border.color: searchField.activeFocus ? "#44ff44" : "#222"; border.width: 1
+                                            color: "#111"; radius: 14; border.color: searchField.activeFocus ? "#b57339" : "#222"; border.width: 1
                                             RowLayout {
                                                 anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 16; spacing: 12
                                                 Image {
                                                     source: "qrc:/assets/magnify.svg"; Layout.preferredWidth: 20; Layout.preferredHeight: 20
-                                                    layer.enabled: true; layer.effect: ColorOverlay { color: searchField.activeFocus ? "#44ff44" : "#666" }
+                                                    layer.enabled: true; layer.effect: ColorOverlay { color: searchField.activeFocus ? "#b57339" : "#666" }
                                                 }
                                                 TextField {
                 placeholderTextColor: "#666"
@@ -984,7 +984,7 @@ function playTrack(track, index) {
                                                 model: ["all", "yandex", "soundcloud", "youtube"]
                                                 Rectangle {
                                                     Layout.preferredHeight: 32; Layout.preferredWidth: filterText.width + 24
-                                                    color: searchSource === modelData ? "#44ff44" : "#111"; radius: 16; border.color: searchSource === modelData ? "#44ff44" : "#222"; border.width: 1
+                                                    color: searchSource === modelData ? "#b57339" : "#111"; radius: 16; border.color: searchSource === modelData ? "#b57339" : "#222"; border.width: 1
                                                     Text {
                                                         id: filterText; anchors.centerIn: parent; text: modelData === "all" ? "All" : (modelData === "yandex" ? "Yandex Music" : (modelData === "soundcloud" ? "SoundCloud" : "YouTube"))
                                                         color: searchSource === modelData ? "black" : "#aaa"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Medium
@@ -1069,7 +1069,7 @@ function playTrack(track, index) {
                                         Rectangle {
                                             id: greetingDot
                                             width: 8; height: 8; radius: 4
-                                            property color dotColor: (new Date().getHours() >= 4 && new Date().getHours() < 18) ? "#44ff44" : "#bb66ff"
+                                            property color dotColor: (new Date().getHours() >= 4 && new Date().getHours() < 18) ? "#b57339" : "#bb66ff"
                                             color: dotColor
                                             layer.enabled: true; layer.effect: DropShadow { transparentBorder: true; radius: 8; samples: 17; color: greetingDot.dotColor }
                                         }
@@ -1091,7 +1091,7 @@ function playTrack(track, index) {
                                             Text { text: "MY VIBE"; color: "white"; font.family: mainFont.name; font.pixelSize: 28; font.weight: Font.Black }
                                             Text { 
                                                 text: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "PLAYING NOW" : "PERSONALIZED WAVE"
-                                                color: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "#44ff44" : "white"
+                                                color: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? "#b57339" : "white"
                                                 font.family: mainFont.name; font.pixelSize: 14; opacity: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? 1.0 : 0.8 
                                                 font.weight: (currentPlaylist === "MY_VIBE" && MorphAudio.isPlaying) ? Font.Bold : Font.Normal
                                             }
@@ -1240,7 +1240,7 @@ function playTrack(track, index) {
 
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Rectangle {
                                                             Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
                                                             Image { 
@@ -1254,7 +1254,7 @@ function playTrack(track, index) {
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                                             Text {
                                                                 id: leftArtistText
                                                                 Layout.preferredWidth: contentWidth
@@ -1307,7 +1307,7 @@ function playTrack(track, index) {
                                                             }
                                                         }
                                                         Rectangle {
-                                                            width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, leftTrack ? MorphCache.isTrackCached(leftTrack.id) : false)
+                                                            width: 6; height: 6; radius: 3; color: "#b57339"; visible: (window.cacheVersion, leftTrack ? MorphCache.isTrackCached(leftTrack.id) : false)
                                                             Layout.alignment: Qt.AlignVCenter
                                                         }
                                                     }
@@ -1354,7 +1354,7 @@ function playTrack(track, index) {
 
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
                                                         Rectangle {
                                                             Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
                                                             Image { 
@@ -1368,7 +1368,7 @@ function playTrack(track, index) {
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                                                             Text {
                                                                 id: rightArtistText
                                                                 Layout.preferredWidth: contentWidth
@@ -1422,7 +1422,7 @@ function playTrack(track, index) {
                                                         }
                                                         Rectangle {
                                                             id: rightCacheDot
-                                                            width: 6; height: 6; radius: 3; color: "#44ff44"; visible: (window.cacheVersion, rightTrack ? MorphCache.isTrackCached(rightTrack.id) : false)
+                                                            width: 6; height: 6; radius: 3; color: "#b57339"; visible: (window.cacheVersion, rightTrack ? MorphCache.isTrackCached(rightTrack.id) : false)
                                                             Layout.alignment: Qt.AlignVCenter
                                                         }
                                                     }
@@ -1958,10 +1958,10 @@ function playTrack(track, index) {
                                                     Rectangle { anchors.fill: parent; color: "#222"; radius: 4 }
                                                     Rectangle { 
                                                         id: trackBar
-                                                        height: parent.height; color: "#44ff44"; radius: 4
+                                                        height: parent.height; color: "#b57339"; radius: 4
                                                         width: parent.width * (window.cacheVersion, (MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())))
                                                         Rectangle {
-                                                            anchors.right: parent.right; width: 4; height: parent.height; color: "#44ff44"
+                                                            anchors.right: parent.right; width: 4; height: parent.height; color: "#b57339"
                                                             visible: coverBar.visible && parent.width > 4
                                                         }
                                                     }
@@ -1980,7 +1980,7 @@ function playTrack(track, index) {
                                                 RowLayout {
                                                     spacing: 15
                                                     RowLayout {
-                                                        Rectangle { width: 8; height: 8; radius: 4; color: "#44ff44" }
+                                                        Rectangle { width: 8; height: 8; radius: 4; color: "#b57339" }
                                                         Text { text: "Tracks (" + Math.round((window.cacheVersion, MorphCache.getTrackCacheSize() / Math.max(1, MorphCache.getTrackCacheSize() + MorphCache.getCoverCacheSize())) * 100) + "%)"; color: "#666"; font.family: mainFont.name; font.pixelSize: 11 }
                                                     }
                                                     RowLayout {
@@ -2006,7 +2006,7 @@ function playTrack(track, index) {
                                                         RowLayout {
                                                             anchors.fill: parent; anchors.margins: 15; spacing: 15
                                                             Rectangle { 
-                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#44ff44" : "#333"; Layout.alignment: Qt.AlignVCenter
+                                                                width: 20; height: 20; radius: 4; color: cacheContent.clearTracks ? "#b57339" : "#333"; Layout.alignment: Qt.AlignVCenter
                                                                 Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 12; height: 12; visible: cacheContent.clearTracks; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                             }
                                                             Text { text: "Track Cache"; color: "white"; font.family: mainFont.name; font.pixelSize: 14; Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter }
@@ -2062,7 +2062,7 @@ function playTrack(track, index) {
                                                                     RowLayout {
                                                                         anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
-                                                                            width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#44ff44" : "#222"
+                                                                            width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#b57339" : "#222"
                                                                             Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                                         }
                                                                         Text { text: model.id; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
@@ -2257,7 +2257,7 @@ function playTrack(track, index) {
                                             }
                                             contentItem: Text { 
                                                 text: cacheContent.showSuccess ? "CLEARED SUCCESSFULLY!" : "CLEAR SELECTED DATA"
-                                                color: cacheContent.showSuccess ? "#44ff44" : (clearBtn.enabled ? "white" : "#444")
+                                                color: cacheContent.showSuccess ? "#b57339" : (clearBtn.enabled ? "white" : "#444")
                                                 font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Black
                                                 horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                                             }
@@ -2281,7 +2281,7 @@ function playTrack(track, index) {
                                                     }
                                                     indicator: Rectangle {
                                                         implicitWidth: 36; implicitHeight: 20; radius: 10
-                                                        color: saveTrackSwitch.checked ? "#44ff44" : "#222"
+                                                        color: saveTrackSwitch.checked ? "#b57339" : "#222"
                                                         Behavior on color { ColorAnimation { duration: 150 } }
                                                         Rectangle {
                                                             x: saveTrackSwitch.checked ? parent.width - width - 2 : 2; y: 2
@@ -2462,7 +2462,7 @@ function playTrack(track, index) {
                                                             id: configTile
                                                             width: 240; height: 250
                                                             color: (activeStyleName === name) ? "#222" : (styleItemMouse.containsMouse ? "#1f1f1f" : "#131313")
-                                                            radius: 12; border.color: (activeStyleName === name) ? "#44ff44" : "#333"; border.width: 1
+                                                            radius: 12; border.color: (activeStyleName === name) ? "#b57339" : "#333"; border.width: 1
                                                             property string activeStyleName: (window.settingsVersion, MorphSettings.getActiveStyleName())
                                                             
                                                             MouseArea {
@@ -2495,7 +2495,7 @@ function playTrack(track, index) {
                                                                     Image {
                                                                         anchors.centerIn: parent
                                                                         source: "qrc:/assets/notebook-outline.svg"; width: 48; height: 48; sourceSize: Qt.size(128, 128)
-                                                                        layer.enabled: true; layer.effect: ColorOverlay { color: (activeStyleName === name) ? "#44ff44" : "#444" }
+                                                                        layer.enabled: true; layer.effect: ColorOverlay { color: (activeStyleName === name) ? "#b57339" : "#444" }
                                                                         visible: model.preview === ""
                                                                     }
                                                                 }                                                                    
@@ -2864,7 +2864,7 @@ function playTrack(track, index) {
                                             Text {
                                                 id: bitrateText; anchors.centerIn: parent
                                                 text: MorphAudio.bitrate + " kbps"
-                                                color: MorphAudio.bitrate <= 128 ? "#ff4444" : (MorphAudio.bitrate <= 256 ? "#ffcc00" : "#44ff44")
+                                                color: MorphAudio.bitrate <= 128 ? "#ff4444" : (MorphAudio.bitrate <= 256 ? "#ffcc00" : "#b57339")
                                                 font.family: mainFont.name; font.pixelSize: 9; font.weight: Font.Bold
                                             }
                                         }
@@ -2997,7 +2997,7 @@ function playTrack(track, index) {
                 }
                 ColumnLayout {
                     Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#44ff44" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
                         Image { source: getServiceIcon(model.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
@@ -3093,7 +3093,7 @@ function playTrack(track, index) {
                     Layout.alignment: Qt.AlignVCenter
                     
                     Rectangle {
-                        width: 6; height: 6; radius: 3; color: "#44ff44"
+                        width: 6; height: 6; radius: 3; color: "#b57339"
                         visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
                     }
                     Text {
@@ -3758,7 +3758,7 @@ function playTrack(track, index) {
                             MorphApp.clearQmlCache()
                             previewLoader.source = Qt.resolvedUrl(finalUrl)                        }
                         background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: isPreviewRunning ? "#ff4444" : "#333" }
-                        contentItem: Text { text: parent.text; color: isPreviewRunning ? "#ff4444" : "#44ff44"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        contentItem: Text { text: parent.text; color: isPreviewRunning ? "#ff4444" : "#b57339"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                     }
                     Button {
@@ -3770,7 +3770,7 @@ function playTrack(track, index) {
                                 refreshStyleFiles()
                             }
                         }
-                        background: Rectangle { color: "#44ff44"; radius: 6 }
+                        background: Rectangle { color: "#b57339"; radius: 6 }
                         contentItem: Text { text: parent.text; color: "black"; font.family: mainFont.name; font.pixelSize: 10; font.weight: Font.Black; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                     }
@@ -3848,7 +3848,7 @@ function playTrack(track, index) {
                             width: parent.width
                             height: styleEditorArea.contentHeight > 0 ? (editorScrollView.height / styleEditorArea.contentHeight) * minimapText.height : parent.height
                             y: minimapContainer.height < minimapText.height ? minimapContainer.scrollProgress * (minimapContainer.height - height) : 0
-                            color: "#44ff44"
+                            color: "#b57339"
                             opacity: 0.15
                         }
 
@@ -3950,7 +3950,7 @@ function playTrack(track, index) {
                     onToggled: createStylePopup.useTemplate = checked
                     indicator: Rectangle {
                         implicitWidth: 36; implicitHeight: 20; radius: 10
-                        color: useTemplateSwitch.checked ? "#44ff44" : "black"
+                        color: useTemplateSwitch.checked ? "#b57339" : "black"
                         Behavior on color { ColorAnimation { duration: 150 } }
                         Rectangle {
                             x: useTemplateSwitch.checked ? parent.width - width - 2 : 2; y: 2
@@ -4347,7 +4347,7 @@ function playTrack(track, index) {
                                         anchors.fill: parent
                                         radius: 12
                                         color: "#1a1a1a"
-                                        border.color: (selectedAlbum && selectedAlbum.title === modelData.title) ? "#44ff44" : "#333"
+                                        border.color: (selectedAlbum && selectedAlbum.title === modelData.title) ? "#b57339" : "#333"
                                         border.width: 1
                                         clip: true
                                         
@@ -4557,7 +4557,7 @@ function playTrack(track, index) {
                                         Text {
                                             Layout.fillWidth: true
                                             text: modelData.title || ""
-                                            color: (currentTrack && currentTrack.id === modelData.id) ? "#44ff44" : "white"
+                                            color: (currentTrack && currentTrack.id === modelData.id) ? "#b57339" : "white"
                                             font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
                                         }
                                         RowLayout {
@@ -4626,7 +4626,7 @@ function playTrack(track, index) {
                                         Layout.alignment: Qt.AlignVCenter
                                         
                                         Rectangle {
-                                            width: 6; height: 6; radius: 3; color: "#44ff44"
+                                            width: 6; height: 6; radius: 3; color: "#b57339"
                                             visible: (window.cacheVersion, MorphCache.isTrackCached(modelData.id))
                                         }
                                         Text {

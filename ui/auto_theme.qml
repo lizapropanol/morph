@@ -18,7 +18,7 @@ ApplicationWindow {
         property color card: "#1a1a1a"
         property color container: "#222222"
         property color button: "#333333"
-        property color accent: "#44ff44"
+        property color accent: "#b57339"
         property color text: "white"
         property color subtext: "#888888"
         property color border: "#444444"
