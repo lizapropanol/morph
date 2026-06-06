@@ -518,81 +518,8 @@ function playTrack(track, index) {
         }
     }
 
-    property bool isStartup: true
     property bool tracksExpanded: false
     property bool coversExpanded: false
-    property real revealRadius: 0
-    property real logoScale: 1.0
-
-    Timer {
-        interval: 2200
-        running: true
-        onTriggered: {
-            isStartup = false
-            revealAnimation.start()
-        }
-    }
-
-    ParallelAnimation {
-        id: revealAnimation
-        NumberAnimation {
-            target: window
-            property: "revealRadius"
-            from: 0
-            to: Math.sqrt(Math.pow(window.width, 2) + Math.pow(window.height, 2)) * 1.2
-            duration: 800
-            easing.type: Easing.InExpo
-        }
-        NumberAnimation {
-            target: window
-            property: "logoScale"
-            from: 1.0
-            to: 15.0
-            duration: 800
-            easing.type: Easing.InExpo
-        }
-    }
-
-    Item {
-        id: splashScreen
-        anchors.fill: parent
-        z: 9999
-        visible: isStartup || revealAnimation.running
-
-        Rectangle { id: splashBlack; anchors.fill: parent; color: "black"; visible: false }
-        
-        Item {
-            id: maskSource
-            anchors.fill: parent
-            visible: false
-            Rectangle {
-                width: revealRadius; height: width
-                radius: width / 2
-                color: "white"
-                anchors.centerIn: parent
-            }
-        }
-
-        OpacityMask {
-            anchors.fill: parent
-            source: splashBlack
-            maskSource: maskSource
-            invert: true
-        }
-
-        Image {
-            id: splashLogo
-            anchors.centerIn: parent
-            source: "qrc:/assets/logo.svg"
-            width: 80; height: 80
-            scale: logoScale
-            smooth: true
-            layer.enabled: true
-            layer.effect: ColorOverlay { color: "white" }
-        }
-        
-        MouseArea { anchors.fill: parent; enabled: isStartup }
-    }
 
     Rectangle {
         anchors.fill: parent
