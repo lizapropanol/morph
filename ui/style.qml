@@ -3870,7 +3870,6 @@ ApplicationWindow {
                         smooth: true
                         layer.enabled: true
                         layer.smooth: true
-                        layer.mipmap: true
                         layer.effect: OpacityMask {
                             maskSource: Rectangle { width: 80; height: 80; radius: 40 }
                         }
@@ -4032,7 +4031,6 @@ ApplicationWindow {
                                             smooth: true
                                             layer.enabled: true
                                             layer.smooth: true
-                                            layer.mipmap: true
                                             layer.effect: OpacityMask {
                                                 maskSource: Rectangle { width: 100; height: 100; radius: 12 }
                                             }
@@ -4153,7 +4151,6 @@ ApplicationWindow {
                                             smooth: true
                                             layer.enabled: true
                                             layer.smooth: true
-                                            layer.mipmap: true
                                             layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
                                             onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                         }
@@ -4207,20 +4204,24 @@ ApplicationWindow {
                                                 anchors.fill: parent
                                                 cursorShape: Qt.PointingHandCursor
                                                 onClicked: {
-                                                    if (MorphSettings.isLiked(modelData.id)) {
-                                                        MorphSettings.removeLike(modelData.id)
-                                                    } else {
-                                                        var tObj = {
-                                                            "id": modelData.id,
-                                                            "title": modelData.title,
-                                                            "artist": modelData.artist,
-                                                            "coverUrl": modelData.coverUrl || "",
-                                                            "service": modelData.service || "Yandex",
-                                                            "webUrl": modelData.webUrl || "",
-                                                            "durationMs": modelData.durationMs || 0
-                                                        }
-                                                        MorphSettings.addLike(tObj)
+                                                    var cleanTrack = {
+                                                        "id": modelData.id,
+                                                        "title": modelData.title || "Unknown Title",
+                                                        "artist": modelData.artist || "Unknown Artist",
+                                                        "album": modelData.album || "",
+                                                        "coverUrl": modelData.coverUrl || "",
+                                                        "service": modelData.service || "",
+                                                        "webUrl": modelData.webUrl || "",
+                                                        "durationMs": modelData.durationMs || 0
                                                     }
+                                                    if (cleanTrack.service === "") {
+                                                        if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("yandex") !== -1) cleanTrack.service = "Yandex"
+                                                        else if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
+                                                        else cleanTrack.service = "Yandex"
+                                                    }
+                                                    var isL = MorphSettings.isLiked(cleanTrack.id)
+                                                    MorphSettings.toggleLike(cleanTrack)
+                                                    showToast(isL ? "Removed from Liked" : "Added to Liked")
                                                     likesVersion++
                                                 }
                                             }
