@@ -347,7 +347,7 @@ ApplicationWindow {
         MorphServices.search(cleanName, service)
     }
 
-        function getArtistsRichText(artistStr, hoveredArtist, availableWidth) {
+        function getArtistsRichText(artistStr, hoveredArtist, availableWidth, transparentUnhovered) {
         if (!artistStr) return "";
         var displayStr = artistStr;
         
@@ -396,12 +396,13 @@ ApplicationWindow {
                 var isTruncatedEnd = cleanArtist.endsWith("...");
                 var linkArtist = isTruncatedEnd ? cleanArtist.substring(0, cleanArtist.length - 3) : cleanArtist;
                 var isHovered = (hoveredArtist !== "" && hoveredArtist.toLowerCase() === linkArtist.toLowerCase());
-                var color = isHovered ? "#ffffff" : "#888888";
+                var color = isHovered ? "#ffffff" : (transparentUnhovered ? "transparent" : "#888888");
                 var escapedArtist = cleanArtist.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 richText += "<a href=\"" + linkArtist + "\" style=\"color: " + color + "; text-decoration: none;\">" + escapedArtist + "</a>";
             } else {
+                var colorSep = transparentUnhovered ? "transparent" : "#666666";
                 var escapedSep = part.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                richText += "<span style=\"color: #666666;\">" + escapedSep + "</span>";
+                richText += "<span style=\"color: " + colorSep + ";\">" + escapedSep + "</span>";
             }
         }
         return richText;
@@ -1241,11 +1242,50 @@ function playTrack(track, index) {
                                                                 Layout.preferredWidth: contentWidth
                                                                 textFormat: Text.RichText
                                                                 property string hoveredArtist: ""
-                                                                text: leftTrack ? getArtistsRichText(leftTrack.artist, hoveredArtist, leftChartsMouseArea.width - 120) : ""
+                                                                text: leftTrack ? getArtistsRichText(leftTrack.artist, "", leftChartsMouseArea.width - 120) : ""
                                                                 font.family: mainFont.name
                                                                 font.pixelSize: 12
                                                                 onLinkHovered: (link) => { hoveredArtist = link }
                                                                 onLinkActivated: (link) => { if (leftTrack) showArtistProfile(link, leftTrack) }
+
+                                                                property bool useOverlay2: false
+                                                                onHoveredArtistChanged: {
+                                                                    if (hoveredArtist !== "") {
+                                                                        if (useOverlay2) {
+                                                                            leftArtistTextHovered1.activeHovered = hoveredArtist
+                                                                            useOverlay2 = false
+                                                                        } else {
+                                                                            leftArtistTextHovered2.activeHovered = hoveredArtist
+                                                                            useOverlay2 = true
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                Text {
+                                                                    id: leftArtistTextHovered1
+                                                                    anchors.fill: parent
+                                                                    textFormat: Text.RichText
+                                                                    font: parent.font
+                                                                    property string activeHovered: ""
+                                                                    text: leftTrack ? getArtistsRichText(leftTrack.artist, activeHovered, leftChartsMouseArea.width - 120, true) : ""
+                                                                    opacity: (parent.hoveredArtist !== "" && !parent.useOverlay2) ? 1 : 0
+                                                                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                                                                    onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                                                    onLinkActivated: (link) => { if (leftTrack) showArtistProfile(link, leftTrack) }
+                                                                }
+
+                                                                Text {
+                                                                    id: leftArtistTextHovered2
+                                                                    anchors.fill: parent
+                                                                    textFormat: Text.RichText
+                                                                    font: parent.font
+                                                                    property string activeHovered: ""
+                                                                    text: leftTrack ? getArtistsRichText(leftTrack.artist, activeHovered, leftChartsMouseArea.width - 120, true) : ""
+                                                                    opacity: (parent.hoveredArtist !== "" && parent.useOverlay2) ? 1 : 0
+                                                                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                                                                    onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                                                    onLinkActivated: (link) => { if (leftTrack) showArtistProfile(link, leftTrack) }
+                                                                }
                                                             }
                                                         }
                                                         Rectangle {
@@ -1298,11 +1338,50 @@ function playTrack(track, index) {
                                                                 Layout.preferredWidth: contentWidth
                                                                 textFormat: Text.RichText
                                                                 property string hoveredArtist: ""
-                                                                text: rightTrack ? getArtistsRichText(rightTrack.artist, hoveredArtist, rightChartsMouseArea.width - 120) : ""
+                                                                text: rightTrack ? getArtistsRichText(rightTrack.artist, "", rightChartsMouseArea.width - 120) : ""
                                                                 font.family: mainFont.name
                                                                 font.pixelSize: 12
                                                                 onLinkHovered: (link) => { hoveredArtist = link }
                                                                 onLinkActivated: (link) => { if (rightTrack) showArtistProfile(link, rightTrack) }
+
+                                                                property bool useOverlay2: false
+                                                                onHoveredArtistChanged: {
+                                                                    if (hoveredArtist !== "") {
+                                                                        if (useOverlay2) {
+                                                                            rightArtistTextHovered1.activeHovered = hoveredArtist
+                                                                            useOverlay2 = false
+                                                                        } else {
+                                                                            rightArtistTextHovered2.activeHovered = hoveredArtist
+                                                                            useOverlay2 = true
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                Text {
+                                                                    id: rightArtistTextHovered1
+                                                                    anchors.fill: parent
+                                                                    textFormat: Text.RichText
+                                                                    font: parent.font
+                                                                    property string activeHovered: ""
+                                                                    text: rightTrack ? getArtistsRichText(rightTrack.artist, activeHovered, rightChartsMouseArea.width - 120, true) : ""
+                                                                    opacity: (parent.hoveredArtist !== "" && !parent.useOverlay2) ? 1 : 0
+                                                                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                                                                    onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                                                    onLinkActivated: (link) => { if (rightTrack) showArtistProfile(link, rightTrack) }
+                                                                }
+
+                                                                Text {
+                                                                    id: rightArtistTextHovered2
+                                                                    anchors.fill: parent
+                                                                    textFormat: Text.RichText
+                                                                    font: parent.font
+                                                                    property string activeHovered: ""
+                                                                    text: rightTrack ? getArtistsRichText(rightTrack.artist, activeHovered, rightChartsMouseArea.width - 120, true) : ""
+                                                                    opacity: (parent.hoveredArtist !== "" && parent.useOverlay2) ? 1 : 0
+                                                                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                                                                    onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                                                    onLinkActivated: (link) => { if (rightTrack) showArtistProfile(link, rightTrack) }
+                                                                }
                                                             }
                                                         }
                                                         Rectangle {
@@ -2606,15 +2685,54 @@ function playTrack(track, index) {
                                                     Layout.fillWidth: true
                                                     textFormat: Text.RichText
                                                     property string hoveredArtist: ""
-                                                    text: currentTrack ? getArtistsRichText(currentTrack.artist, hoveredArtist, trackInfoRow.width - 80) : ""
+                                                    text: currentTrack ? getArtistsRichText(currentTrack.artist, "", trackInfoRow.width - 80) : ""
                                                     font.family: mainFont.name
                                                     font.pixelSize: 12
                                                     onLinkHovered: (link) => { hoveredArtist = link }
                                                     onLinkActivated: (link) => { if (currentTrack) showArtistProfile(link, currentTrack) }
+                                                    onHoveredArtistChanged: {
+                                                        if (hoveredArtist !== "") {
+                                                            if (useOverlay2) {
+                                                                nowPlayingArtistTextHovered1.activeHovered = hoveredArtist
+                                                                useOverlay2 = false
+                                                            } else {
+                                                                nowPlayingArtistTextHovered2.activeHovered = hoveredArtist
+                                                                useOverlay2 = true
+                                                            }
+                                                        }
+                                                    }
                                                     MouseArea {
                                                         anchors.fill: parent
                                                         acceptedButtons: Qt.NoButton
                                                         cursorShape: parent.hoveredArtist !== "" ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                                    }
+
+                                                    property bool useOverlay2: false
+
+                                                    Text {
+                                                        id: nowPlayingArtistTextHovered1
+                                                        anchors.fill: parent
+                                                        textFormat: Text.RichText
+                                                        font: parent.font
+                                                        property string activeHovered: ""
+                                                        text: currentTrack ? getArtistsRichText(currentTrack.artist, activeHovered, trackInfoRow.width - 80, true) : ""
+                                                        opacity: (parent.hoveredArtist !== "" && !parent.useOverlay2) ? 1 : 0
+                                                        Behavior on opacity { NumberAnimation { duration: 150 } }
+                                                        onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                                        onLinkActivated: (link) => { if (currentTrack) showArtistProfile(link, currentTrack) }
+                                                    }
+
+                                                    Text {
+                                                        id: nowPlayingArtistTextHovered2
+                                                        anchors.fill: parent
+                                                        textFormat: Text.RichText
+                                                        font: parent.font
+                                                        property string activeHovered: ""
+                                                        text: currentTrack ? getArtistsRichText(currentTrack.artist, activeHovered, trackInfoRow.width - 80, true) : ""
+                                                        opacity: (parent.hoveredArtist !== "" && parent.useOverlay2) ? 1 : 0
+                                                        Behavior on opacity { NumberAnimation { duration: 150 } }
+                                                        onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                                        onLinkActivated: (link) => { if (currentTrack) showArtistProfile(link, currentTrack) }
                                                     }
                                                 }
                                             }
@@ -2834,7 +2952,7 @@ function playTrack(track, index) {
                             Layout.preferredWidth: contentWidth
                             textFormat: Text.RichText
                             property string hoveredArtist: ""
-                            text: artist ? getArtistsRichText(artist, hoveredArtist, trackDelegateRoot.width - 190) : ""
+                            text: artist ? getArtistsRichText(artist, "", trackDelegateRoot.width - 190) : ""
                             font.family: mainFont.name
                             font.pixelSize: 12
                             onLinkHovered: (link) => { hoveredArtist = link }
@@ -2850,6 +2968,68 @@ function playTrack(track, index) {
                                     "durationMs": model.durationMs || 0
                                 }
                                 showArtistProfile(link, tObj)
+                            }
+                            property bool useOverlay2: false
+                            onHoveredArtistChanged: {
+                                if (hoveredArtist !== "") {
+                                    if (useOverlay2) {
+                                        artistTextTextHovered1.activeHovered = hoveredArtist
+                                        useOverlay2 = false
+                                    } else {
+                                        artistTextTextHovered2.activeHovered = hoveredArtist
+                                        useOverlay2 = true
+                                    }
+                                }
+                            }
+
+                            Text {
+                                id: artistTextTextHovered1
+                                anchors.fill: parent
+                                textFormat: Text.RichText
+                                font: parent.font
+                                property string activeHovered: ""
+                                text: artist ? getArtistsRichText(artist, activeHovered, trackDelegateRoot.width - 190, true) : ""
+                                opacity: (parent.hoveredArtist !== "" && !parent.useOverlay2) ? 1 : 0
+                                Behavior on opacity { NumberAnimation { duration: 150 } }
+                                onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                onLinkActivated: (link) => {
+                                    var tObj = {
+                                        "id": model.id,
+                                        "title": model.title,
+                                        "artist": model.artist,
+                                        "album": model.album || "",
+                                        "coverUrl": model.coverUrl,
+                                        "service": model.service || "Yandex",
+                                        "webUrl": model.webUrl || "",
+                                        "durationMs": model.durationMs || 0
+                                    }
+                                    showArtistProfile(link, tObj)
+                                }
+                            }
+
+                            Text {
+                                id: artistTextTextHovered2
+                                anchors.fill: parent
+                                textFormat: Text.RichText
+                                font: parent.font
+                                property string activeHovered: ""
+                                text: artist ? getArtistsRichText(artist, activeHovered, trackDelegateRoot.width - 190, true) : ""
+                                opacity: (parent.hoveredArtist !== "" && parent.useOverlay2) ? 1 : 0
+                                Behavior on opacity { NumberAnimation { duration: 150 } }
+                                onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                onLinkActivated: (link) => {
+                                    var tObj = {
+                                        "id": model.id,
+                                        "title": model.title,
+                                        "artist": model.artist,
+                                        "album": model.album || "",
+                                        "coverUrl": model.coverUrl,
+                                        "service": model.service || "Yandex",
+                                        "webUrl": model.webUrl || "",
+                                        "durationMs": model.durationMs || 0
+                                    }
+                                    showArtistProfile(link, tObj)
+                                }
                             }
                         }
                     }
@@ -4316,12 +4496,54 @@ function playTrack(track, index) {
                                                       Layout.preferredWidth: contentWidth
                                                       textFormat: Text.RichText
                                                       property string hoveredArtist: ""
-                                                      text: modelData.artist ? getArtistsRichText(modelData.artist, hoveredArtist, trackRow.width - 180) : ""
+                                                      text: modelData.artist ? getArtistsRichText(modelData.artist, "", trackRow.width - 180) : ""
                                                       font.family: mainFont.name
                                                       font.pixelSize: 12
                                                       onLinkHovered: (link) => { hoveredArtist = link }
                                                       onLinkActivated: (link) => {
                                                           showArtistProfile(link, modelData)
+                                                      }
+                                                      property bool useOverlay2: false
+                                                      onHoveredArtistChanged: {
+                                                          if (hoveredArtist !== "") {
+                                                              if (useOverlay2) {
+                                                                  popupTrackArtistTextHovered1.activeHovered = hoveredArtist
+                                                                  useOverlay2 = false
+                                                              } else {
+                                                                  popupTrackArtistTextHovered2.activeHovered = hoveredArtist
+                                                                  useOverlay2 = true
+                                                              }
+                                                          }
+                                                      }
+
+                                                      Text {
+                                                          id: popupTrackArtistTextHovered1
+                                                          anchors.fill: parent
+                                                          textFormat: Text.RichText
+                                                          font: parent.font
+                                                          property string activeHovered: ""
+                                                          text: modelData.artist ? getArtistsRichText(modelData.artist, activeHovered, trackRow.width - 180, true) : ""
+                                                          opacity: (parent.hoveredArtist !== "" && !parent.useOverlay2) ? 1 : 0
+                                                          Behavior on opacity { NumberAnimation { duration: 150 } }
+                                                          onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                                          onLinkActivated: (link) => {
+                                                              showArtistProfile(link, modelData)
+                                                          }
+                                                      }
+
+                                                      Text {
+                                                          id: popupTrackArtistTextHovered2
+                                                          anchors.fill: parent
+                                                          textFormat: Text.RichText
+                                                          font: parent.font
+                                                          property string activeHovered: ""
+                                                          text: modelData.artist ? getArtistsRichText(modelData.artist, activeHovered, trackRow.width - 180, true) : ""
+                                                          opacity: (parent.hoveredArtist !== "" && parent.useOverlay2) ? 1 : 0
+                                                          Behavior on opacity { NumberAnimation { duration: 150 } }
+                                                          onLinkHovered: (link) => { parent.hoveredArtist = link }
+                                                          onLinkActivated: (link) => {
+                                                              showArtistProfile(link, modelData)
+                                                          }
                                                       }
                                                  }
                                         }
