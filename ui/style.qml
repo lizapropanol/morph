@@ -4177,6 +4177,54 @@ function playTrack(track, index) {
                                     }
                                 }
                             }
+
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 32
+                                height: 32
+                                radius: 16
+                                color: "#cc000000"
+                                visible: albumsListView.contentWidth > albumsListView.width && albumsListView.contentX > 10
+                                Image {
+                                    anchors.centerIn: parent
+                                    source: "qrc:/assets/chevron-left.svg"
+                                    width: 16
+                                    height: 16
+                                    layer.enabled: true
+                                    layer.effect: ColorOverlay { color: "white" }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+                                    onClicked: (mouse) => albumsListView.flick(2000, 0)
+                                }
+                            }
+
+                            Rectangle {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 32
+                                height: 32
+                                radius: 16
+                                color: "#cc000000"
+                                visible: albumsListView.contentWidth > albumsListView.width && albumsListView.contentX < albumsListView.contentWidth - albumsListView.width - 10
+                                Image {
+                                    anchors.centerIn: parent
+                                    source: "qrc:/assets/chevron-right.svg"
+                                    width: 16
+                                    height: 16
+                                    layer.enabled: true
+                                    layer.effect: ColorOverlay { color: "white" }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+                                    onClicked: (mouse) => albumsListView.flick(-2000, 0)
+                                }
+                            }
                         }
                     }
                 }
