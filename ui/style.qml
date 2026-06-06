@@ -3789,10 +3789,10 @@ ApplicationWindow {
     Popup {
         id: artistProfilePopup
         parent: Overlay.overlay
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        width: 600
-        height: 520
+        x: parent ? (parent.width - width) / 2 : 0
+        y: parent ? (parent.height - height) / 2 : 0
+        width: parent ? Math.max(440, Math.min(parent.width * 0.6, 560)) : 520
+        height: parent ? Math.max(360, Math.min(parent.height * 0.65, 480)) : 450
         modal: true
         focus: true
         background: Rectangle {
