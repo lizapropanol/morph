@@ -1219,7 +1219,8 @@ function playTrack(track, index) {
                                                     property var rightTrack: (index + 10 < chartsModel.count) ? chartsModel.get(index + 10) : null
                                                 
                                                 Rectangle {
-                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#252525" : (leftChartsMouseArea.containsMouse ? "#222" : "transparent"); radius: 6
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#252525" : (leftChartsMouseArea.containsMouse ? "#222" : "#00222222"); radius: 6
+                                                    Behavior on color { ColorAnimation { duration: 150 } }
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
@@ -1315,7 +1316,8 @@ function playTrack(track, index) {
                                                 }
 
                                                 Rectangle {
-                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; visible: rightTrack !== null; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#252525" : (rightChartsMouseArea.containsMouse ? "#222" : "transparent"); radius: 6
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; visible: rightTrack !== null; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#252525" : (rightChartsMouseArea.containsMouse ? "#222" : "#00222222"); radius: 6
+                                                    Behavior on color { ColorAnimation { duration: 150 } }
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#44ff44" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
@@ -2870,8 +2872,9 @@ function playTrack(track, index) {
             id: trackDelegateRoot
             width: ListView.view ? ListView.view.width : 500
             height: 54
-            color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#252525" : (trackMouseArea.containsMouse ? "#222" : "transparent")
+            color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#252525" : (trackMouseArea.containsMouse ? "#222" : "#00222222")
             radius: 6
+            Behavior on color { ColorAnimation { duration: 150 } }
 
             MouseArea {
                 id: trackMouseArea
@@ -4434,7 +4437,8 @@ function playTrack(track, index) {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 54
                                 radius: 6
-                                color: (currentTrack && currentTrack.id === modelData.id) ? "#252525" : (trackRowMouse.containsMouse ? "#222" : "transparent")
+                                color: (currentTrack && currentTrack.id === modelData.id) ? "#252525" : (trackRowMouse.containsMouse ? "#222" : "#00222222")
+                                Behavior on color { ColorAnimation { duration: 150 } }
                                 
                                 MouseArea {
                                      id: trackRowMouse
