@@ -352,7 +352,7 @@ ApplicationWindow {
         var displayStr = artistStr;
         
         var measured = false;
-        if (typeof(textCanvasMeasurer) !== "undefined" && textCanvasMeasurer) {
+        if (typeof(textCanvasMeasurer) !== "undefined" && textCanvasMeasurer && textCanvasMeasurer.available) {
             var ctx = textCanvasMeasurer.getContext("2d");
             if (ctx) {
                 ctx.font = "12px " + mainFont.name;
