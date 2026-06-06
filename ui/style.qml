@@ -61,6 +61,13 @@ ApplicationWindow {
 
     FontLoader { id: mainFont; source: "qrc:/assets/fonts/interblack.otf" }
 
+    Canvas {
+        id: textCanvasMeasurer
+        visible: false
+        width: 1
+        height: 1
+    }
+
     property var currentTrack: null
     property int currentTrackIndex: -1
     property string currentView: "home"
@@ -342,12 +349,43 @@ ApplicationWindow {
 
         function getArtistsRichText(artistStr, hoveredArtist, availableWidth) {
         if (!artistStr) return "";
-        var avgCharWidth = 7.0;
-        var maxChars = Math.floor(availableWidth / avgCharWidth);
         var displayStr = artistStr;
-        if (maxChars > 5 && artistStr.length > maxChars) {
-            displayStr = artistStr.substring(0, maxChars - 3) + "...";
+        
+        var measured = false;
+        if (typeof(textCanvasMeasurer) !== "undefined" && textCanvasMeasurer) {
+            var ctx = textCanvasMeasurer.getContext("2d");
+            if (ctx) {
+                ctx.font = "12px " + mainFont.name;
+                var textWidth = ctx.measureText(displayStr).width;
+                if (textWidth > availableWidth) {
+                    var s = artistStr;
+                    var maxEstimatedChars = Math.floor(availableWidth / 4.0);
+                    if (s.length > maxEstimatedChars) {
+                        s = s.substring(0, maxEstimatedChars);
+                    }
+                    while (s.length > 0) {
+                        s = s.substring(0, s.length - 1);
+                        if (ctx.measureText(s + "...").width <= availableWidth) {
+                            displayStr = s + "...";
+                            break;
+                        }
+                    }
+                    if (s.length === 0) {
+                        displayStr = "...";
+                    }
+                }
+                measured = true;
+            }
         }
+        
+        if (!measured) {
+            var avgCharWidth = 6.2;
+            var maxChars = Math.floor(availableWidth / avgCharWidth);
+            if (maxChars > 5 && artistStr.length > maxChars) {
+                displayStr = artistStr.substring(0, maxChars - 3) + "...";
+            }
+        }
+        
         var parts = displayStr.split(/(\s*,\s*|\s*&\s*|\s+feat\.\s+|\s+ft\.\s+|\s+Feat\.\s+|\s+Ft\.\s+)/i);
         var richText = "";
         for (var i = 0; i < parts.length; i++) {
