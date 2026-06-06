@@ -1232,7 +1232,8 @@ function playTrack(track, index) {
 
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id == leftTrack.id && currentTrack.service == "Yandex") ? "#b57339" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight
+                                                            Behavior on color { ColorAnimation { duration: 150 } } }
                                                         Rectangle {
                                                             Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
                                                             Image { 
@@ -1246,7 +1247,8 @@ function playTrack(track, index) {
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: leftTrack ? leftTrack.title : ""; color: (currentTrack && leftTrack && currentTrack.id == leftTrack.id && currentTrack.service == "Yandex") ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
+                                                                Behavior on color { ColorAnimation { duration: 150 } } }
                                                             Text {
                                                                 id: leftArtistText
                                                                 Layout.preferredWidth: contentWidth
@@ -1338,7 +1340,8 @@ function playTrack(track, index) {
 
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
-                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
+                                                        Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id == rightTrack.id && currentTrack.service == "Yandex") ? "#b57339" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight
+                                                            Behavior on color { ColorAnimation { duration: 150 } } }
                                                         Rectangle {
                                                             Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
                                                             Image { 
@@ -1352,7 +1355,8 @@ function playTrack(track, index) {
                                                         }
                                                         ColumnLayout {
                                                             Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                                                            Text { Layout.fillWidth: true; text: rightTrack ? rightTrack.title : ""; color: (currentTrack && rightTrack && currentTrack.id == rightTrack.id && currentTrack.service == "Yandex") ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
+                                                                Behavior on color { ColorAnimation { duration: 150 } } }
                                                             Text {
                                                                 id: rightArtistText
                                                                 Layout.preferredWidth: contentWidth
@@ -2893,7 +2897,7 @@ function playTrack(track, index) {
             color: "transparent"
             radius: 6
 
-            property bool isCurrent: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex")))
+            property bool isCurrent: (currentTrack && currentTrack.id == model.id && (currentTrack.service == model.service || (!model.service && currentTrack.service == "Yandex")))
 
             Rectangle {
                 anchors.fill: parent
@@ -2973,7 +2977,8 @@ function playTrack(track, index) {
                 }
                 ColumnLayout {
                     Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight }
+                    Text { Layout.fillWidth: true; text: title || ""; color: (currentTrack && currentTrack.id == model.id && (currentTrack.service == model.service || (!model.service && currentTrack.service == "Yandex"))) ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
+                        Behavior on color { ColorAnimation { duration: 150 } } }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 6
                         Image { source: getServiceIcon(model.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
@@ -4527,6 +4532,7 @@ function playTrack(track, index) {
                                             text: modelData.title || ""
                                             color: (currentTrack && currentTrack.id === modelData.id) ? "#b57339" : "white"
                                             font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
+                                            Behavior on color { ColorAnimation { duration: 150 } }
                                         }
                                         RowLayout {
                                             Layout.fillWidth: true; spacing: 6
