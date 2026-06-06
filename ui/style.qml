@@ -1224,17 +1224,9 @@ function playTrack(track, index) {
 
                                                     Rectangle {
                                                         anchors.fill: parent
-                                                        color: "#252525"
-                                                        radius: 6
-                                                        opacity: parent.isCurrent ? 1 : 0
-                                                        Behavior on opacity { NumberAnimation { duration: 150 } }
-                                                    }
-
-                                                    Rectangle {
-                                                        anchors.fill: parent
                                                         color: "#222"
                                                         radius: 6
-                                                        opacity: (leftChartsMouseArea.containsMouse && !parent.isCurrent) ? 1 : 0
+                                                        opacity: (parent.isCurrent || leftChartsMouseArea.containsMouse) ? 1 : 0
                                                         Behavior on opacity { NumberAnimation { duration: 150 } }
                                                     }
 
@@ -1338,17 +1330,9 @@ function playTrack(track, index) {
 
                                                     Rectangle {
                                                         anchors.fill: parent
-                                                        color: "#252525"
-                                                        radius: 6
-                                                        opacity: parent.isCurrent ? 1 : 0
-                                                        Behavior on opacity { NumberAnimation { duration: 150 } }
-                                                    }
-
-                                                    Rectangle {
-                                                        anchors.fill: parent
                                                         color: "#222"
                                                         radius: 6
-                                                        opacity: (rightChartsMouseArea.containsMouse && !parent.isCurrent) ? 1 : 0
+                                                        opacity: (parent.isCurrent || rightChartsMouseArea.containsMouse) ? 1 : 0
                                                         Behavior on opacity { NumberAnimation { duration: 150 } }
                                                     }
 
@@ -2913,17 +2897,9 @@ function playTrack(track, index) {
 
             Rectangle {
                 anchors.fill: parent
-                color: "#252525"
-                radius: 6
-                opacity: parent.isCurrent ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 150 } }
-            }
-
-            Rectangle {
-                anchors.fill: parent
                 color: "#222"
                 radius: 6
-                opacity: (trackMouseArea.containsMouse && !parent.isCurrent) ? 1 : 0
+                opacity: (parent.isCurrent || trackMouseArea.containsMouse) ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: 150 } }
             }
 
@@ -4494,17 +4470,9 @@ function playTrack(track, index) {
 
                                 Rectangle {
                                     anchors.fill: parent
-                                    color: "#252525"
-                                    radius: 6
-                                    opacity: parent.isCurrent ? 1 : 0
-                                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                                }
-
-                                Rectangle {
-                                    anchors.fill: parent
                                     color: "#222"
                                     radius: 6
-                                    opacity: (trackRowMouse.containsMouse && !parent.isCurrent) ? 1 : 0
+                                    opacity: (parent.isCurrent || trackRowMouse.containsMouse) ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: 150 } }
                                 }
                                 

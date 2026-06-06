@@ -1123,7 +1123,7 @@ ApplicationWindow {
                                                     property var rightTrack: (index + 10 < chartsModel.count) ? chartsModel.get(index + 10) : null
                                                 
                                                 Rectangle {
-                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#252525" : (leftChartsMouseArea.containsMouse ? "#dddddd" : "transparent"); radius: 6
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#dddddd" : (leftChartsMouseArea.containsMouse ? "#dddddd" : "transparent"); radius: 6
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#555555"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
@@ -1170,7 +1170,7 @@ ApplicationWindow {
                                                 }
 
                                                 Rectangle {
-                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; visible: rightTrack !== null; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#252525" : (rightChartsMouseArea.containsMouse ? "#dddddd" : "transparent"); radius: 6
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; visible: rightTrack !== null; color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#dddddd" : (rightChartsMouseArea.containsMouse ? "#dddddd" : "transparent"); radius: 6
                                                     RowLayout {
                                                         anchors.fill: parent; anchors.margins: 10; spacing: 15
                                                         Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex") ? "#b57339" : "#555555"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight }
@@ -2621,7 +2621,7 @@ ApplicationWindow {
             id: trackDelegateRoot
             width: ListView.view ? ListView.view.width : 500
             height: 54
-            color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#252525" : (trackMouseArea.containsMouse ? "#dddddd" : "transparent")
+            color: (currentTrack && currentTrack.id === model.id && (currentTrack.service === model.service || (!model.service && currentTrack.service === "Yandex"))) ? "#dddddd" : (trackMouseArea.containsMouse ? "#dddddd" : "transparent")
             radius: 6
 
             MouseArea {
