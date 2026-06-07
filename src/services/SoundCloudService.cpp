@@ -225,8 +225,11 @@ void SoundCloudService::importPlaylist(const QString& url) {
         if (coverUrl.isEmpty()) {
             coverUrl = result["calculated_artwork_url"].toString().replace("-large", "-t500x500");
         }
-        
         QJsonArray tracks = result["tracks"].toArray();
+        if (coverUrl.isEmpty() && !tracks.isEmpty()) {
+            QJsonObject firstTrack = tracks.first().toObject();
+            coverUrl = firstTrack["artwork_url"].toString().replace("-large", "-t500x500");
+        }
         
         QStringList allTrackIds;
         for (const QJsonValue& val : tracks) {
@@ -250,12 +253,27 @@ void SoundCloudService::importPlaylist(const QString& url) {
 void SoundCloudService::fetchPlaylistTracksMetadata(const QString& playlistName, const QString& coverUrl, const QStringList& trackIds) {
     auto remainingIds = new QStringList(trackIds);
     auto allTracks = new QVariantList();
-    fetchNextPlaylistChunk(playlistName, coverUrl, remainingIds, allTracks);
+    fetchNextPlaylistChunk(playlistName, coverUrl, remainingIds, allTracks, trackIds);
 }
 
-void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, const QString& coverUrl, QStringList* remainingIds, QVariantList* allTracks) {
+void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, const QString& coverUrl, QStringList* remainingIds, QVariantList* allTracks, const QStringList& originalIds) {
     if (remainingIds->isEmpty()) {
-        emit playlistImported(playlistName, coverUrl, *allTracks);
+        QVariantList sortedTracks;
+        QMap<QString, QVariantMap> trackMap;
+        for (const QVariant& tVal : *allTracks) {
+            QVariantMap tMap = tVal.toMap();
+            trackMap[tMap["id"].toString()] = tMap;
+        }
+        for (const QString& id : originalIds) {
+            if (trackMap.contains(id)) {
+                sortedTracks.append(trackMap[id]);
+            }
+        }
+        QString finalCoverUrl = coverUrl;
+        if (finalCoverUrl.isEmpty() && !sortedTracks.isEmpty()) {
+            finalCoverUrl = sortedTracks.first().toMap()["coverUrl"].toString();
+        }
+        emit playlistImported(playlistName, finalCoverUrl, sortedTracks);
         delete remainingIds;
         delete allTracks;
         return;
@@ -278,7 +296,7 @@ void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, cons
     }
     url.setQuery(q);
 
-    net->get(url, authHeader, [this, playlistName, coverUrl, remainingIds, allTracks](QNetworkReply* reply) {
+    net->get(url, authHeader, [this, playlistName, coverUrl, remainingIds, allTracks, originalIds](QNetworkReply* reply) {
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray data = reply->readAll();
             QJsonArray results = QJsonDocument::fromJson(data).array();
@@ -302,7 +320,7 @@ void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, cons
                 allTracks->append(track.toVariantMap());
             }
         }
-        fetchNextPlaylistChunk(playlistName, coverUrl, remainingIds, allTracks);
+        fetchNextPlaylistChunk(playlistName, coverUrl, remainingIds, allTracks, originalIds);
     });
 }
 
