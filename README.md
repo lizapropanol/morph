@@ -29,7 +29,7 @@
 - **Advanced Cache Management**: Dedicated storage view with real-time size calculation and granular clearing options for tracks and covers.
 - **Real-time Bitrate Display**: Shows current track quality and bitrate information directly in the interface for all supported services.
 - **Security & Privacy**:
-  - **Hardware-Linked Encryption**: Authentication tokens are encrypted using a system-unique key derived from `/etc/machine-id`, ensuring your credentials remain secure and unusable if copied to another machine.
+  - **Hardware-Linked Encryption**: Authentication tokens are protected with dual-layer AES-256-GCM encryption. Keys are derived via PBKDF2-HMAC-SHA-512 (600,000 iterations) from a combination of system-unique identifiers, ensuring your credentials remain secure and unusable if copied to another machine.
 - **System Integration**:
   - **Discord Rich Presence**: Show your current track, artist, and playback status directly on your Discord profile.
   - **MPRIS Support**: Full integration with Linux media controllers (playerctl, system tray, etc.) for remote playback control and metadata display.

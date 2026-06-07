@@ -11,6 +11,11 @@ public:
 
 private:
     static QByteArray getSystemKey();
+    static QByteArray getSystemIdentifier();
+    static QByteArray derivePrimaryKey();
+    static QByteArray aesGcmEncrypt(const QByteArray& plaintext, const QByteArray& key);
+    static QByteArray aesGcmDecrypt(const QByteArray& data, const QByteArray& key);
+    static QString legacyDecrypt(const QByteArray& data);
 };
 
 #endif

@@ -22,6 +22,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 COMPONENTS Core Quick Qml Network Multimedia DBus Widgets Svg Core5Compat REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 add_executable(morph
     resources.qrc
@@ -60,6 +61,7 @@ target_link_libraries(morph PRIVATE
     Qt6::Widgets
     Qt6::Svg
     Qt6::Core5Compat
+    OpenSSL::Crypto
 )
 
 include(Packaging.cmake)
