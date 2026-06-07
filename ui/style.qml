@@ -1081,15 +1081,16 @@ function playTrack(track, index) {
                                                     delegate: Item {
                                                         width: 140; height: 140
                                                         Rectangle {
-                                                            anchors.fill: parent; radius: 15; color: "#1a1a1a"; clip: true
+                                                            anchors.fill: parent; radius: 20; color: "#1a1a1a"; clip: true
                                                             Image {
                                                                 id: mixImage
                                                                 anchors.fill: parent; source: MorphCache.getCachedCover(model.coverUrl || ""); fillMode: Image.PreserveAspectCrop; asynchronous: true
-                                                                layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 15 } }
+                                                                layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 140; height: 140; radius: 20 } }
                                                                 onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                             }
                                                             Text { anchors.centerIn: parent; text: "♪"; color: "#333"; font.family: mainFont.name; font.pixelSize: 40; visible: mixImage.status !== Image.Ready }
-                                                            Rectangle {                                                                anchors.fill: parent; color: "#aa000000"; visible: mixMouseArea.containsMouse; radius: 15
+                                                            Rectangle {
+                                                                anchors.fill: parent; color: "#a0b57339"; visible: mixMouseArea.containsMouse; radius: 20
                                                                 Image {
                                                                     anchors.centerIn: parent; source: "qrc:/assets/play.svg"; Layout.preferredWidth: 40; Layout.preferredHeight: 40
                                                                     layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
@@ -1146,13 +1147,15 @@ function playTrack(track, index) {
                                                     property var rightTrack: (index + 10 < chartsModel.count) ? chartsModel.get(index + 10) : null
                                                 
                                                 Rectangle {
-                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; color: "transparent"; radius: 6
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; color: "transparent"; radius: 12
                                                     property bool isCurrent: (currentTrack && leftTrack && currentTrack.id === leftTrack.id && currentTrack.service === "Yandex")
 
                                                     Rectangle {
                                                         anchors.fill: parent
-                                                        color: "#222"
-                                                        radius: 6
+                                                        color: parent.isCurrent ? "#3d2b1f" : "#282828"
+                                                        radius: 12
+                                                        border.color: parent.isCurrent ? "#b57339" : (leftChartsMouseArea.containsMouse ? "#555" : "transparent")
+                                                        border.width: 1.5
                                                         opacity: (parent.isCurrent || leftChartsMouseArea.containsMouse) ? 1 : 0
                                                         Behavior on opacity { NumberAnimation { duration: 150 } }
                                                     }
@@ -1162,12 +1165,12 @@ function playTrack(track, index) {
                                                         Text { text: (index + 1).toString(); color: (currentTrack && leftTrack && currentTrack.id == leftTrack.id && currentTrack.service == "Yandex") ? "#b57339" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight
                                                             Behavior on color { ColorAnimation { duration: 150 } } }
                                                         Rectangle {
-                                                            Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
+                                                            Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 10
                                                             Image { 
                                                                 id: leftTrackImage
                                                                 anchors.fill: parent
                                                                 source: leftTrack ? MorphCache.getCachedCover(leftTrack.coverUrl || "") : ""; fillMode: Image.PreserveAspectCrop; asynchronous: true
-                                                                layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                                                layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 10 } }
                                                                 onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                             }
                                                             Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: leftTrackImage.status !== Image.Ready }
@@ -1254,13 +1257,15 @@ function playTrack(track, index) {
                                                 }
 
                                                 Rectangle {
-                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; visible: rightTrack !== null; color: "transparent"; radius: 6
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; visible: rightTrack !== null; color: "transparent"; radius: 12
                                                     property bool isCurrent: (currentTrack && rightTrack && currentTrack.id === rightTrack.id && currentTrack.service === "Yandex")
 
                                                     Rectangle {
                                                         anchors.fill: parent
-                                                        color: "#222"
-                                                        radius: 6
+                                                        color: parent.isCurrent ? "#3d2b1f" : "#282828"
+                                                        radius: 12
+                                                        border.color: parent.isCurrent ? "#b57339" : (rightChartsMouseArea.containsMouse ? "#555" : "transparent")
+                                                        border.width: 1.5
                                                         opacity: (parent.isCurrent || rightChartsMouseArea.containsMouse) ? 1 : 0
                                                         Behavior on opacity { NumberAnimation { duration: 150 } }
                                                     }
@@ -1270,12 +1275,12 @@ function playTrack(track, index) {
                                                         Text { text: (index + 11).toString(); color: (currentTrack && rightTrack && currentTrack.id == rightTrack.id && currentTrack.service == "Yandex") ? "#b57339" : "#888"; font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight
                                                             Behavior on color { ColorAnimation { duration: 150 } } }
                                                         Rectangle {
-                                                            Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
+                                                            Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 10
                                                             Image { 
                                                                 id: rightTrackImage
                                                                 anchors.fill: parent
                                                                 source: rightTrack ? MorphCache.getCachedCover(rightTrack.coverUrl || "") : ""; Layout.preferredWidth: 36; Layout.preferredHeight: 36; fillMode: Image.PreserveAspectCrop; asynchronous: true
-                                                                layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                                                layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 10 } }
                                                                 onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                                             }
                                                             Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: rightTrackImage.status !== Image.Ready }
@@ -1433,9 +1438,9 @@ function playTrack(track, index) {
                                                     header: Item {
                                                         width: libraryGridView.width; height: 200
                                                         Rectangle {
-                                                            anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12; border.color: likedMouseArea.containsMouse ? "white" : "#333"; border.width: 1
+                                                            anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 16; border.color: likedMouseArea.containsMouse ? "#b57339" : "#333"; border.width: likedMouseArea.containsMouse ? 1.5 : 1
                                                             Rectangle {
-                                                                anchors.fill: parent; anchors.margins: 10; color: "#333"; radius: 8
+                                                                anchors.fill: parent; anchors.margins: 10; color: likedMouseArea.containsMouse ? "#3d2b1f" : "#282828"; radius: 12
                                                                 Image {
                                                                     anchors.centerIn: parent
                                                                     source: "qrc:/assets/heart.svg"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64)
@@ -1457,15 +1462,15 @@ function playTrack(track, index) {
                                                     delegate: Item {
                                                         width: 160; height: 200
                                                         Rectangle {
-                                                            anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 12; border.color: playlistMouseArea.containsMouse ? "white" : "#333"; border.width: 1
+                                                            anchors.fill: parent; anchors.margins: 10; color: "#1a1a1a"; radius: 16; border.color: playlistMouseArea.containsMouse ? "#b57339" : "#333"; border.width: playlistMouseArea.containsMouse ? 1.5 : 1
                                                             ColumnLayout {
                                                                 anchors.fill: parent; anchors.margins: 10; spacing: 8
                                                                     Rectangle {
-                                                                        Layout.fillWidth: true; Layout.preferredHeight: width; color: "#333"; radius: 8
+                                                                        Layout.fillWidth: true; Layout.preferredHeight: width; color: playlistMouseArea.containsMouse ? "#3d2b1f" : "#282828"; radius: 12
                                                                         Image {
                                                                             id: playlistImage
                                                                             anchors.fill: parent; source: coverUrl ? MorphCache.getCachedCover(coverUrl) : ""; fillMode: Image.PreserveAspectCrop
-                                                                            visible: coverUrl && coverUrl !== ""; layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 120; height: 120; radius: 8 } }
+                                                                            visible: coverUrl && coverUrl !== ""; layer.enabled: true; layer.effect: OpacityMask { maskSource: Rectangle { width: 120; height: 120; radius: 12 } }
                                                                         }
                                                                         Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 40; visible: playlistImage.status !== Image.Ready }
                                                                         Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 40; visible: !coverUrl || coverUrl === "" }
@@ -1973,18 +1978,28 @@ function playTrack(track, index) {
                                                             interactive: contentHeight > height
                                                             ScrollBar.vertical: ScrollBar { visible: parent.interactive }
                                                             delegate: Item {
+                                                                    id: detailedTrackDelegate
                                                                     width: ListView.view.width; height: 40
+                                                                    Rectangle {
+                                                                        anchors.fill: parent
+                                                                        anchors.leftMargin: 5; anchors.rightMargin: 5
+                                                                        radius: 8
+                                                                        color: detailedTrackMouseArea.containsMouse ? "#282828" : "transparent"
+                                                                    }
                                                                     RowLayout {
                                                                         anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
-                                                                            width: 16; height: 16; radius: 4; color: (cacheContent.clearTracks || model.selected) ? "#b57339" : "#222"
+                                                                            width: 18; height: 18; radius: 6; color: (cacheContent.clearTracks || model.selected) ? "#b57339" : "transparent"
+                                                                            border.color: (cacheContent.clearTracks || model.selected) ? "#b57339" : "#555"
+                                                                            border.width: 1.5
                                                                             Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearTracks || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                                         }
-                                                                        Text { text: model.id; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
+                                                                        Text { text: model.id; color: detailedTrackMouseArea.containsMouse ? "white" : "#aaa"; font.family: mainFont.name; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideRight }
                                                                         Text { text: formatSize(model.size); color: "#666"; font.family: mainFont.name; font.pixelSize: 11 }
                                                                     }
                                                                     MouseArea { 
-                                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                                        id: detailedTrackMouseArea
+                                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
                                                                         onClicked: (mouse) => {
                                                                             if (cacheContent.clearTracks) {
                                                                                 cacheContent.clearTracks = false
@@ -2065,18 +2080,28 @@ function playTrack(track, index) {
                                                             interactive: contentHeight > height
                                                             ScrollBar.vertical: ScrollBar { visible: parent.interactive }
                                                             delegate: Item {
+                                                                    id: detailedCoverDelegate
                                                                     width: ListView.view.width; height: 40
+                                                                    Rectangle {
+                                                                        anchors.fill: parent
+                                                                        anchors.leftMargin: 5; anchors.rightMargin: 5
+                                                                        radius: 8
+                                                                        color: detailedCoverMouseArea.containsMouse ? "#282828" : "transparent"
+                                                                    }
                                                                     RowLayout {
                                                                         anchors.fill: parent; anchors.leftMargin: 15; anchors.rightMargin: 15; spacing: 15
                                                                         Rectangle { 
-                                                                            width: 16; height: 16; radius: 4; color: (cacheContent.clearCovers || model.selected) ? "#bb66ff" : "#222"
+                                                                            width: 18; height: 18; radius: 6; color: (cacheContent.clearCovers || model.selected) ? "#bb66ff" : "transparent"
+                                                                            border.color: (cacheContent.clearCovers || model.selected) ? "#bb66ff" : "#555"
+                                                                            border.width: 1.5
                                                                             Image { anchors.centerIn: parent; source: "qrc:/assets/check.svg"; width: 10; height: 10; visible: cacheContent.clearCovers || model.selected; layer.enabled: true; layer.effect: ColorOverlay { color: "black" } }
                                                                         }
-                                                                        Text { text: model.name; color: "#aaa"; font.family: mainFont.name; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
+                                                                        Text { text: model.name; color: detailedCoverMouseArea.containsMouse ? "white" : "#aaa"; font.family: mainFont.name; font.pixelSize: 12; Layout.fillWidth: true; elide: Text.ElideMiddle }
                                                                         Text { text: formatSize(model.size); color: "#666"; font.family: mainFont.name; font.pixelSize: 11 }
                                                                     }
                                                                     MouseArea { 
-                                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                                                        id: detailedCoverMouseArea
+                                                                        anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
                                                                         onClicked: (mouse) => {
                                                                             if (cacheContent.clearCovers) {
                                                                                 cacheContent.clearCovers = false
@@ -2376,8 +2401,8 @@ function playTrack(track, index) {
                                                         delegate: Rectangle {
                                                             id: configTile
                                                             width: 240; height: 250
-                                                            color: (activeStyleName === name) ? "#222" : (styleItemMouse.containsMouse ? "#1f1f1f" : "#131313")
-                                                            radius: 12; border.color: (activeStyleName === name) ? "#b57339" : "#333"; border.width: 1
+                                                            color: (activeStyleName === name) ? "#3d2b1f" : (styleItemMouse.containsMouse ? "#282828" : "#181818")
+                                                            radius: 16; border.color: (activeStyleName === name) ? "#b57339" : (styleItemMouse.containsMouse ? "#555" : "#333"); border.width: (activeStyleName === name) ? 1.5 : 1
                                                             property string activeStyleName: (window.settingsVersion, MorphSettings.getActiveStyleName())
                                                             
                                                             MouseArea {
@@ -2395,7 +2420,7 @@ function playTrack(track, index) {
                                                                 anchors.fill: parent; anchors.margins: 12; spacing: 10
 
                                                                 Rectangle {
-                                                                    Layout.fillWidth: true; Layout.preferredHeight: 122; color: "#111"; radius: 4; clip: true
+                                                                    Layout.fillWidth: true; Layout.preferredHeight: 122; color: "#111"; radius: 10; clip: true
                                                                     Image {
                                                                         id: previewImage
                                                                         anchors.fill: parent
@@ -2405,7 +2430,7 @@ function playTrack(track, index) {
                                                                         visible: model.preview !== ""
                                                                         smooth: true
                                                                         layer.enabled: true
-                                                                        layer.effect: OpacityMask { maskSource: Rectangle { width: previewImage.width; height: previewImage.height; radius: 4 } }
+                                                                        layer.effect: OpacityMask { maskSource: Rectangle { width: previewImage.width; height: previewImage.height; radius: 10 } }
                                                                     }
                                                                     Image {
                                                                         anchors.centerIn: parent
@@ -2822,14 +2847,16 @@ function playTrack(track, index) {
             width: ListView.view ? ListView.view.width : 500
             height: 54
             color: "transparent"
-            radius: 6
+            radius: 12
 
             property bool isCurrent: (currentTrack && currentTrack.id == model.id && (currentTrack.service == model.service || (!model.service && currentTrack.service == "Yandex")))
 
             Rectangle {
                 anchors.fill: parent
-                color: "#222"
-                radius: 6
+                color: parent.isCurrent ? "#3d2b1f" : "#282828"
+                radius: 12
+                border.color: parent.isCurrent ? "#b57339" : (trackMouseArea.containsMouse ? "#555" : "transparent")
+                border.width: 1.5
                 opacity: (parent.isCurrent || trackMouseArea.containsMouse) ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: 150 } }
             }
@@ -2891,13 +2918,13 @@ function playTrack(track, index) {
                 anchors.rightMargin: 10
                 spacing: 15
                 Rectangle {
-                    Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
+                    Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 10
                     Image { 
                         id: trackImage
                         anchors.fill: parent
                         source: MorphCache.getCachedCover(coverUrl || ""); fillMode: Image.PreserveAspectCrop 
                         layer.enabled: true
-                        layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                        layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 10 } }
                         onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                     }
                     Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: trackImage.status !== Image.Ready }
@@ -3009,9 +3036,11 @@ function playTrack(track, index) {
                         color: "#666"; font.family: mainFont.name; font.pixelSize: 12; visible: (durationMs || 0) > 0
                     }
                     Image {
-                        source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
+                        id: heartIcon
+                        source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "#b57339" : (heartMouseArea.containsMouse ? "white" : "#888") }
                         MouseArea { 
-                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor 
+                            id: heartMouseArea
+                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
                             onClicked: (mouse) => {
                                 var trackObj;
                                 if (currentView === "search") {
@@ -3160,7 +3189,7 @@ function playTrack(track, index) {
         parent: Overlay.overlay
         width: 180; height: Math.min(300, (playlistsModel.count * 40) + 10)
         padding: 5
-        background: Rectangle { color: "#1a1a1a"; radius: 6; border.color: "#333"; border.width: 1 }
+        background: Rectangle { color: "#1a1a1a"; radius: 12; border.color: "#333"; border.width: 1 }
         closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
 
         ListView {
@@ -3168,10 +3197,10 @@ function playTrack(track, index) {
             model: playlistsModel
             clip: true
             delegate: Rectangle {
-                width: 170; height: 40; color: plItemMouse.containsMouse ? "#333" : "transparent"; radius: 4
+                width: 170; height: 40; color: plItemMouse.containsMouse ? "#3d2b1f" : "transparent"; radius: 8
                 Text {
                     anchors.centerIn: parent; width: parent.width - 20
-                    text: model.name; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black
+                    text: model.name; color: plItemMouse.containsMouse ? "#b57339" : "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black
                     elide: Text.ElideRight; horizontalAlignment: Text.AlignHCenter
                 }
                 MouseArea {
@@ -4252,11 +4281,12 @@ function playTrack(track, index) {
                                     height: 100
                                     
                                     Rectangle {
+                                        id: albumTileRect
                                         anchors.fill: parent
-                                        radius: 12
+                                        radius: 16
                                         color: "#1a1a1a"
                                         border.color: (selectedAlbum && selectedAlbum.title === modelData.title) ? "#b57339" : "#333"
-                                        border.width: 1
+                                        border.width: (selectedAlbum && selectedAlbum.title === modelData.title) ? 2 : 1
                                         clip: true
                                         
                                         Image {
@@ -4269,7 +4299,7 @@ function playTrack(track, index) {
                                             layer.enabled: true
                                             layer.smooth: true
                                             layer.effect: OpacityMask {
-                                                maskSource: Rectangle { width: 100; height: 100; radius: 12 }
+                                                maskSource: Rectangle { width: 100; height: 100; radius: 16 }
                                             }
                                             onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                         }
@@ -4285,9 +4315,9 @@ function playTrack(track, index) {
                                         
                                         Rectangle {
                                             anchors.fill: parent
-                                            color: "#cc000000"
+                                            color: "#e6151515"
                                             visible: albumMouseArea.containsMouse || (selectedAlbum && selectedAlbum.title === modelData.title)
-                                            radius: 12
+                                            radius: 16
                                             
                                             Text {
                                                 anchors.fill: parent
@@ -4392,21 +4422,23 @@ function playTrack(track, index) {
                             model: artistProfilePopup.getFullTracksList().slice(0, artistProfilePopup.visibleTracksCount)
                             
                             delegate: Rectangle {
-                                id: trackRow
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 54
-                                radius: 6
-                                color: "transparent"
-
-                                property bool isCurrent: (currentTrack && currentTrack.id === modelData.id)
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    color: "#222"
-                                    radius: 6
-                                    opacity: (parent.isCurrent || trackRowMouse.containsMouse) ? 1 : 0
-                                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                                }
+                                 id: trackRow
+                                 Layout.fillWidth: true
+                                 Layout.preferredHeight: 54
+                                 radius: 12
+                                 color: "transparent"
+ 
+                                 property bool isCurrent: (currentTrack && currentTrack.id === modelData.id)
+ 
+                                 Rectangle {
+                                     anchors.fill: parent
+                                     color: parent.isCurrent ? "#3d2b1f" : "#282828"
+                                     radius: 12
+                                     border.color: parent.isCurrent ? "#b57339" : (trackRowMouse.containsMouse ? "#555" : "transparent")
+                                     border.width: 1.5
+                                     opacity: (parent.isCurrent || trackRowMouse.containsMouse) ? 1 : 0
+                                     Behavior on opacity { NumberAnimation { duration: 150 } }
+                                 }
                                 
                                 MouseArea {
                                      id: trackRowMouse
@@ -4436,17 +4468,17 @@ function playTrack(track, index) {
                                     anchors.rightMargin: 10
                                     spacing: 15
                                     
-                                    Rectangle {
-                                        Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 6
-                                        Image {
-                                            id: popupTrackImage
-                                            anchors.fill: parent
-                                            source: MorphCache.getCachedCover(modelData.coverUrl || "")
-                                            fillMode: Image.PreserveAspectCrop
-                                            smooth: true
-                                            layer.enabled: true
-                                            layer.smooth: true
-                                            layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 6 } }
+                                     Rectangle {
+                                         Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 10
+                                         Image {
+                                             id: popupTrackImage
+                                             anchors.fill: parent
+                                             source: MorphCache.getCachedCover(modelData.coverUrl || "")
+                                             fillMode: Image.PreserveAspectCrop
+                                             smooth: true
+                                             layer.enabled: true
+                                             layer.smooth: true
+                                             layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 10 } }
                                             onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
                                         }
                                         Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: popupTrackImage.status !== Image.Ready }
@@ -4534,43 +4566,46 @@ function playTrack(track, index) {
                                             text: formatTime(modelData.durationMs || 0)
                                             color: "#666"; font.family: mainFont.name; font.pixelSize: 12; visible: (modelData.durationMs || 0) > 0
                                         }
-                                        Image {
-                                            source: (window.likesVersion, MorphSettings.isLiked(modelData.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"
-                                            Layout.preferredWidth: 18
-                                            Layout.preferredHeight: 18
-                                            Layout.leftMargin: 4
-                                            sourceSize: Qt.size(36, 36)
-                                            fillMode: Image.PreserveAspectFit
-                                            smooth: true
-                                            layer.enabled: true
-                                            layer.smooth: true
-                                            layer.effect: ColorOverlay { color: "white" }
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: {
-                                                    var cleanTrack = {
-                                                        "id": modelData.id,
-                                                        "title": modelData.title || "Unknown Title",
-                                                        "artist": modelData.artist || "Unknown Artist",
-                                                        "album": modelData.album || "",
-                                                        "coverUrl": modelData.coverUrl || "",
-                                                        "service": modelData.service || "",
-                                                        "webUrl": modelData.webUrl || "",
-                                                        "durationMs": modelData.durationMs || 0
-                                                    }
-                                                    if (cleanTrack.service === "") {
-                                                        if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("yandex") !== -1) cleanTrack.service = "Yandex"
-                                                        else if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
-                                                        else cleanTrack.service = "Yandex"
-                                                    }
-                                                    var isL = MorphSettings.isLiked(cleanTrack.id)
-                                                    MorphSettings.toggleLike(cleanTrack)
-                                                    showToast(isL ? "Removed from Liked" : "Added to Liked")
-                                                    likesVersion++
-                                                }
-                                            }
-                                        }
+                                         Image {
+                                             id: popupHeartIcon
+                                             source: (window.likesVersion, MorphSettings.isLiked(modelData.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"
+                                             Layout.preferredWidth: 18
+                                             Layout.preferredHeight: 18
+                                             Layout.leftMargin: 4
+                                             sourceSize: Qt.size(36, 36)
+                                             fillMode: Image.PreserveAspectFit
+                                             smooth: true
+                                             layer.enabled: true
+                                             layer.smooth: true
+                                             layer.effect: ColorOverlay { color: (window.likesVersion, MorphSettings.isLiked(modelData.id)) ? "#b57339" : (popupHeartMouseArea.containsMouse ? "white" : "#888") }
+                                             MouseArea {
+                                                 id: popupHeartMouseArea
+                                                 anchors.fill: parent
+                                                 cursorShape: Qt.PointingHandCursor
+                                                 hoverEnabled: true
+                                                 onClicked: {
+                                                     var cleanTrack = {
+                                                         "id": modelData.id,
+                                                         "title": modelData.title || "Unknown Title",
+                                                         "artist": modelData.artist || "Unknown Artist",
+                                                         "album": modelData.album || "",
+                                                         "coverUrl": modelData.coverUrl || "",
+                                                         "service": modelData.service || "",
+                                                         "webUrl": modelData.webUrl || "",
+                                                         "durationMs": modelData.durationMs || 0
+                                                     }
+                                                     if (cleanTrack.service === "") {
+                                                         if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("yandex") !== -1) cleanTrack.service = "Yandex"
+                                                         else if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
+                                                         else cleanTrack.service = "Yandex"
+                                                     }
+                                                     var isL = MorphSettings.isLiked(cleanTrack.id)
+                                                     MorphSettings.toggleLike(cleanTrack)
+                                                     showToast(isL ? "Removed from Liked" : "Added to Liked")
+                                                     likesVersion++
+                                                 }
+                                             }
+                                         }
                                     }
                                 }
                             }
