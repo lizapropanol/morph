@@ -15,6 +15,7 @@ ApplicationWindow {
         target: MorphApp
         function onStyleFilesChanged() { refreshStyleFiles() }
         function onConfigRestored(message) { showToast(message, "CONFIG RESTORED") }
+        function onAboutToQuitRequested() { saveCurrentSession() }
     }
     width: 1075
     height: 700
@@ -143,16 +144,18 @@ ApplicationWindow {
     }
 
     function refreshDetailedCache() {
-        detailedTracksModel.clear()
-        detailedCoversModel.clear()
+        if (tracksExpanded) detailedTracksModel.clear()
+        if (coversExpanded) detailedCoversModel.clear()
         if (tracksExpanded) loadDetailedTracks()
         if (coversExpanded) loadDetailedCovers()
     }
 
     function preResolveNext() {
+        if (currentTrackIndex < 0) return
         var model = currentView === "search" ? (searchModel.count > 0 ? searchModel : historyModel) : libraryModel
         if (currentTrackIndex + 1 < model.count) {
             var nextTrack = model.get(currentTrackIndex + 1)
+            if (!nextTrack || !nextTrack.id) return
             var service = nextTrack.service || (nextTrack.coverUrl && nextTrack.coverUrl.indexOf("yandex") !== -1 ? "Yandex" : "SoundCloud")
             if (!streamUrlCache[nextTrack.id]) {
                 MorphServices.resolve(service, nextTrack.id)
@@ -202,7 +205,7 @@ ApplicationWindow {
         for (var i = 0; i < hist.length; i++) historyModel.append(hist[i])
         
         var session = MorphSettings.loadSession()
-        if (session.track) {
+        if (session && session.track && session.track.id) {
             isRestoringSession = true
             currentTrack = session.track
             MorphAudio.volume = session.volume || 50
@@ -236,6 +239,7 @@ ApplicationWindow {
     onRepeatOneChanged: saveCurrentSession()
 
     function saveCurrentSession() {
+        if (isRestoringSession) return
         MorphSettings.saveSession({
             "track": currentTrack,
             "volume": MorphAudio.volume,
@@ -477,22 +481,15 @@ function playTrack(track, index) {
         }
     }
 
-    function forceRole(model) {
-        if (model.count === 0) {
-            model.append({ "id": "", "title": "", "artist": "", "coverUrl": "", "service": "", "webUrl": "", "durationMs": 0, "album": "" })
-            model.clear()
-        }
-    }
-
-    ListModel { id: searchModel; Component.onCompleted: forceRole(this) }
-    ListModel { id: libraryModel; Component.onCompleted: forceRole(this) }
+    ListModel { id: searchModel; dynamicRoles: true }
+    ListModel { id: libraryModel; dynamicRoles: true }
     ListModel { id: playlistsModel }
-    ListModel { id: historyModel; Component.onCompleted: forceRole(this) }
-    ListModel { id: chartsModel; Component.onCompleted: forceRole(this) }
-    ListModel { id: dailyMixesModel }
-    ListModel { id: styleFilesModel }
-    ListModel { id: detailedTracksModel }
-    ListModel { id: detailedCoversModel }
+    ListModel { id: historyModel; dynamicRoles: true }
+    ListModel { id: chartsModel; dynamicRoles: true }
+    ListModel { id: dailyMixesModel; dynamicRoles: true }
+    ListModel { id: styleFilesModel; dynamicRoles: true }
+    ListModel { id: detailedTracksModel; dynamicRoles: true }
+    ListModel { id: detailedCoversModel; dynamicRoles: true }
 
     FileDialog {
         id: importStyleDialog
@@ -855,7 +852,7 @@ function playTrack(track, index) {
                         Item {
                             Timer {
                                 id: searchTimer; interval: 600; repeat: false
-                                onTriggered: { if (searchField.text.trim().length > 0) { searchModel.clear(); isSearching = true; MorphServices.search(searchField.text, searchSource) } }
+                                onTriggered: { if (isSearching || searchField.text.trim().length === 0) return; searchModel.clear(); isSearching = true; MorphServices.search(searchField.text, searchSource) }
                             }
                             Flickable {
                                 id: searchFlickable
@@ -2160,9 +2157,9 @@ function playTrack(track, index) {
                                                     }
                                                 }
                                                 
-                                                if (currentTrackDeleted && currentTrack) {
+                                                if (currentTrackDeleted && currentTrack && currentTrack.id) {
                                                     delete streamUrlCache[currentTrack.id]
-                                                    if (MorphAudio.isPlaying) {
+                                                    if (MorphAudio.isPlaying && currentTrack.service) {
                                                         lastKnownPosition = MorphAudio.position
                                                         isRecovering = true
                                                         MorphServices.resolve(currentTrack.service, currentTrack.id)
@@ -3384,8 +3381,14 @@ function playTrack(track, index) {
                 MorphAudio.play(streamUrl)
             }
             
-            if (currentTrackIndex === -1) { 
-                currentTrackIndex = loadedTracksCount
+            if (currentTrackIndex === -1) {
+                for (var i = 0; i < fullPlaylistTracks.length; i++) {
+                    if (fullPlaylistTracks[i].id === trackId && fullPlaylistTracks[i].service === currentTrack.service) {
+                        currentTrackIndex = i
+                        break
+                    }
+                }
+                if (currentTrackIndex === -1) currentTrackIndex = 0
             }
         }
     }

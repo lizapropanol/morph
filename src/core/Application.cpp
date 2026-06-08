@@ -34,6 +34,7 @@ Application::Application(QObject *parent) : QObject(parent) {
     connect(watcher, &FileWatcher::directoryChanged, this, &Application::styleFilesChanged);
     connect(audio, &AudioEngine::stateChanged, this, &Application::updateTrayMenu);
     connect(mpris, &MprisManager::metadataChanged, this, &Application::updateTrayMenu);
+    connect(qApp, &QApplication::aboutToQuit, this, &Application::aboutToQuitRequested);
 
     connect(services, &ServiceManager::bitrateReady, this, [this](const QString&, int bitrate) {
         audio->setBitrate(bitrate);

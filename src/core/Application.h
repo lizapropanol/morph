@@ -29,6 +29,7 @@ public slots:
 signals:
     void styleFilesChanged();
     void configRestored(const QString& message);
+    void aboutToQuitRequested();
 
 private:
     void setupTray();
