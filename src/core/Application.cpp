@@ -9,33 +9,25 @@
 #include <QTimer>
 #include "utils/PathProvider.h"
 #include "services/TrackData.h"
-#include "services/YouTubeService.h"
 
 Application::Application(QObject *parent) : QObject(parent) {
     connect(&PathProvider::instance(), &PathProvider::configRestored, this, [this](const QString& msg) {
         pendingNotifications.append(msg);
     });
     PathProvider::instance().ensureConfigExists();
-    
+
     engine = new QQmlApplicationEngine(this);
     net = new NetworkManager(this);
     cache = new CacheManager(net, this);
     settings = new SettingsManager(cache, this);
     audio = new AudioEngine(this);
-    services = new ServiceManager(cache, this);
+    services = new ServiceManager(net, cache, this);
     mpris = new MprisManager(audio, this);
     discord = new DiscordManager(audio, settings, this);
     watcher = new FileWatcher(settings->getActiveStylePath(), this);
     watcher->setDirectory(PathProvider::getConfigPath());
 
-    engine->rootContext()->setContextProperty("MorphAudio", audio);
-    engine->rootContext()->setContextProperty("MorphServices", services);
-    engine->rootContext()->setContextProperty("MorphSettings", settings);
-    engine->rootContext()->setContextProperty("MorphMpris", mpris);
-    engine->rootContext()->setContextProperty("MorphDiscord", discord);
-    engine->rootContext()->setContextProperty("MorphCache", cache);
-    engine->rootContext()->setContextProperty("MorphApp", this);
-
+    bindContextProperties();
     setupTray();
 
     connect(watcher, &FileWatcher::fileChanged, this, &Application::reload);
@@ -43,13 +35,20 @@ Application::Application(QObject *parent) : QObject(parent) {
     connect(audio, &AudioEngine::stateChanged, this, &Application::updateTrayMenu);
     connect(mpris, &MprisManager::metadataChanged, this, &Application::updateTrayMenu);
 
-    YouTubeService* youtube = services->findChild<YouTubeService*>();
-    if (youtube) {
-        connect(youtube, &YouTubeService::bitrateReady, this, [this](const QString& trackId, int bitrate) {
-            Q_UNUSED(trackId);
-            audio->setBitrate(bitrate);
-        });
-    }
+    connect(services, &ServiceManager::bitrateReady, this, [this](const QString&, int bitrate) {
+        audio->setBitrate(bitrate);
+    });
+    services->setAudioQuality(settings->getAudioQuality());
+}
+
+void Application::bindContextProperties() {
+    engine->rootContext()->setContextProperty("MorphAudio", audio);
+    engine->rootContext()->setContextProperty("MorphServices", services);
+    engine->rootContext()->setContextProperty("MorphSettings", settings);
+    engine->rootContext()->setContextProperty("MorphMpris", mpris);
+    engine->rootContext()->setContextProperty("MorphDiscord", discord);
+    engine->rootContext()->setContextProperty("MorphCache", cache);
+    engine->rootContext()->setContextProperty("MorphApp", this);
 }
 
 void Application::start() {
@@ -63,7 +62,7 @@ void Application::start() {
                 }
                 pendingNotifications.clear();
             });
-            
+
             connect(&PathProvider::instance(), &PathProvider::configRestored, this, &Application::configRestored);
         }
     });
@@ -77,17 +76,10 @@ void Application::reload() {
     for (QObject* obj : rootObjects) {
         obj->deleteLater();
     }
-    
+
     watcher->setPath(settings->getActiveStylePath());
 
-    engine->rootContext()->setContextProperty("MorphAudio", audio);
-    engine->rootContext()->setContextProperty("MorphServices", services);
-    engine->rootContext()->setContextProperty("MorphSettings", settings);
-    engine->rootContext()->setContextProperty("MorphMpris", mpris);
-    engine->rootContext()->setContextProperty("MorphDiscord", discord);
-    engine->rootContext()->setContextProperty("MorphCache", cache);
-    engine->rootContext()->setContextProperty("MorphApp", this);
-
+    bindContextProperties();
     engine->load(QUrl::fromLocalFile(settings->getActiveStylePath()));
 }
 
@@ -108,7 +100,7 @@ void Application::setupTray() {
 
     trackInfoAction = new QAction("Not Playing", this);
     trackInfoAction->setEnabled(false);
-    
+
     playPauseAction = new QAction("Play", this);
     connect(playPauseAction, &QAction::triggered, this, [this]() {
         if (audio->isPlaying()) audio->pause();
@@ -123,7 +115,7 @@ void Application::setupTray() {
 
     QAction* toggleAction = new QAction("Show/Hide", this);
     connect(toggleAction, &QAction::triggered, this, &Application::toggleWindow);
-    
+
     QAction* quitAction = new QAction("Quit", this);
     connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
 
@@ -158,8 +150,15 @@ void Application::updateTrayMenu() {
 }
 
 void Application::toggleWindow() {
-    if (engine->rootObjects().isEmpty()) return;
-    QQuickWindow* window = qobject_cast<QQuickWindow*>(engine->rootObjects().first());
+    QQuickWindow* window = nullptr;
+    for (QObject* obj : engine->rootObjects()) {
+        if (QQuickWindow* w = qobject_cast<QQuickWindow*>(obj)) {
+            if (w->parent() == nullptr) {
+                window = w;
+                break;
+            }
+        }
+    }
     if (window) {
         if (window->isVisible()) window->hide();
         else {

@@ -12,7 +12,7 @@
 class ServiceManager : public QObject {
     Q_OBJECT
 public:
-    explicit ServiceManager(CacheManager* cache, QObject* parent = nullptr);
+    explicit ServiceManager(NetworkManager* net, CacheManager* cache, QObject* parent = nullptr);
 
 public slots:
     void search(const QString& query, const QString& serviceName = "all");
@@ -34,6 +34,7 @@ signals:
     void dailyMixesReady(const QString& serviceName, const QVariantList& playlists);
     void playlistImported(const QString& name, const QString& coverUrl, const QVariantList& tracks);
     void errorOccurred(const QString& message);
+    void bitrateReady(const QString& trackId, int bitrate);
 
 private:
     NetworkManager* net;

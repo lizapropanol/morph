@@ -9,6 +9,7 @@ class BaseService : public QObject {
     Q_OBJECT
 public:
     explicit BaseService(QObject* parent = nullptr) : QObject(parent) {}
+    virtual ~BaseService() = default;
     virtual void search(const QString& query) = 0;
     virtual void resolveStreamUrl(const QString& trackId) = 0;
     virtual void getCharts() = 0;

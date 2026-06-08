@@ -6,8 +6,21 @@
 #include <QUrlQuery>
 #include <QRegularExpression>
 
-YandexService::YandexService(NetworkManager* network, QObject* parent) 
+YandexService::YandexService(NetworkManager* network, QObject* parent)
     : BaseService(parent), net(network) {}
+
+static QMap<QString, QByteArray> yandexHeaders(const QString& token) {
+    QMap<QString, QByteArray> h;
+    h["User-Agent"] = "Yandex-Music-Desktop/5.92.1";
+    h["X-Yandex-Music-Client"] = "WindowsDesktop/5.92.1";
+    h["Accept"] = "application/json";
+    h["X-Retpath-Y"] = "https://music.yandex.ru/";
+    h["Accept-Language"] = "ru";
+    if (!token.isEmpty()) {
+        h["Authorization"] = "OAuth " + token.toUtf8();
+    }
+    return h;
+}
 
 void YandexService::setToken(const QString& token) {
     m_token = token;
@@ -23,11 +36,11 @@ QVariantList YandexService::parseYandexTracks(const QJsonArray& tracks) {
         QJsonObject wrapper = val.toObject();
         QJsonObject trackObj = wrapper.contains("track") ? wrapper["track"].toObject() : wrapper;
         if (trackObj.isEmpty()) continue;
-        
+
         TrackData track;
         track.id = trackObj["id"].toVariant().toString();
         track.title = trackObj["title"].toString();
-        
+
         if (trackObj.contains("durationMs")) {
             track.durationMs = trackObj["durationMs"].toVariant().toLongLong();
         } else if (wrapper.contains("durationMs")) {
@@ -35,12 +48,12 @@ QVariantList YandexService::parseYandexTracks(const QJsonArray& tracks) {
         } else if (trackObj.contains("duration")) {
             track.durationMs = trackObj["duration"].toVariant().toLongLong() * 1000;
         }
-        
+
         QJsonArray artists = trackObj["artists"].toArray();
         QStringList artistNames;
         for (const QJsonValue& a : artists) artistNames.append(a.toObject()["name"].toString());
         track.artist = artistNames.join(", ");
-        
+
         QJsonArray albums = trackObj["albums"].toArray();
         if (!albums.isEmpty()) {
             QString albumId = QString::number(albums[0].toObject()["id"].toInt());
@@ -69,7 +82,7 @@ void YandexService::search(const QString& query) {
     if (trackMatch.hasMatch()) {
         QString trackId = trackMatch.captured(1);
         QUrl url("https://api.music.yandex.net/tracks/" + trackId);
-        net->get(url, m_token, [this](QNetworkReply* reply) {
+        net->get(url, yandexHeaders(m_token), [this](QNetworkReply* reply) {
             if (reply->error() != QNetworkReply::NoError) return;
             QJsonArray tracks = QJsonDocument::fromJson(reply->readAll()).object()["result"].toArray();
             emit searchResultsReady("Yandex", parseYandexTracks(tracks));
@@ -85,7 +98,7 @@ void YandexService::search(const QString& query) {
     q.addQueryItem("pageSize", "100");
     url.setQuery(q);
 
-    net->get(url, m_token, [this](QNetworkReply* reply) {
+    net->get(url, yandexHeaders(m_token), [this](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) {
             return;
         }
@@ -100,7 +113,7 @@ void YandexService::getCharts() {
     if (m_token.isEmpty()) return;
 
     QUrl url("https://api.music.yandex.net/users/414787002/playlists/1076");
-    net->get(url, m_token, [this](QNetworkReply* reply) {
+    net->get(url, yandexHeaders(m_token), [this](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
         QJsonArray tracks = QJsonDocument::fromJson(reply->readAll()).object()["result"].toObject()["tracks"].toArray();
         emit chartsReady("Yandex", parseYandexTracks(tracks));
@@ -111,7 +124,7 @@ void YandexService::getWave() {
     if (m_token.isEmpty()) return;
 
     QUrl url("https://api.music.yandex.net/rotor/station/user:onyourwave/tracks");
-    net->get(url, m_token, [this](QNetworkReply* reply) {
+    net->get(url, yandexHeaders(m_token), [this](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
         QJsonArray sequence = QJsonDocument::fromJson(reply->readAll()).object()["result"].toObject()["sequence"].toArray();
         emit waveReady("Yandex", parseYandexTracks(sequence));
@@ -127,7 +140,7 @@ void YandexService::importPlaylist(const QString& url) {
 
     QRegularExpression classicRe("users/([^/]+)/playlists/(\\d+)");
     QRegularExpression sharedRe("playlists/([a-zA-Z0-9\\.-]+)");
-    
+
     QRegularExpressionMatch classicMatch = classicRe.match(url);
     QRegularExpressionMatch sharedMatch = sharedRe.match(url);
 
@@ -135,7 +148,7 @@ void YandexService::importPlaylist(const QString& url) {
         QString user = classicMatch.captured(1);
         QString id = classicMatch.captured(2);
         QUrl apiUrl(QString("https://api.music.yandex.net/users/%1/playlists/%2").arg(user, id));
-        net->get(apiUrl, m_token, [this](QNetworkReply* reply) {
+        net->get(apiUrl, yandexHeaders(m_token), [this](QNetworkReply* reply) {
             if (reply->error() != QNetworkReply::NoError) {
                 emit errorOccurred("Yandex API Error: " + reply->errorString());
                 return;
@@ -155,7 +168,7 @@ void YandexService::importPlaylist(const QString& url) {
         q.addQueryItem("rich-tracks", "true");
         apiUrl.setQuery(q);
 
-        net->get(apiUrl, m_token, [this, apiUrl](QNetworkReply* reply) {
+        net->get(apiUrl, yandexHeaders(m_token), [this, apiUrl](QNetworkReply* reply) {
             if (reply->error() != QNetworkReply::NoError) {
                 QByteArray body = reply->readAll();
                 emit errorOccurred(QString("Yandex API Error: %1\nURL: %2\nResponse: %3").arg(reply->errorString(), apiUrl.toString(), QString(body)));
@@ -181,7 +194,7 @@ void YandexService::resolveStreamUrl(const QString& trackId) {
     if (m_token.isEmpty()) return;
 
     QUrl url(QString("https://api.music.yandex.net/tracks/%1/download-info").arg(trackId));
-    net->get(url, m_token, [this, trackId](QNetworkReply* reply) {
+    net->get(url, yandexHeaders(m_token), [this, trackId](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
 
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
@@ -191,7 +204,7 @@ void YandexService::resolveStreamUrl(const QString& trackId) {
         int targetBitrate = 320;
         if (m_quality == "low") targetBitrate = 192;
         else if (m_quality == "high") targetBitrate = 2000;
-        
+
         int bestIdx = 0;
         int minDiff = 10000;
 
@@ -218,7 +231,7 @@ void YandexService::reportPlay(const QString& trackId, const QString& albumId) {
 
     QUrl url("https://api.music.yandex.net/play-audio");
     QString timestamp = QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
-    
+
     QUrlQuery q;
     q.addQueryItem("track-id", trackId);
     if (!albumId.isEmpty() && albumId != "0") q.addQueryItem("album-id", albumId);
@@ -230,7 +243,9 @@ void YandexService::reportPlay(const QString& trackId, const QString& albumId) {
     q.addQueryItem("total-played-seconds", "0");
     q.addQueryItem("end-position-seconds", "0");
 
-    net->post(url, q.toString(QUrl::FullyEncoded).toUtf8(), m_token, [](QNetworkReply* reply) {
+    QMap<QString, QByteArray> headers = yandexHeaders(m_token);
+    headers["Content-Type"] = "application/x-www-form-urlencoded";
+    net->post(url, q.toString(QUrl::FullyEncoded).toUtf8(), headers, [](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) {
         } else {
         }
@@ -238,12 +253,19 @@ void YandexService::reportPlay(const QString& trackId, const QString& albumId) {
 }
 
 void YandexService::fetchDownloadInfo(const QString& trackId, const QUrl& url) {
-    net->get(url, "", [this, trackId](QNetworkReply* reply) {
+    QMap<QString, QByteArray> h;
+    h["User-Agent"] = "Yandex-Music-Desktop/5.92.1";
+    h["X-Yandex-Music-Client"] = "WindowsDesktop/5.92.1";
+    h["Accept"] = "*/*";
+    h["X-Retpath-Y"] = "https://music.yandex.ru/";
+    h["Accept-Language"] = "ru";
+
+    net->get(url, h, [this, trackId](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
 
         QByteArray data = reply->readAll();
         QXmlStreamReader xml(data);
-        
+
         QString host, path, ts, s;
         while (!xml.atEnd()) {
             xml.readNext();
@@ -264,7 +286,7 @@ void YandexService::fetchDownloadInfo(const QString& trackId, const QUrl& url) {
 
         QString streamUrl = QString("https://%1/get-mp3/%2/%3%4")
             .arg(host).arg(sign).arg(ts).arg(path);
-            
+
         emit streamUrlReady(trackId, streamUrl);
     });
 }

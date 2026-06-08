@@ -5,11 +5,19 @@
 #include <QJsonArray>
 #include <QUrlQuery>
 
-SoundCloudService::SoundCloudService(NetworkManager* network, QObject* parent) 
+SoundCloudService::SoundCloudService(NetworkManager* network, QObject* parent)
     : BaseService(parent), net(network) {}
 
 void SoundCloudService::setToken(const QString& token) {
     m_token = token;
+}
+
+static QMap<QString, QByteArray> scAuthHeader(const QString& token) {
+    QMap<QString, QByteArray> h;
+    if (token.startsWith("2-")) {
+        h["Authorization"] = "OAuth " + token.toUtf8();
+    }
+    return h;
 }
 
 QVariantList SoundCloudService::parseSoundCloudTracks(const QJsonArray& tracks) {
@@ -20,17 +28,17 @@ QVariantList SoundCloudService::parseSoundCloudTracks(const QJsonArray& tracks) 
         track.id = obj["id"].toVariant().toString();
         track.title = obj["title"].toString();
         track.durationMs = obj["duration"].toVariant().toLongLong();
-        
+
         QJsonObject pub = obj["publisher_metadata"].toObject();
         if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {
             track.artist = pub["artist"].toString();
         } else {
             track.artist = obj["user"].toObject()["username"].toString();
         }
-        
+
         track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
         track.webUrl = obj["permalink_url"].toString();
-        
+
         QJsonArray transcodings = obj["media"].toObject()["transcodings"].toArray();
         for (const QJsonValue& t : transcodings) {
             QJsonObject to = t.toObject();
@@ -39,7 +47,7 @@ QVariantList SoundCloudService::parseSoundCloudTracks(const QJsonArray& tracks) 
                 break;
             }
         }
-        
+
         track.service = "SoundCloud";
         results.append(track.toVariantMap());
     }
@@ -49,19 +57,14 @@ QVariantList SoundCloudService::parseSoundCloudTracks(const QJsonArray& tracks) 
 void SoundCloudService::search(const QString& query) {
     if (m_token.isEmpty()) return;
 
-    QString authHeader = "";
-    if (m_token.startsWith("2-")) {
-        authHeader = "OAuth " + m_token;
-    }
-
     if (query.startsWith("http") && query.contains("soundcloud.com")) {
         QUrl url("https://api-v2.soundcloud.com/resolve");
         QUrlQuery q;
         q.addQueryItem("url", query);
-        if (authHeader.isEmpty()) q.addQueryItem("client_id", m_token);
+        if (!m_token.startsWith("2-")) q.addQueryItem("client_id", m_token);
         url.setQuery(q);
 
-        net->get(url, authHeader, [this](QNetworkReply* reply) {
+        net->get(url, scAuthHeader(m_token), [this](QNetworkReply* reply) {
             if (reply->error() != QNetworkReply::NoError) return;
             QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
             QJsonObject result = doc.object();
@@ -77,13 +80,13 @@ void SoundCloudService::search(const QString& query) {
     QUrl url("https://api-v2.soundcloud.com/search/tracks");
     QUrlQuery q;
     q.addQueryItem("q", query);
-    if (authHeader.isEmpty()) {
+    if (!m_token.startsWith("2-")) {
         q.addQueryItem("client_id", m_token);
     }
     q.addQueryItem("limit", "100");
     url.setQuery(q);
 
-    net->get(url, authHeader, [this](QNetworkReply* reply) {
+    net->get(url, scAuthHeader(m_token), [this](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
 
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
@@ -105,23 +108,20 @@ void SoundCloudService::getDailyMixes() {
     if (m_token.isEmpty()) return;
 
     QUrl url("https://api-v2.soundcloud.com/mixed-selections");
-    QString authHeader = "";
-    if (m_token.startsWith("2-")) {
-        authHeader = "OAuth " + m_token;
-    } else {
-        QUrlQuery q;
+    QUrlQuery q;
+    if (!m_token.startsWith("2-")) {
         q.addQueryItem("client_id", m_token);
-        url.setQuery(q);
     }
+    url.setQuery(q);
 
-    net->get(url, authHeader, [this](QNetworkReply* reply) {
+    net->get(url, scAuthHeader(m_token), [this](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
 
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         QJsonArray collection = doc.object()["collection"].toArray();
-        
+
         QVariantList mixedPlaylists;
-        
+
         auto processSection = [&](const QJsonObject& section) {
             QJsonArray items = section["items"].toObject()["collection"].toArray();
             for (const QJsonValue& itemValue : items) {
@@ -175,13 +175,15 @@ void SoundCloudService::getDailyMixes() {
 }
 
 void SoundCloudService::reportPlay(const QString& trackId, const QString& albumId) {
+    Q_UNUSED(trackId);
+    Q_UNUSED(albumId);
 }
 
 void SoundCloudService::importPlaylist(const QString& url) {
     if (m_token.isEmpty()) return;
 
     if (url.contains("on.soundcloud.com")) {
-        net->get(QUrl(url), "", [this](QNetworkReply* reply) {
+        net->get(QUrl(url), QMap<QString, QByteArray>(), [this](QNetworkReply* reply) {
             QUrl redirectedUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
             if (redirectedUrl.isValid()) {
                 QString finalUrl = reply->url().resolved(redirectedUrl).toString();
@@ -196,25 +198,22 @@ void SoundCloudService::importPlaylist(const QString& url) {
     QUrl apiUrl("https://api-v2.soundcloud.com/resolve");
     QUrlQuery q;
     q.addQueryItem("url", url);
-    QString authHeader = "";
-    if (m_token.startsWith("2-")) {
-        authHeader = "OAuth " + m_token;
-    } else {
+    if (!m_token.startsWith("2-")) {
         q.addQueryItem("client_id", m_token);
     }
     apiUrl.setQuery(q);
 
-    net->get(apiUrl, authHeader, [this](QNetworkReply* reply) {
+    net->get(apiUrl, scAuthHeader(m_token), [this](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) {
             emit errorOccurred("SoundCloud API Error: " + reply->errorString());
             return;
         }
-        
+
         QByteArray responseData = reply->readAll();
         QJsonDocument doc = QJsonDocument::fromJson(responseData);
         QJsonObject result = doc.object();
         QString kind = result["kind"].toString();
-        
+
         if (kind != "playlist" && kind != "system-playlist") {
             emit errorOccurred("Invalid SoundCloud URL or not a playlist");
             return;
@@ -230,7 +229,7 @@ void SoundCloudService::importPlaylist(const QString& url) {
             QJsonObject firstTrack = tracks.first().toObject();
             coverUrl = firstTrack["artwork_url"].toString().replace("-large", "-t500x500");
         }
-        
+
         QStringList allTrackIds;
         for (const QJsonValue& val : tracks) {
             QJsonObject tObj = val.toObject();
@@ -288,15 +287,12 @@ void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, cons
     QUrl url("https://api-v2.soundcloud.com/tracks");
     QUrlQuery q;
     q.addQueryItem("ids", currentChunk.join(","));
-    QString authHeader = "";
-    if (m_token.startsWith("2-")) {
-        authHeader = "OAuth " + m_token;
-    } else {
+    if (!m_token.startsWith("2-")) {
         q.addQueryItem("client_id", m_token);
     }
     url.setQuery(q);
 
-    net->get(url, authHeader, [this, playlistName, coverUrl, remainingIds, allTracks, originalIds](QNetworkReply* reply) {
+    net->get(url, scAuthHeader(m_token), [this, playlistName, coverUrl, remainingIds, allTracks, originalIds](QNetworkReply* reply) {
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray data = reply->readAll();
             QJsonArray results = QJsonDocument::fromJson(data).array();
@@ -306,14 +302,14 @@ void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, cons
                 track.id = obj["id"].toVariant().toString();
                 track.title = obj["title"].toString();
                 track.durationMs = obj["duration"].toVariant().toLongLong();
-                
+
                 QJsonObject pub = obj["publisher_metadata"].toObject();
                 if (!pub.isEmpty() && !pub["artist"].toString().isEmpty()) {
                     track.artist = pub["artist"].toString();
                 } else {
                     track.artist = obj["user"].toObject()["username"].toString();
                 }
-                
+
                 track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
                 track.webUrl = obj["permalink_url"].toString();
                 track.service = "SoundCloud";
@@ -332,17 +328,14 @@ void SoundCloudService::resolveStreamUrl(const QString& trackId) {
     } else {
         QUrl url("https://api-v2.soundcloud.com/tracks/" + trackId);
         QUrlQuery q;
-        QString authHeader = "";
-        if (m_token.startsWith("2-")) {
-            authHeader = "OAuth " + m_token;
-        } else {
+        if (!m_token.startsWith("2-")) {
             q.addQueryItem("client_id", m_token);
         }
         url.setQuery(q);
 
-        net->get(url, authHeader, [this, trackId](QNetworkReply* reply) {
+        net->get(url, scAuthHeader(m_token), [this, trackId](QNetworkReply* reply) {
             if (reply->error() != QNetworkReply::NoError) return;
-            
+
             QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
             QJsonArray transcodings = doc.object()["media"].toObject()["transcodings"].toArray();
             QString transcodingUrl;
@@ -353,7 +346,7 @@ void SoundCloudService::resolveStreamUrl(const QString& trackId) {
                     break;
                 }
             }
-            
+
             if (!transcodingUrl.isEmpty()) {
                 m_trackLinks[trackId] = transcodingUrl;
                 fetchStreamUrl(trackId, transcodingUrl);
@@ -365,15 +358,12 @@ void SoundCloudService::resolveStreamUrl(const QString& trackId) {
 void SoundCloudService::fetchStreamUrl(const QString& trackId, const QString& transcodingUrl) {
     QUrl url(transcodingUrl);
     QUrlQuery q;
-    QString authHeader = "";
-    if (m_token.startsWith("2-")) {
-        authHeader = "OAuth " + m_token;
-    } else {
+    if (!m_token.startsWith("2-")) {
         q.addQueryItem("client_id", m_token);
     }
     url.setQuery(q);
 
-    net->get(url, authHeader, [this, trackId](QNetworkReply* reply) {
+    net->get(url, scAuthHeader(m_token), [this, trackId](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
 
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());

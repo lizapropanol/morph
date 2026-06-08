@@ -41,7 +41,12 @@ add_executable(morph
     src/audio/AudioEngine.h src/audio/AudioEngine.cpp
     src/core/ServiceManager.h src/core/ServiceManager.cpp
     src/settings/SettingsManager.h src/settings/SettingsManager.cpp
+    src/settings/PlaylistManager.h src/settings/PlaylistManager.cpp
+    src/settings/TokenManager.h src/settings/TokenManager.cpp
+    src/settings/HistoryManager.h src/settings/HistoryManager.cpp
+    src/settings/StyleManager.h src/settings/StyleManager.cpp
     src/core/MprisManager.h src/core/MprisManager.cpp
+    src/core/MprisRootAdaptor.h src/core/MprisPlayerAdaptor.h src/core/MprisPlayerAdaptor.cpp
     src/utils/DiscordManager.h src/utils/DiscordManager.cpp
 )
 

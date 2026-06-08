@@ -7,29 +7,28 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include "../utils/CacheManager.h"
-
 #include <QClipboard>
 #include <QGuiApplication>
-
 #include <QQuickTextDocument>
+#include "../utils/CacheManager.h"
 #include "../utils/QmlHighlighter.h"
+#include "PlaylistManager.h"
+#include "TokenManager.h"
+#include "HistoryManager.h"
+#include "StyleManager.h"
 
 class SettingsManager : public QObject {
     Q_OBJECT
 public:
     explicit SettingsManager(CacheManager* cache, QObject* parent = nullptr);
-    
+
     Q_INVOKABLE void attachHighlighter(QObject* textDocument);
 
 public slots:
     void copyToClipboard(const QString& text);
     void saveSession(const QVariantMap& session);
     QVariantMap loadSession();
-    
+
     void toggleLike(const QVariantMap& track);
     bool isLiked(const QString& trackId);
     QVariantList getLikedTracks();
@@ -61,9 +60,9 @@ public slots:
     void setCacheLimit(qint64 bytes);
     qint64 getCacheLimit();
 
-    void setSaveTrackCache(bool save);
+    void setSaveTrackCache(bool enable);
     bool getSaveTrackCache();
-    void setSaveCoverCache(bool save);
+    void setSaveCoverCache(bool enable);
     bool getSaveCoverCache();
 
     void setDiscordRpcEnabled(bool enabled);
@@ -100,6 +99,10 @@ private:
     QString m_path;
     QJsonObject m_data;
     CacheManager* cache;
+    PlaylistManager* m_playlists;
+    TokenManager* m_tokens;
+    HistoryManager* m_history;
+    StyleManager* m_styles;
     void load();
     void save();
 };

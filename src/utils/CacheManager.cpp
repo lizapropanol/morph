@@ -28,7 +28,7 @@ void CacheManager::cacheTrack(const QString& trackId, const QString& url) {
 void CacheManager::performTrackDownload(const QString& trackId, const QUrl& url, int redirectionDepth) {
     if (redirectionDepth > 5) return;
 
-    net->rawGet(url, [this, trackId, url, redirectionDepth](QNetworkReply* reply) {
+    net->rawGet(url, QMap<QString, QByteArray>(), [this, trackId, url, redirectionDepth](QNetworkReply* reply) {
         int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         if (statusCode == 301 || statusCode == 302) {
             QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
@@ -139,7 +139,7 @@ void CacheManager::cacheCover(const QString& url) {
 void CacheManager::performCoverDownload(const QString& url, const QString& path, const QUrl& targetUrl, int redirectionDepth) {
     if (redirectionDepth > 5) return;
 
-    net->rawGet(targetUrl, [this, url, path, targetUrl, redirectionDepth](QNetworkReply* reply) {
+    net->rawGet(targetUrl, QMap<QString, QByteArray>(), [this, url, path, targetUrl, redirectionDepth](QNetworkReply* reply) {
         int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         if (statusCode == 301 || statusCode == 302) {
             QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();

@@ -1,7 +1,6 @@
 #include "ServiceManager.h"
 
-ServiceManager::ServiceManager(CacheManager* cache, QObject* parent) : QObject(parent), cache(cache) {
-    net = new NetworkManager(this);
+ServiceManager::ServiceManager(NetworkManager* net, CacheManager* cache, QObject* parent) : QObject(parent), net(net), cache(cache) {
     connect(net, &NetworkManager::errorOccurred, this, &ServiceManager::errorOccurred);
     yandex = new YandexService(net, this);
     soundcloud = new SoundCloudService(net, this);
@@ -57,7 +56,7 @@ ServiceManager::ServiceManager(CacheManager* cache, QObject* parent) : QObject(p
         processTracks(results);
         emit waveReady(serviceName, results);
     });
-    
+
     connect(yandex, &BaseService::dailyMixesReady, [this](const QString& serviceName, QVariantList playlists) {
         for (int i = 0; i < playlists.size(); ++i) {
             QVariantMap pl = playlists[i].toMap();
@@ -124,9 +123,7 @@ ServiceManager::ServiceManager(CacheManager* cache, QObject* parent) : QObject(p
         emit playlistImported(name, coverUrl, tracks);
     });
 
-    connect(youtube, &YouTubeService::bitrateReady, [this](const QString& trackId, int bitrate) {
-        Q_UNUSED(trackId);
-    });
+    connect(youtube, &YouTubeService::bitrateReady, this, &ServiceManager::bitrateReady);
 
     connect(yandex, &BaseService::errorOccurred, this, &ServiceManager::errorOccurred);
     connect(soundcloud, &BaseService::errorOccurred, this, &ServiceManager::errorOccurred);

@@ -32,6 +32,7 @@ signals:
 
 private:
     void setupTray();
+    void bindContextProperties();
 
     QQmlApplicationEngine* engine;
     FileWatcher* watcher;

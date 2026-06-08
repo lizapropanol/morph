@@ -105,6 +105,9 @@ void AudioEngine::play(const QString& url) {
         QString source = QUrl(url).toLocalFile();
         if (QFile::exists(source)) {
             QProcess* proc = new QProcess(this);
+            connect(proc, &QProcess::errorOccurred, [this, proc](QProcess::ProcessError) {
+                proc->deleteLater();
+            });
             connect(proc, &QProcess::finished, [this, proc](int exitCode) {
                 if (exitCode == 0) {
                     QString out = proc->readAllStandardOutput().trimmed();

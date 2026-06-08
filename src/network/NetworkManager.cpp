@@ -4,20 +4,17 @@ NetworkManager::NetworkManager(QObject* parent) : QObject(parent) {
     manager = new QNetworkAccessManager(this);
 }
 
-void NetworkManager::get(const QUrl& url, const QString& token, std::function<void(QNetworkReply*)> callback) {
+static void applyHeaders(QNetworkRequest& request, const QMap<QString, QByteArray>& headers) {
+    for (auto it = headers.begin(); it != headers.end(); ++it) {
+        request.setRawHeader(it.key().toUtf8(), it.value());
+    }
+}
+
+void NetworkManager::get(const QUrl& url, const QMap<QString, QByteArray>& headers, std::function<void(QNetworkReply*)> callback) {
     QNetworkRequest request(url);
     request.setTransferTimeout(10000);
-    
-    request.setHeader(QNetworkRequest::UserAgentHeader, "Yandex-Music-Desktop/5.92.1");
-    request.setRawHeader("X-Yandex-Music-Client", "WindowsDesktop/5.92.1");
-    request.setRawHeader("Accept", "application/json");
-    request.setRawHeader("X-Retpath-Y", "https://music.yandex.ru/");
-    request.setRawHeader("Accept-Language", "ru");
-    
-    if (!token.isEmpty()) {
-        request.setRawHeader("Authorization", "OAuth " + token.toUtf8());
-    }
-    
+    applyHeaders(request, headers);
+
     QNetworkReply* reply = manager->get(request);
     connect(reply, &QNetworkReply::finished, [this, reply, callback, url]() {
         if (reply->error() != QNetworkReply::NoError) {
@@ -28,14 +25,11 @@ void NetworkManager::get(const QUrl& url, const QString& token, std::function<vo
     });
 }
 
-void NetworkManager::rawGet(const QUrl& url, std::function<void(QNetworkReply*)> callback) {
+void NetworkManager::rawGet(const QUrl& url, const QMap<QString, QByteArray>& headers, std::function<void(QNetworkReply*)> callback) {
     QNetworkRequest request(url);
     request.setTransferTimeout(10000);
-    request.setHeader(QNetworkRequest::UserAgentHeader, "Yandex-Music-Desktop/5.92.1");
-    request.setRawHeader("X-Yandex-Music-Client", "WindowsDesktop/5.92.1");
-    request.setRawHeader("X-Retpath-Y", "https://music.yandex.ru/");
-    request.setRawHeader("Accept", "*/*");
-    
+    applyHeaders(request, headers);
+
     QNetworkReply* reply = manager->get(request);
     connect(reply, &QNetworkReply::finished, [this, reply, callback, url]() {
         if (reply->error() != QNetworkReply::NoError) {
@@ -46,19 +40,11 @@ void NetworkManager::rawGet(const QUrl& url, std::function<void(QNetworkReply*)>
     });
 }
 
-void NetworkManager::post(const QUrl& url, const QByteArray& data, const QString& token, std::function<void(QNetworkReply*)> callback) {
+void NetworkManager::post(const QUrl& url, const QByteArray& data, const QMap<QString, QByteArray>& headers, std::function<void(QNetworkReply*)> callback) {
     QNetworkRequest request(url);
     request.setTransferTimeout(10000);
-    
-    request.setHeader(QNetworkRequest::UserAgentHeader, "Yandex-Music-Desktop/5.92.1");
-    request.setRawHeader("X-Yandex-Music-Client", "WindowsDesktop/5.92.1");
-    request.setRawHeader("Accept", "application/json");
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    
-    if (!token.isEmpty()) {
-        request.setRawHeader("Authorization", "OAuth " + token.toUtf8());
-    }
-    
+    applyHeaders(request, headers);
+
     QNetworkReply* reply = manager->post(request, data);
     connect(reply, &QNetworkReply::finished, [this, reply, callback, url]() {
         if (reply->error() != QNetworkReply::NoError) {
