@@ -355,39 +355,10 @@ ApplicationWindow {
         if (!artistStr) return "";
         var displayStr = artistStr;
         
-        var measured = false;
-        if (typeof(textCanvasMeasurer) !== "undefined" && textCanvasMeasurer && textCanvasMeasurer.available) {
-            var ctx = textCanvasMeasurer.getContext("2d");
-            if (ctx) {
-                ctx.font = "12px " + mainFont.name;
-                var textWidth = ctx.measureText(displayStr).width;
-                if (textWidth > availableWidth) {
-                    var s = artistStr;
-                    var maxEstimatedChars = Math.floor(availableWidth / 4.0);
-                    if (s.length > maxEstimatedChars) {
-                        s = s.substring(0, maxEstimatedChars);
-                    }
-                    while (s.length > 0) {
-                        s = s.substring(0, s.length - 1);
-                        if (ctx.measureText(s + "...").width <= availableWidth) {
-                            displayStr = s + "...";
-                            break;
-                        }
-                    }
-                    if (s.length === 0) {
-                        displayStr = "...";
-                    }
-                }
-                measured = true;
-            }
-        }
-        
-        if (!measured) {
-            var avgCharWidth = 6.2;
-            var maxChars = Math.floor(availableWidth / avgCharWidth);
-            if (maxChars > 5 && artistStr.length > maxChars) {
-                displayStr = artistStr.substring(0, maxChars - 3) + "...";
-            }
+        var avgCharWidth = 6.2;
+        var maxChars = Math.floor(availableWidth / avgCharWidth);
+        if (maxChars > 5 && artistStr.length > maxChars) {
+            displayStr = artistStr.substring(0, maxChars - 3) + "...";
         }
         
         var parts = displayStr.split(/(\s*,\s*|\s*&\s*|\s+feat\.\s+|\s+ft\.\s+|\s+Feat\.\s+|\s+Ft\.\s+)/i);
@@ -482,6 +453,20 @@ function playTrack(track, index) {
     }
 
     ListModel { id: searchModel; dynamicRoles: true }
+    property var rawSearchResults: []
+
+    function resetSearch() {
+        rawSearchResults = []
+        searchModel.clear()
+    }
+
+    function appendSearchChunk() {
+        if (!rawSearchResults || searchModel.count >= rawSearchResults.length) return
+        var limit = Math.min(searchModel.count + 20, rawSearchResults.length)
+        for (var i = searchModel.count; i < limit; i++) {
+            searchModel.append(rawSearchResults[i])
+        }
+    }
     ListModel { id: libraryModel; dynamicRoles: true }
     ListModel { id: playlistsModel }
     ListModel { id: historyModel; dynamicRoles: true }
@@ -852,12 +837,17 @@ function playTrack(track, index) {
                         Item {
                             Timer {
                                 id: searchTimer; interval: 600; repeat: false
-                                onTriggered: { if (isSearching || searchField.text.trim().length === 0) return; searchModel.clear(); isSearching = true; MorphServices.search(searchField.text, searchSource) }
+                                onTriggered: { if (isSearching || searchField.text.trim().length === 0) return; resetSearch(); isSearching = true; MorphServices.search(searchField.text, searchSource) }
                             }
                             Flickable {
                                 id: searchFlickable
                                 anchors.fill: parent; contentHeight: searchContent.height + 100; clip: true
                                 ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                                onContentYChanged: {
+                                    if (contentHeight > height && contentY >= contentHeight - height - 150) {
+                                        appendSearchChunk()
+                                    }
+                                }
 
                                 MouseArea {
                                     anchors.fill: parent
@@ -885,11 +875,11 @@ function playTrack(track, index) {
                                                     layer.enabled: true; layer.effect: ColorOverlay { color: searchField.activeFocus ? "#b57339" : "#666" }
                                                 }
                                                 TextField {
-                placeholderTextColor: "#666"
+                                                    placeholderTextColor: "#666"
                                                     id: searchField; placeholderText: "What do you want to listen to?"; Layout.fillWidth: true; color: "white"
                                                     font.family: mainFont.name; font.pixelSize: 16; background: null; verticalAlignment: TextInput.AlignVCenter
-                                                    onTextChanged: { if (text.trim() === "") { searchModel.clear(); isSearching = false; searchTimer.stop() } else searchTimer.restart() }
-                                                    onAccepted: { searchTimer.stop(); searchModel.clear(); isSearching = true; MorphServices.search(text, searchSource) }
+                                                    onTextChanged: { if (text.trim() === "") { resetSearch(); isSearching = false; searchTimer.stop() } else searchTimer.restart() }
+                                                    onAccepted: { searchTimer.stop(); resetSearch(); isSearching = true; MorphServices.search(text, searchSource) }
                                                 }
                                                 Button {
                                                     id: clearSearchBtn; visible: searchField.text !== ""; Layout.preferredWidth: 28; Layout.preferredHeight: 28; background: null
@@ -897,7 +887,7 @@ function playTrack(track, index) {
                                                         source: "qrc:/assets/close.svg"; sourceSize.width: 18; sourceSize.height: 18; fillMode: Image.PreserveAspectFit
                                                         opacity: clearSearchBtn.hovered ? 1.0 : 0.5; layer.enabled: true; layer.effect: ColorOverlay { color: "white" }
                                                     }
-                                                    onClicked: (mouse) => { searchField.text = ""; searchModel.clear(); isSearching = false }
+                                                    onClicked: (mouse) => { searchField.text = ""; resetSearch(); isSearching = false }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                                 }
                                             }
@@ -915,7 +905,7 @@ function playTrack(track, index) {
                                                     }
                                                     MouseArea {
                                                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                                        onClicked: (mouse) => { searchSource = modelData; if (searchField.text.trim() !== "") { searchModel.clear(); isSearching = true; MorphServices.search(searchField.text, searchSource) } }
+                                                        onClicked: (mouse) => { searchSource = modelData; if (searchField.text.trim() !== "") { resetSearch(); isSearching = true; MorphServices.search(searchField.text, searchSource) } }
                                                     }
                                                 }
                                             }
@@ -2847,6 +2837,8 @@ function playTrack(track, index) {
             radius: 12
 
             property bool isCurrent: (currentTrack && currentTrack.id == model.id && (currentTrack.service == model.service || (!model.service && currentTrack.service == "Yandex")))
+            property bool isLikedTrack: (window.likesVersion, MorphSettings.isLiked(model.id))
+            property bool isCachedTrack: (window.cacheVersion, MorphCache.isTrackCached(model.id))
 
             Rectangle {
                 anchors.fill: parent
@@ -2895,7 +2887,7 @@ function playTrack(track, index) {
                             saveLastImport = false
                             var tempTracks = []
                             for (var i = 0; i < m.count; i++) tempTracks.push(m.get(i))
-                            fullPlaylistTracks = tempTracks
+                            fullPlaylistTracks = (rawSearchResults && rawSearchResults.length > 0) ? rawSearchResults : tempTracks
                             libraryModel.clear()
                             loadedTracksCount = 0
                             loadNextChunk()
@@ -2974,7 +2966,7 @@ function playTrack(track, index) {
                                 textFormat: Text.RichText
                                 font: parent.font
                                 property string activeHovered: ""
-                                text: artist ? getArtistsRichText(artist, activeHovered, trackDelegateRoot.width - 190, true) : ""
+                                text: (artist && activeHovered !== "") ? getArtistsRichText(artist, activeHovered, trackDelegateRoot.width - 190, true) : ""
                                 opacity: (parent.hoveredArtist !== "" && !parent.useOverlay2) ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: 150 } }
                                 onLinkHovered: (link) => { parent.hoveredArtist = link }
@@ -2999,7 +2991,7 @@ function playTrack(track, index) {
                                 textFormat: Text.RichText
                                 font: parent.font
                                 property string activeHovered: ""
-                                text: artist ? getArtistsRichText(artist, activeHovered, trackDelegateRoot.width - 190, true) : ""
+                                text: (artist && activeHovered !== "") ? getArtistsRichText(artist, activeHovered, trackDelegateRoot.width - 190, true) : ""
                                 opacity: (parent.hoveredArtist !== "" && parent.useOverlay2) ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: 150 } }
                                 onLinkHovered: (link) => { parent.hoveredArtist = link }
@@ -3026,7 +3018,7 @@ function playTrack(track, index) {
                     
                     Rectangle {
                         width: 6; height: 6; radius: 3; color: "#b57339"
-                        visible: (window.cacheVersion, MorphCache.isTrackCached(model.id))
+                        visible: trackDelegateRoot.isCachedTrack
                     }
                     Text {
                         text: formatTime(durationMs || 0)
@@ -3034,7 +3026,7 @@ function playTrack(track, index) {
                     }
                     Image {
                         id: heartIcon
-                        source: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: (window.likesVersion, MorphSettings.isLiked(model.id)) ? "#b57339" : (heartMouseArea.containsMouse ? "white" : "#888") }
+                        source: trackDelegateRoot.isLikedTrack ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"; Layout.preferredWidth: 18; Layout.preferredHeight: 18; Layout.leftMargin: 4; layer.enabled: true; layer.effect: ColorOverlay { color: trackDelegateRoot.isLikedTrack ? "#b57339" : (heartMouseArea.containsMouse ? "white" : "#888") }
                         MouseArea { 
                             id: heartMouseArea
                             anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
@@ -3285,14 +3277,17 @@ function playTrack(track, index) {
                 selectedAlbum = null
             } else {
                 isSearching = false
+                var temp = []
                 for (var k = 0; k < results.length; k++) {
                     var item3 = results[k]
                     item3.service = serviceName
                     if (item3.durationMs === undefined) item3.durationMs = 0
                     if (item3.album === undefined) item3.album = ""
                     if (item3.webUrl === undefined) item3.webUrl = ""
-                    searchModel.append(item3)
+                    temp.push(item3)
                 }
+                rawSearchResults = rawSearchResults.concat(temp)
+                appendSearchChunk()
             }
         }
         function onErrorOccurred(message) {
@@ -4072,22 +4067,20 @@ function playTrack(track, index) {
         }
         
         property int visibleTracksCount: 20
+        property var cachedFullTracks: []
         
-        Connections {
-            target: window
-            function onSelectedArtistChanged() {
-                artistProfilePopup.visibleTracksCount = 20
+        function updateCachedTracks() {
+            if (!selectedArtist) {
+                cachedFullTracks = []
+                return
             }
-            function onSelectedAlbumChanged() {
-                artistProfilePopup.visibleTracksCount = 20
+            if (selectedAlbum && selectedAlbum.tracks) {
+                cachedFullTracks = selectedAlbum.tracks
+                return
             }
-        }
-        
-        function getFullTracksList() {
-            if (!selectedArtist) return []
-            if (selectedAlbum) return selectedAlbum.tracks || []
             if (selectedArtist.tracks && selectedArtist.tracks.length > 0) {
-                return selectedArtist.tracks
+                cachedFullTracks = selectedArtist.tracks
+                return
             }
             var allTracks = []
             if (selectedArtist.albums) {
@@ -4100,7 +4093,23 @@ function playTrack(track, index) {
                     }
                 }
             }
-            return allTracks
+            cachedFullTracks = allTracks
+        }
+        
+        Connections {
+            target: window
+            function onSelectedArtistChanged() {
+                artistProfilePopup.visibleTracksCount = 20
+                artistProfilePopup.updateCachedTracks()
+            }
+            function onSelectedAlbumChanged() {
+                artistProfilePopup.visibleTracksCount = 20
+                artistProfilePopup.updateCachedTracks()
+            }
+        }
+        
+        function getFullTracksList() {
+            return cachedFullTracks
         }
         
         onClosed: {
@@ -4231,7 +4240,7 @@ function playTrack(track, index) {
             
             onContentYChanged: {
                 if (contentHeight > height && contentY >= contentHeight - height - 100) {
-                    var fullList = artistProfilePopup.getFullTracksList()
+                    var fullList = artistProfilePopup.cachedFullTracks
                     if (artistProfilePopup.visibleTracksCount < fullList.length) {
                         artistProfilePopup.visibleTracksCount = Math.min(artistProfilePopup.visibleTracksCount + 20, fullList.length)
                     }
@@ -4422,7 +4431,7 @@ function playTrack(track, index) {
                         
                         Repeater {
                             id: popupTracksRepeater
-                            model: artistProfilePopup.getFullTracksList().slice(0, artistProfilePopup.visibleTracksCount)
+                            model: artistProfilePopup.cachedFullTracks.slice(0, artistProfilePopup.visibleTracksCount)
                             
                             delegate: Rectangle {
                                  id: trackRow
@@ -4441,29 +4450,25 @@ function playTrack(track, index) {
                                      border.width: 1.5
                                      opacity: (parent.isCurrent || trackRowMouse.containsMouse) ? 1 : 0
                                      Behavior on opacity { NumberAnimation { duration: 150 } }
-                                 }
-                                
-                                MouseArea {
+                                      MouseArea {
                                      id: trackRowMouse
                                      anchors.fill: parent
                                      hoverEnabled: true
                                      cursorShape: Qt.PointingHandCursor
                                      onClicked: {
-                                         var tracksList = artistProfilePopup.getFullTracksList()
+                                         var tracksList = artistProfilePopup.cachedFullTracks
                                          
                                          currentPlaylist = "ARTIST_" + selectedArtist.name.toUpperCase().replace(" ", "_")
                                          saveLastImport = false
                                          fullPlaylistTracks = tracksList
                                          
                                          libraryModel.clear()
-                                         for (var j = 0; j < tracksList.length; j++) {
-                                             libraryModel.append(tracksList[j])
-                                         }
-                                         loadedTracksCount = tracksList.length
+                                         loadedTracksCount = 0
+                                         loadNextChunk()
                                          
                                          playTrack(modelData, index)
                                      }
-                                 }
+                                 }                             }
                                 
                                 RowLayout {
                                     anchors.fill: parent

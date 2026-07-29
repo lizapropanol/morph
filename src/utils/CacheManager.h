@@ -10,6 +10,8 @@
 #include "../network/NetworkManager.h"
 #include "PathProvider.h"
 
+#include <QSet>
+
 class CacheManager : public QObject {
     Q_OBJECT
 public:
@@ -49,6 +51,10 @@ private:
     qint64 m_limit = 0;
     bool m_saveTracks = true;
     bool m_saveCovers = true;
+    bool m_cacheScanned = false;
+    QSet<QString> m_cachedTracks;
+    QSet<QString> m_cachedCovers;
+    void scanCacheSets();
     QString getHash(const QString& input);
     void enforceLimit();
     void performTrackDownload(const QString& trackId, const QUrl& url, int redirectionDepth = 0);

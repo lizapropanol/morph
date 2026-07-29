@@ -7,6 +7,8 @@
 #include <QVariantMap>
 #include <QVariantList>
 
+#include <QSet>
+
 class PlaylistManager : public QObject {
     Q_OBJECT
 public:
@@ -30,6 +32,8 @@ signals:
 
 private:
     QJsonObject* m_data;
+    QSet<QString> m_likedSet;
+    void updateLikedSet();
 };
 
 #endif

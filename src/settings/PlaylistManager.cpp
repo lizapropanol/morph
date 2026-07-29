@@ -3,6 +3,15 @@
 PlaylistManager::PlaylistManager(QJsonObject* data, QObject* parent)
     : QObject(parent), m_data(data) {}
 
+void PlaylistManager::updateLikedSet() {
+    m_likedSet.clear();
+    if (!m_data->contains("likes")) return;
+    QJsonArray likes = (*m_data)["likes"].toArray();
+    for (int i = 0; i < likes.size(); ++i) {
+        m_likedSet.insert(likes[i].toObject()["id"].toString());
+    }
+}
+
 void PlaylistManager::toggleLike(const QVariantMap& track) {
     QJsonArray likes = (*m_data)["likes"].toArray();
     QString id = track["id"].toString();
@@ -18,15 +27,15 @@ void PlaylistManager::toggleLike(const QVariantMap& track) {
         likes.insert(0, QJsonObject::fromVariantMap(track));
     }
     (*m_data)["likes"] = likes;
+    updateLikedSet();
     emit likesChanged();
 }
 
 bool PlaylistManager::isLiked(const QString& trackId) {
-    QJsonArray likes = (*m_data)["likes"].toArray();
-    for (int i = 0; i < likes.size(); ++i) {
-        if (likes[i].toObject()["id"].toString() == trackId) return true;
+    if (m_likedSet.isEmpty() && m_data->contains("likes")) {
+        updateLikedSet();
     }
-    return false;
+    return m_likedSet.contains(trackId);
 }
 
 QVariantList PlaylistManager::getLikedTracks() {

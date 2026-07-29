@@ -2,12 +2,32 @@
 
 CacheManager::CacheManager(NetworkManager* net, QObject* parent) : QObject(parent), net(net) {}
 
+void CacheManager::scanCacheSets() {
+    m_cachedTracks.clear();
+    QDir trackDir(PathProvider::getTrackCachePath());
+    trackDir.setNameFilters(QStringList() << "*.mp3");
+    for (const QString& file : trackDir.entryList(QDir::Files)) {
+        QFileInfo fi(file);
+        m_cachedTracks.insert(fi.baseName());
+    }
+
+    m_cachedCovers.clear();
+    QDir coverDir(PathProvider::getCoverCachePath());
+    for (const QString& file : coverDir.entryList(QDir::Files)) {
+        m_cachedCovers.insert(file);
+    }
+    m_cacheScanned = true;
+}
+
 QString CacheManager::getHash(const QString& input) {
     return QString(QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Md5).toHex());
 }
 
 bool CacheManager::isTrackCached(const QString& trackId) {
-    return QFile::exists(getTrackPath(trackId));
+    if (!m_cacheScanned) scanCacheSets();
+    QString safeId = trackId;
+    safeId.replace("/", "_").replace(":", "_").replace("?", "_").replace("*", "_");
+    return m_cachedTracks.contains(safeId);
 }
 
 QString CacheManager::getTrackPath(const QString& trackId) {
@@ -42,6 +62,9 @@ void CacheManager::performTrackDownload(const QString& trackId, const QUrl& url,
             if (file.open(QIODevice::WriteOnly)) {
                 file.write(reply->readAll());
                 file.close();
+                QString safeId = trackId;
+                safeId.replace("/", "_").replace(":", "_").replace("?", "_").replace("*", "_");
+                m_cachedTracks.insert(safeId);
                 enforceLimit();
                 emit trackCached(trackId, "file://" + file.fileName());
             }
@@ -56,6 +79,7 @@ void CacheManager::clearTrackCache() {
     for (const QString& file : dir.entryList()) {
         dir.remove(file);
     }
+    m_cacheScanned = false;
 }
 
 qint64 CacheManager::getTrackCacheSize() {
@@ -116,23 +140,26 @@ QVariantList CacheManager::getCoverCacheItems() {
 void CacheManager::removeCacheFile(const QString& fileName, bool isTrack) {
     QString path = (isTrack ? PathProvider::getTrackCachePath() : PathProvider::getCoverCachePath()) + "/" + fileName;
     QFile::remove(path);
+    m_cacheScanned = false;
 }
 
 QString CacheManager::getCachedCover(const QString& url) {
     if (url.isEmpty()) return "";
-    if (url.startsWith("file://")) {
-        if (QFile::exists(url.mid(7))) return url;
-        return "";
+    if (url.startsWith("file://")) return url;
+    if (!m_cacheScanned) scanCacheSets();
+    QString hash = getHash(url);
+    if (m_cachedCovers.contains(hash)) {
+        return "file://" + PathProvider::getCoverCachePath() + "/" + hash;
     }
-    QString path = PathProvider::getCoverCachePath() + "/" + getHash(url);
-    if (QFile::exists(path)) return "file://" + path;
     return url;
 }
 
 void CacheManager::cacheCover(const QString& url) {
     if (!m_saveCovers || url.isEmpty() || url.startsWith("file://")) return;
-    QString path = PathProvider::getCoverCachePath() + "/" + getHash(url);
-    if (QFile::exists(path)) return;
+    if (!m_cacheScanned) scanCacheSets();
+    QString hash = getHash(url);
+    if (m_cachedCovers.contains(hash)) return;
+    QString path = PathProvider::getCoverCachePath() + "/" + hash;
     performCoverDownload(url, path, QUrl(url));
 }
 
@@ -153,6 +180,7 @@ void CacheManager::performCoverDownload(const QString& url, const QString& path,
             if (file.open(QIODevice::WriteOnly)) {
                 file.write(reply->readAll());
                 file.close();
+                m_cachedCovers.insert(getHash(url));
                 enforceLimit();
                 emit coverCached(url, "file://" + file.fileName());
             }
