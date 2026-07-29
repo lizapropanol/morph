@@ -3216,10 +3216,14 @@ function playTrack(track, index) {
         target: MorphServices
         function onSearchResultsReady(serviceName, results) {
             if (isSearchingForArtistProfile) {
-                isSearchingForArtistProfile = false
-                var artistTracks = []
+                var currentArtistTracks = (selectedArtist && selectedArtist.tracks) ? selectedArtist.tracks : []
+                var currentAlbumsList = (selectedArtist && selectedArtist.albums) ? selectedArtist.albums : []
                 var albumsMap = {}
-                var albumsList = []
+                for (var a = 0; a < currentAlbumsList.length; a++) {
+                    albumsMap[currentAlbumsList[a].title] = currentAlbumsList[a]
+                }
+
+                var newArtistTracks = []
                 for (var i = 0; i < results.length; i++) {
                     var item = results[i]
                     item.service = serviceName
@@ -3227,7 +3231,7 @@ function playTrack(track, index) {
                     if (item.album === undefined) item.album = ""
                     if (item.webUrl === undefined) item.webUrl = ""
                     if (item.artist && item.artist.toLowerCase().indexOf(selectedArtistName.toLowerCase()) !== -1) {
-                        artistTracks.push(item)
+                        newArtistTracks.push(item)
                         var albumTitle = item.album || "Single"
                         if (!albumsMap[albumTitle]) {
                             albumsMap[albumTitle] = {
@@ -3235,19 +3239,19 @@ function playTrack(track, index) {
                                 coverUrl: item.coverUrl || "",
                                 tracks: []
                             }
-                            albumsList.push(albumsMap[albumTitle])
+                            currentAlbumsList.push(albumsMap[albumTitle])
                         }
                         albumsMap[albumTitle].tracks.push(item)
                     }
                 }
-                if (artistTracks.length === 0) {
+                if (newArtistTracks.length === 0 && currentArtistTracks.length === 0) {
                     for (var j = 0; j < results.length; j++) {
                         var item2 = results[j]
                         item2.service = serviceName
                         if (item2.durationMs === undefined) item2.durationMs = 0
                         if (item2.album === undefined) item2.album = ""
                         if (item2.webUrl === undefined) item2.webUrl = ""
-                        artistTracks.push(item2)
+                        newArtistTracks.push(item2)
                         var albumTitle2 = item2.album || "Single"
                         if (!albumsMap[albumTitle2]) {
                             albumsMap[albumTitle2] = {
@@ -3255,24 +3259,20 @@ function playTrack(track, index) {
                                 coverUrl: item2.coverUrl || "",
                                 tracks: []
                             }
-                            albumsList.push(albumsMap[albumTitle2])
+                            currentAlbumsList.push(albumsMap[albumTitle2])
                         }
                         albumsMap[albumTitle2].tracks.push(item2)
                     }
                 }
-                
-                var svcNameLower = serviceName.toLowerCase()
-                if (svcNameLower === "soundcloud" || svcNameLower === "youtube" || 
-                    (albumsList.length === 1 && (albumsList[0].title === "Single" || albumsList[0].title === "Tracks"))) {
-                    albumsList = []
-                }
-                
+
+                var mergedTracks = currentArtistTracks.concat(newArtistTracks)
+                isSearchingForArtistProfile = false
                 selectedArtist = {
                     name: selectedArtistName,
-                    image: (artistTracks.length > 0) ? artistTracks[0].coverUrl : "",
-                    bio: selectedArtistName + " is a featured artist on " + serviceName + ".",
-                    albums: albumsList,
-                    tracks: artistTracks
+                    image: (mergedTracks.length > 0) ? mergedTracks[0].coverUrl : "",
+                    bio: selectedArtistName + " tracks from " + serviceName + ".",
+                    albums: currentAlbumsList,
+                    tracks: mergedTracks
                 }
                 selectedAlbum = null
             } else {
@@ -4442,6 +4442,8 @@ function playTrack(track, index) {
                                  color: "transparent"
  
                                  property bool isCurrent: (currentTrack && currentTrack.id === modelData.id)
+                                 property bool isLikedTrack: (window.likesVersion, MorphSettings.isLiked(modelData.id))
+                                 property bool isCachedTrack: (window.cacheVersion, MorphCache.isTrackCached(modelData.id))
  
                                  Rectangle {
                                      anchors.fill: parent
@@ -4552,7 +4554,7 @@ function playTrack(track, index) {
                                                           textFormat: Text.RichText
                                                           font: parent.font
                                                           property string activeHovered: ""
-                                                          text: modelData.artist ? getArtistsRichText(modelData.artist, activeHovered, trackRow.width - 180, true) : ""
+                                                          text: (activeHovered !== "" && modelData.artist) ? getArtistsRichText(modelData.artist, activeHovered, trackRow.width - 180, true) : ""
                                                           opacity: (parent.hoveredArtist !== "" && parent.useOverlay2) ? 1 : 0
                                                           Behavior on opacity { NumberAnimation { duration: 150 } }
                                                           onLinkHovered: (link) => { parent.hoveredArtist = link }
@@ -4570,7 +4572,7 @@ function playTrack(track, index) {
                                         
                                         Rectangle {
                                             width: 6; height: 6; radius: 3; color: "#b57339"
-                                            visible: (window.cacheVersion, MorphCache.isTrackCached(modelData.id))
+                                            visible: trackRow.isCachedTrack
                                         }
                                         Text {
                                             text: formatTime(modelData.durationMs || 0)
@@ -4578,7 +4580,7 @@ function playTrack(track, index) {
                                         }
                                          Image {
                                              id: popupHeartIcon
-                                             source: (window.likesVersion, MorphSettings.isLiked(modelData.id)) ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"
+                                             source: trackRow.isLikedTrack ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"
                                              Layout.preferredWidth: 18
                                              Layout.preferredHeight: 18
                                              Layout.leftMargin: 4
@@ -4587,7 +4589,7 @@ function playTrack(track, index) {
                                              smooth: true
                                              layer.enabled: true
                                              layer.smooth: true
-                                             layer.effect: ColorOverlay { color: (window.likesVersion, MorphSettings.isLiked(modelData.id)) ? "#b57339" : (popupHeartMouseArea.containsMouse ? "white" : "#888") }
+                                             layer.effect: ColorOverlay { color: trackRow.isLikedTrack ? "#b57339" : (popupHeartMouseArea.containsMouse ? "white" : "#888") }
                                              MouseArea {
                                                  id: popupHeartMouseArea
                                                  anchors.fill: parent
