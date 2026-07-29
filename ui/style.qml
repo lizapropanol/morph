@@ -3265,6 +3265,12 @@ function playTrack(track, index) {
                     }
                 }
 
+                var svcNameLower = serviceName.toLowerCase()
+                if (svcNameLower === "soundcloud" || svcNameLower === "youtube" || 
+                    (currentAlbumsList.length === 1 && (currentAlbumsList[0].title === "Single" || currentAlbumsList[0].title === "Tracks"))) {
+                    currentAlbumsList = []
+                }
+
                 var mergedTracks = currentArtistTracks.concat(newArtistTracks)
                 isSearchingForArtistProfile = false
                 selectedArtist = {
