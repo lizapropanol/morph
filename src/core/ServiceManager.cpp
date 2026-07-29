@@ -10,10 +10,6 @@ ServiceManager::ServiceManager(NetworkManager* net, CacheManager* cache, QObject
         for (int i = 0; i < results.size(); ++i) {
             QVariantMap track = results[i].toMap();
             if (!track.contains("durationMs")) track["durationMs"] = 0;
-            QString coverUrl = track["coverUrl"].toString();
-            if (!coverUrl.isEmpty()) {
-                this->cache->cacheCover(coverUrl);
-            }
             results[i] = track;
         }
     };

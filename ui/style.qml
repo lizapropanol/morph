@@ -3468,13 +3468,20 @@ function playTrack(track, index) {
         function onPreviousRequested() { playPrevious() }
     }
 
+    Timer {
+        id: cacheUpdateTimer
+        interval: 300
+        repeat: false
+        onTriggered: window.cacheVersion++
+    }
+
     Connections {
         target: MorphCache
         function onTrackCached(trackId, localPath) { 
             streamUrlCache[trackId] = localPath
-            window.cacheVersion++ 
+            cacheUpdateTimer.restart()
         }
-        function onCoverCached() { window.cacheVersion++ }
+        function onCoverCached() { cacheUpdateTimer.restart() }
     }
 
     Connections {
