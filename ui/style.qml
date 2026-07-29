@@ -2911,7 +2911,7 @@ function playTrack(track, index) {
                     Image { 
                         id: trackImage
                         anchors.fill: parent
-                        source: MorphCache.getCachedCover(coverUrl || ""); fillMode: Image.PreserveAspectCrop 
+                        source: MorphCache.getCachedCover(coverUrl || ""); fillMode: Image.PreserveAspectCrop; asynchronous: true 
                         layer.enabled: true
                         layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 10 } }
                         onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
@@ -4145,6 +4145,7 @@ function playTrack(track, index) {
                         anchors.fill: parent
                         source: (selectedArtist && selectedArtist.image) ? MorphCache.getCachedCover(selectedArtist.image) : ""
                         fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
                         smooth: true
                         layer.enabled: true
                         layer.smooth: true
@@ -4483,6 +4484,7 @@ function playTrack(track, index) {
                                              anchors.fill: parent
                                              source: MorphCache.getCachedCover(modelData.coverUrl || "")
                                              fillMode: Image.PreserveAspectCrop
+                                             asynchronous: true
                                              smooth: true
                                              layer.enabled: true
                                              layer.smooth: true

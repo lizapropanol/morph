@@ -2,10 +2,12 @@
 #include <QFontDatabase>
 #include <QLockFile>
 #include <QDir>
+#include <QImageReader>
 #include "core/Application.h"
 #include "utils/PathProvider.h"
 
 int main(int argc, char *argv[]) {
+    QImageReader::setAllocationLimit(64);
     QApplication app(argc, argv);
     
     QLockFile lockFile(QDir::tempPath() + "/morph.lock");

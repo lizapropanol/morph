@@ -40,6 +40,13 @@ Application::Application(QObject *parent) : QObject(parent) {
         audio->setBitrate(bitrate);
     });
     services->setAudioQuality(settings->getAudioQuality());
+
+    QTimer* gcTimer = new QTimer(this);
+    connect(gcTimer, &QTimer::timeout, this, [this]() {
+        if (engine) engine->clearComponentCache();
+        QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+    });
+    gcTimer->start(60000);
 }
 
 void Application::bindContextProperties() {
