@@ -37,7 +37,7 @@ QString CacheManager::getTrackPath(const QString& trackId) {
 }
 
 QString CacheManager::getTrackUrl(const QString& trackId) {
-    return "file://" + getTrackPath(trackId);
+    return QUrl::fromLocalFile(getTrackPath(trackId)).toString();
 }
 
 void CacheManager::cacheTrack(const QString& trackId, const QString& url) {
@@ -58,7 +58,8 @@ void CacheManager::performTrackDownload(const QString& trackId, const QUrl& url,
         }
 
         if (reply->error() == QNetworkReply::NoError) {
-            QFile file(getTrackPath(trackId));
+            QString trackPath = getTrackPath(trackId);
+            QFile file(trackPath);
             if (file.open(QIODevice::WriteOnly)) {
                 file.write(reply->readAll());
                 file.close();
@@ -66,7 +67,7 @@ void CacheManager::performTrackDownload(const QString& trackId, const QUrl& url,
                 safeId.replace("/", "_").replace(":", "_").replace("?", "_").replace("*", "_");
                 m_cachedTracks.insert(safeId);
                 enforceLimit();
-                emit trackCached(trackId, "file://" + file.fileName());
+                emit trackCached(trackId, QUrl::fromLocalFile(trackPath).toString());
             }
         }
     });
@@ -149,7 +150,7 @@ QString CacheManager::getCachedCover(const QString& url) {
     if (!m_cacheScanned) scanCacheSets();
     QString hash = getHash(url);
     if (m_cachedCovers.contains(hash)) {
-        return "file://" + PathProvider::getCoverCachePath() + "/" + hash;
+        return QUrl::fromLocalFile(PathProvider::getCoverCachePath() + "/" + hash).toString();
     }
     return url;
 }
@@ -182,7 +183,7 @@ void CacheManager::performCoverDownload(const QString& url, const QString& path,
                 file.close();
                 m_cachedCovers.insert(getHash(url));
                 enforceLimit();
-                emit coverCached(url, "file://" + file.fileName());
+                emit coverCached(url, QUrl::fromLocalFile(path).toString());
             }
         }
     });

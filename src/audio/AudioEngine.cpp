@@ -98,11 +98,25 @@ void AudioEngine::play(const QString& url) {
     m_isPausing = false;
     fadeAnimation->stop();
     audioOutput->setVolume(m_targetVolume);
-    player->setSource(QUrl(url));
+
+    QUrl mediaUrl;
+    if (url.startsWith("file://")) {
+        mediaUrl = QUrl(url);
+        if (!mediaUrl.isLocalFile() && !url.startsWith("file:///") && url.length() > 7 && url[7].isLetter() && url.length() > 8 && url[8] == ':') {
+            mediaUrl = QUrl::fromLocalFile(url.mid(7));
+        }
+    } else if (QFile::exists(url)) {
+        mediaUrl = QUrl::fromLocalFile(url);
+    } else {
+        mediaUrl = QUrl(url);
+    }
+
+    player->setSource(mediaUrl);
     player->play();
     
-    if (url.startsWith("file://")) {
-        QString source = QUrl(url).toLocalFile();
+    if (url.startsWith("file://") || mediaUrl.isLocalFile()) {
+        QString source = mediaUrl.toLocalFile();
+        if (source.isEmpty()) source = url;
         if (QFile::exists(source)) {
             QProcess* proc = new QProcess(this);
             connect(proc, &QProcess::errorOccurred, [this, proc](QProcess::ProcessError) {
