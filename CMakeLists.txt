@@ -56,6 +56,10 @@ target_compile_definitions(morph PRIVATE
     MORPH_VERSION="${PROJECT_VERSION}"
 )
 
+if(WIN32)
+    set_target_properties(morph PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
+
 target_link_libraries(morph PRIVATE
     Qt6::Core
     Qt6::Quick
@@ -68,5 +72,9 @@ target_link_libraries(morph PRIVATE
     Qt6::Core5Compat
     OpenSSL::Crypto
 )
+
+if(WIN32)
+    target_link_libraries(morph PRIVATE dwmapi)
+endif()
 
 include(Packaging.cmake)

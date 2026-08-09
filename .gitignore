@@ -1,2 +1,5 @@
 build/
+build-*/
 *.user
+*.log
+aqtinstall.log

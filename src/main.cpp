@@ -7,6 +7,7 @@
 #include "utils/PathProvider.h"
 
 int main(int argc, char *argv[]) {
+    qputenv("QT_QUICK_CONTROLS_STYLE", "Basic");
     QImageReader::setAllocationLimit(64);
     QApplication app(argc, argv);
     

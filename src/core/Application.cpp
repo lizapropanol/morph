@@ -10,6 +10,24 @@
 #include "utils/PathProvider.h"
 #include "services/TrackData.h"
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <dwmapi.h>
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
+
+static void enableWindowDarkMode(QWindow* window) {
+    if (!window) return;
+    HWND hwnd = reinterpret_cast<HWND>(window->winId());
+    if (!hwnd) return;
+    BOOL darkMode = TRUE;
+    if (FAILED(DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode)))) {
+        DwmSetWindowAttribute(hwnd, 19, &darkMode, sizeof(darkMode));
+    }
+}
+#endif
+
 Application::Application(QObject *parent) : QObject(parent) {
     connect(&PathProvider::instance(), &PathProvider::configRestored, this, [this](const QString& msg) {
         pendingNotifications.append(msg);
@@ -47,6 +65,12 @@ Application::Application(QObject *parent) : QObject(parent) {
         QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     });
     gcTimer->start(60000);
+
+#ifdef Q_OS_WIN
+    connect(qApp, &QGuiApplication::focusWindowChanged, this, [](QWindow* window) {
+        enableWindowDarkMode(window);
+    });
+#endif
 }
 
 void Application::bindContextProperties() {
@@ -64,6 +88,11 @@ void Application::start() {
         if (!obj && objUrl == QUrl::fromLocalFile(settings->getActiveStylePath())) {
             qCritical() << "MORPH_ERROR: Could not load QML file!" << objUrl;
         } else if (obj) {
+#ifdef Q_OS_WIN
+            if (QQuickWindow* window = qobject_cast<QQuickWindow*>(obj)) {
+                enableWindowDarkMode(window);
+            }
+#endif
             QTimer::singleShot(5000, this, [this]() {
                 for (const QString& msg : pendingNotifications) {
                     emit configRestored(msg);
@@ -89,6 +118,13 @@ void Application::reload() {
 
     bindContextProperties();
     engine->load(QUrl::fromLocalFile(settings->getActiveStylePath()));
+#ifdef Q_OS_WIN
+    for (QObject* obj : engine->rootObjects()) {
+        if (QQuickWindow* window = qobject_cast<QQuickWindow*>(obj)) {
+            enableWindowDarkMode(window);
+        }
+    }
+#endif
 }
 
 void Application::clearQmlCache() {
