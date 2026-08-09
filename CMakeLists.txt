@@ -58,6 +58,7 @@ target_compile_definitions(morph PRIVATE
 
 if(WIN32)
     set_target_properties(morph PROPERTIES WIN32_EXECUTABLE TRUE)
+    target_sources(morph PRIVATE morph.rc)
 endif()
 
 target_link_libraries(morph PRIVATE

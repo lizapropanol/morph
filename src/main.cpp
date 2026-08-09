@@ -3,6 +3,7 @@
 #include <QLockFile>
 #include <QDir>
 #include <QImageReader>
+#include <QIcon>
 #include "core/Application.h"
 #include "utils/PathProvider.h"
 
@@ -10,6 +11,7 @@ int main(int argc, char *argv[]) {
     qputenv("QT_QUICK_CONTROLS_STYLE", "Basic");
     QImageReader::setAllocationLimit(64);
     QApplication app(argc, argv);
+    app.setWindowIcon(QIcon(":/assets/logo.svg"));
     
     QLockFile lockFile(QDir::tempPath() + "/morph.lock");
     if (!lockFile.tryLock(100)) {

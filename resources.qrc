@@ -39,6 +39,8 @@
     <file>assets/notebook-outline.svg</file>
     <file>assets/camera-iris.svg</file>
     <file>assets/pencil.svg</file>
+    <file>assets/morph.png</file>
+    <file>assets/morph.ico</file>
     <file>assets/fonts/interblack.otf</file>
 </qresource>
 </RCC>
