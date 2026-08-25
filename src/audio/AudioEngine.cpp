@@ -93,7 +93,12 @@ void AudioEngine::setBitrate(int bitrate) {
 }
 
 void AudioEngine::play(const QString& url) {
-    m_manualBitrate = 0;
+    if (url.isEmpty()) {
+        m_manualBitrate = 0;
+        player->stop();
+        emit bitrateChanged();
+        return;
+    }
     m_isInternalPaused = false;
     m_isPausing = false;
     fadeAnimation->stop();

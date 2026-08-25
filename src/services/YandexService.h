@@ -21,7 +21,7 @@ signals:
     void bitrateReady(const QString& trackId, int bitrate);
 
 private:
-    void fetchDownloadInfo(const QString& trackId, const QUrl& url);
+    void fetchDownloadInfo(const QString& trackId, const QUrl& url, int bitrate);
     QVariantList parseYandexTracks(const QJsonArray& tracksArray);
 
 private:

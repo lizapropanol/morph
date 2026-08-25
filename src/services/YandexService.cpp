@@ -218,9 +218,9 @@ void YandexService::resolveStreamUrl(const QString& trackId) {
         }
 
         int br = results[bestIdx].toObject()["bitrateInKbps"].toInt();
-        emit bitrateReady(trackId, br > 0 ? br : targetBitrate);
+        int targetBr = br > 0 ? br : targetBitrate;
         QString downloadInfoUrl = results[bestIdx].toObject()["downloadInfoUrl"].toString();
-        fetchDownloadInfo(trackId, QUrl(downloadInfoUrl));
+        fetchDownloadInfo(trackId, QUrl(downloadInfoUrl), targetBr);
     });
 }
 
@@ -254,7 +254,7 @@ void YandexService::reportPlay(const QString& trackId, const QString& albumId) {
     });
 }
 
-void YandexService::fetchDownloadInfo(const QString& trackId, const QUrl& url) {
+void YandexService::fetchDownloadInfo(const QString& trackId, const QUrl& url, int bitrate) {
     QMap<QString, QByteArray> h;
     h["User-Agent"] = "Yandex-Music-Desktop/5.92.1";
     h["X-Yandex-Music-Client"] = "WindowsDesktop/5.92.1";
@@ -262,7 +262,7 @@ void YandexService::fetchDownloadInfo(const QString& trackId, const QUrl& url) {
     h["X-Retpath-Y"] = "https://music.yandex.ru/";
     h["Accept-Language"] = "ru";
 
-    net->get(url, h, [this, trackId](QNetworkReply* reply) {
+    net->get(url, h, [this, trackId, bitrate](QNetworkReply* reply) {
         if (reply->error() != QNetworkReply::NoError) return;
 
         QByteArray data = reply->readAll();
@@ -290,5 +290,6 @@ void YandexService::fetchDownloadInfo(const QString& trackId, const QUrl& url) {
             .arg(host).arg(sign).arg(ts).arg(path);
 
         emit streamUrlReady(trackId, streamUrl);
+        emit bitrateReady(trackId, bitrate);
     });
 }
