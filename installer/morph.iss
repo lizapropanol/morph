@@ -54,11 +54,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
 [Files]
-; Main executable
 Source: "{#SourceDir}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-; All runtime DLLs
 Source: "{#SourceDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-; Qt Plugins and QML modules
 Source: "{#SourceDir}\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#SourceDir}\imageformats\*"; DestDir: "{app}\imageformats"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 Source: "{#SourceDir}\iconengines\*"; DestDir: "{app}\iconengines"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
@@ -68,7 +65,6 @@ Source: "{#SourceDir}\styles\*"; DestDir: "{app}\styles"; Flags: ignoreversion r
 Source: "{#SourceDir}\tls\*"; DestDir: "{app}\tls"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 Source: "{#SourceDir}\translations\*"; DestDir: "{app}\translations"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 Source: "{#SourceDir}\qml\*"; DestDir: "{app}\qml"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
-; Assets and License
 Source: "{#AssetsDir}\morph.ico"; DestDir: "{app}\assets"; Flags: ignoreversion
 Source: "{#AssetsDir}\morph.png"; DestDir: "{app}\assets"; Flags: ignoreversion
 Source: "{#LicenseFile}"; DestDir: "{app}"; Flags: ignoreversion

@@ -1,5 +1,4 @@
 if(WIN32)
-    # Find windeployqt
     if(TARGET Qt6::windeployqt)
         get_target_property(WINDEPLOYQT_EXECUTABLE Qt6::windeployqt IMPORTED_LOCATION)
     endif()
@@ -13,7 +12,6 @@ if(WIN32)
         )
     endif()
 
-    # Find Inno Setup Compiler (ISCC)
     find_program(INNOSETUP_COMPILER NAMES ISCC iscc
         HINTS
         "$ENV{LOCALAPPDATA}/Programs/Inno Setup 6"
@@ -23,7 +21,6 @@ if(WIN32)
         "C:/Program Files (x86)/Inno Setup 6"
     )
 
-    # OpenSSL Root directory
     if(DEFINED OPENSSL_ROOT_DIR)
         set(_openssl_root "${OPENSSL_ROOT_DIR}")
     elseif(DEFINED OpenSSL_DIR)
