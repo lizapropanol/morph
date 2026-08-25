@@ -88,7 +88,7 @@ void PathProvider::ensureConfigExists() {
         "repeat-once.svg", "repeat.svg", "skip-next.svg", "skip-previous.svg", 
         "soundcloud_icon.svg", "yandex_music_icon.svg", "youtube_music_icon.svg", "discord.svg", "github.svg",
         "telegram.svg", "information.svg", "harddisk.svg", "check.svg", "check-all.svg",
-        "delete.svg", "close.svg", "morph.png", "notebook-outline.svg", "camera-iris.svg", "pencil.svg"
+        "delete.svg", "close.svg", "morph.png", "notebook-outline.svg", "camera-iris.svg", "pencil.svg", "download.svg"
     };
 
     for (const QString& asset : assets) {

@@ -92,6 +92,118 @@ ApplicationWindow {
     property int settingsVersion: 0
     property int cacheVersion: 0
     property var pendingDownloadTrackIds: ({})
+    property var playlistDownloadQueue: []
+    property var activePlaylistDownloads: ({})
+    property bool isPlaylistDownloading: false
+    property int playlistTotalCount: 0
+    property int playlistDownloadedCount: 0
+
+    function toggleDownloadCurrentPlaylist() {
+        if (isPlaylistDownloading) {
+            playlistDownloadQueue = []
+            activePlaylistDownloads = ({})
+            isPlaylistDownloading = false
+            showToast("Playlist download stopped")
+            return
+        }
+
+        if (!fullPlaylistTracks || fullPlaylistTracks.length === 0) {
+            showToast("Playlist is empty")
+            return
+        }
+
+        var queue = []
+        for (var i = 0; i < fullPlaylistTracks.length; i++) {
+            var trk = fullPlaylistTracks[i]
+            if (trk && trk.id) {
+                var tid = trk.id.toString()
+                if (!MorphCache.isTrackCached(tid)) {
+                    var cleanTrk = {
+                        "id": tid,
+                        "service": trk.service || (trk.coverUrl && trk.coverUrl.indexOf("sndcdn") !== -1 ? "SoundCloud" : "Yandex")
+                    }
+                    queue.push(cleanTrk)
+                }
+            }
+        }
+
+        if (queue.length === 0) {
+            showToast("All tracks already downloaded")
+            return
+        }
+
+        playlistDownloadQueue = queue
+        activePlaylistDownloads = ({})
+        playlistTotalCount = queue.length
+        playlistDownloadedCount = 0
+        isPlaylistDownloading = true
+        showToast("Downloading playlist: 0/" + playlistTotalCount)
+        processPlaylistDownloadQueue()
+    }
+
+    function processPlaylistDownloadQueue() {
+        if (!isPlaylistDownloading) return
+
+        var activeKeys = Object.keys(activePlaylistDownloads)
+        var activeCount = activeKeys.length
+
+        while (activeCount < 4 && playlistDownloadQueue.length > 0) {
+            var trk = playlistDownloadQueue.shift()
+            var tid = trk.id.toString()
+            if (MorphCache.isTrackCached(tid)) {
+                playlistDownloadedCount++
+                continue
+            }
+            if (activePlaylistDownloads[tid]) continue
+
+            var currentActive = Object.assign({}, activePlaylistDownloads)
+            currentActive[tid] = {
+                "track": trk,
+                "startTime": Date.now()
+            }
+            activePlaylistDownloads = currentActive
+            activeCount++
+
+            var sUrl = streamUrlCache[tid]
+            if (sUrl && !sUrl.startsWith("file://")) {
+                MorphCache.cacheTrack(tid, sUrl)
+            } else {
+                var currentPending = Object.assign({}, pendingDownloadTrackIds)
+                currentPending[tid] = true
+                pendingDownloadTrackIds = currentPending
+                MorphServices.resolve(trk.service || "Yandex", tid)
+            }
+        }
+
+        if (activeCount === 0 && playlistDownloadQueue.length === 0) {
+            isPlaylistDownloading = false
+            activePlaylistDownloads = ({})
+            showToast("All tracks downloaded successfully!")
+        }
+    }
+
+    Timer {
+        id: playlistQueueWatchdog
+        interval: 3000
+        repeat: true
+        running: isPlaylistDownloading
+        onTriggered: {
+            if (!isPlaylistDownloading) return
+            var now = Date.now()
+            var changed = false
+            var currentActive = Object.assign({}, activePlaylistDownloads)
+            for (var tid in currentActive) {
+                if (MorphCache.isTrackCached(tid) || (now - currentActive[tid].startTime > 35000)) {
+                    delete currentActive[tid]
+                    changed = true
+                }
+            }
+            if (changed) {
+                activePlaylistDownloads = currentActive
+                processPlaylistDownloadQueue()
+            }
+        }
+    }
     property bool repeatOne: false
     property var fullPlaylistTracks: []
     property int loadedTracksCount: 0
@@ -781,9 +893,27 @@ function playTrack(track, index) {
                                 }
                                 
                                 RowLayout {
-                                    visible: currentPlaylist !== "" && saveLastImport
                                     spacing: 8
                                     Button {
+                                        Layout.preferredWidth: 32; Layout.preferredHeight: 32
+                                        visible: fullPlaylistTracks.length > 0
+                                        onClicked: (mouse) => toggleDownloadCurrentPlaylist()
+                                        background: Rectangle {
+                                            color: "#1a1a1a"; radius: 16
+                                            border.color: isPlaylistDownloading ? "#b57339" : "transparent"
+                                            border.width: isPlaylistDownloading ? 1 : 0
+                                        }
+                                        contentItem: Item {
+                                            Image {
+                                                source: "qrc:/assets/download.svg"
+                                                anchors.centerIn: parent; width: 16; height: 16
+                                                layer.enabled: true; layer.effect: ColorOverlay { color: isPlaylistDownloading ? "#b57339" : "white" }
+                                            }
+                                        }
+                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                    }
+                                    Button {
+                                        visible: currentPlaylist !== "" && saveLastImport
                                         Layout.preferredWidth: 32; Layout.preferredHeight: 32
                                         onClicked: (mouse) => {
                                             var pls = MorphSettings.getPlaylists()
@@ -804,6 +934,7 @@ function playTrack(track, index) {
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
                                     }
                                     Button {
+                                        visible: currentPlaylist !== "" && saveLastImport
                                         Layout.preferredWidth: 32; Layout.preferredHeight: 32
                                         onClicked: (mouse) => deleteConfirmationPopup.open()
                                         background: Rectangle { color: "#1a1a1a"; radius: 16 }
@@ -3117,11 +3248,19 @@ function playTrack(track, index) {
             Rectangle {
                 Layout.fillWidth: true; Layout.preferredHeight: 40; color: downloadItemMouse.containsMouse ? "#333" : "transparent"; radius: 4
                 property bool isCached: targetContextTrack && targetContextTrack.id ? (window.cacheVersion, MorphCache.isTrackCached(targetContextTrack.id.toString())) : false
-                Text {
-                    anchors.centerIn: parent
-                    text: parent.isCached ? "DELETE CACHE" : "DOWNLOAD TRACK"
-                    color: parent.isCached ? "#e57373" : "#b57339"
-                    font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black
+                RowLayout {
+                    anchors.centerIn: parent; spacing: 8
+                    Image {
+                        source: parent.parent.isCached ? "qrc:/assets/delete.svg" : "qrc:/assets/download.svg"
+                        Layout.preferredWidth: 14; Layout.preferredHeight: 14
+                        layer.enabled: true
+                        layer.effect: ColorOverlay { color: parent.parent.isCached ? "#e57373" : "#b57339" }
+                    }
+                    Text {
+                        text: parent.parent.isCached ? "DELETE CACHE" : "DOWNLOAD TRACK"
+                        color: parent.parent.isCached ? "#e57373" : "#b57339"
+                        font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black
+                    }
                 }
                 MouseArea {
                     id: downloadItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -3568,10 +3707,20 @@ function playTrack(track, index) {
     Connections {
         target: MorphCache
         function onTrackCached(trackId, localPath) { 
-            streamUrlCache[trackId] = localPath
+            var strId = trackId ? trackId.toString() : ""
+            streamUrlCache[strId] = localPath
             window.cacheVersion++
             cacheUpdateTimer.restart()
-            showToast("Track downloaded")
+            if (activePlaylistDownloads && activePlaylistDownloads[strId]) {
+                var currentActive = Object.assign({}, activePlaylistDownloads)
+                delete currentActive[strId]
+                activePlaylistDownloads = currentActive
+                playlistDownloadedCount++
+                showToast("Downloading playlist: " + playlistDownloadedCount + "/" + playlistTotalCount)
+                processPlaylistDownloadQueue()
+            } else {
+                showToast("Track downloaded")
+            }
         }
         function onCoverCached() { cacheUpdateTimer.restart() }
     }
