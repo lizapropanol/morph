@@ -54,9 +54,12 @@ private:
     bool m_cacheScanned = false;
     QSet<QString> m_cachedTracks;
     QSet<QString> m_cachedCovers;
+    QMap<QString, QNetworkReply*> m_activeTrackReplies;
+    QMap<QString, QNetworkReply*> m_activeCoverReplies;
     void scanCacheSets();
     QString getHash(const QString& input);
     void enforceLimit();
+    void cancelOtherTrackDownloads(const QString& currentSafeId);
     void performTrackDownload(const QString& trackId, const QUrl& url, int redirectionDepth = 0);
     void performCoverDownload(const QString& url, const QString& path, const QUrl& targetUrl, int redirectionDepth = 0);
 };

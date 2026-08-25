@@ -412,6 +412,9 @@ function playTrack(track, index) {
                 MorphAudio.play("")
             } else {
                 MorphAudio.play(streamUrl)
+                if (!streamUrl.startsWith("file://") && streamUrl.indexOf(".m3u8") === -1 && streamUrl.indexOf("/hls") === -1) {
+                    MorphCache.cacheTrack(cleanTrack.id, streamUrl)
+                }
             }
         } else if (MorphCache.isTrackCached(cleanTrack.id)) {
             var cachedUrl = MorphCache.getTrackUrl(cleanTrack.id)
@@ -3405,6 +3408,9 @@ function playTrack(track, index) {
                 isRecovering = false
             } else {
                 MorphAudio.play(streamUrl)
+            }
+            if (!streamUrl.startsWith("file://") && streamUrl.indexOf(".m3u8") === -1 && streamUrl.indexOf("/hls") === -1) {
+                MorphCache.cacheTrack(trackId, streamUrl)
             }
             
             if (currentTrackIndex === -1) {

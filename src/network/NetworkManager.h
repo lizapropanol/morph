@@ -10,6 +10,7 @@ class NetworkManager : public QObject {
     Q_OBJECT
 public:
     explicit NetworkManager(QObject* parent = nullptr);
+    QNetworkAccessManager* getNetworkAccessManager() const { return manager; }
     void get(const QUrl& url, const QMap<QString, QByteArray>& headers, std::function<void(QNetworkReply*)> callback);
     void rawGet(const QUrl& url, const QMap<QString, QByteArray>& headers, std::function<void(QNetworkReply*)> callback);
     void post(const QUrl& url, const QByteArray& data, const QMap<QString, QByteArray>& headers, std::function<void(QNetworkReply*)> callback);
