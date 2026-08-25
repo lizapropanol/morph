@@ -695,7 +695,7 @@ function playTrack(track, index) {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.margins: 12
-                    color: "#222222"
+                    color: "#111111"
                     radius: 18
                     clip: true
 
