@@ -4093,20 +4093,29 @@ function playTrack(track, index) {
         parent: Overlay.overlay
         x: parent ? (parent.width - width) / 2 : 0
         y: parent ? (parent.height - height) / 2 : 0
-        width: parent ? Math.max(440, Math.min(parent.width * 0.6, 560)) : 520
-        height: parent ? Math.max(360, Math.min(parent.height * 0.65, 480)) : 450
+        width: parent ? Math.max(640, Math.min(parent.width * 0.8, 820)) : 720
+        height: parent ? Math.max(460, Math.min(parent.height * 0.82, 620)) : 520
         modal: true
         focus: true
-        background: Rectangle {
-            color: "#1a1a1a"
-            radius: 12
-            border.color: "#333"
-            border.width: 1
+        dim: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        Overlay.modal: Rectangle {
+            color: "#b3000000"
+            Behavior on opacity { NumberAnimation { duration: 150 } }
         }
-        
-        property int visibleTracksCount: 20
+
+        background: Rectangle {
+            color: "#141414"
+            radius: 20
+            border.color: "#242424"
+            border.width: 1
+            clip: true
+        }
+
+        property int visibleTracksCount: 30
         property var cachedFullTracks: []
-        
+
         function updateCachedTracks() {
             if (!selectedArtist) {
                 cachedFullTracks = []
@@ -4133,257 +4142,344 @@ function playTrack(track, index) {
             }
             cachedFullTracks = allTracks
         }
-        
+
         Connections {
             target: window
             function onSelectedArtistChanged() {
-                artistProfilePopup.visibleTracksCount = 20
+                artistProfilePopup.visibleTracksCount = 30
                 artistProfilePopup.updateCachedTracks()
             }
             function onSelectedAlbumChanged() {
-                artistProfilePopup.visibleTracksCount = 20
+                artistProfilePopup.visibleTracksCount = 30
                 artistProfilePopup.updateCachedTracks()
             }
         }
-        
+
         function getFullTracksList() {
             return cachedFullTracks
         }
-        
+
         onClosed: {
             selectedArtist = null
             selectedAlbum = null
             isSearchingForArtistProfile = false
-            visibleTracksCount = 20
+            visibleTracksCount = 30
         }
-        
+
         Item {
-            id: popupHeader
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 120
-            
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 20
-                spacing: 20
-                
-                Rectangle {
-                    Layout.preferredWidth: 80
-                    Layout.preferredHeight: 80
-                    color: "#222"
-                    radius: 40
-                    border.color: "#333"
-                    border.width: 1
-                    clip: true
-                    
-                    Image {
-                        id: artistProfilePopupImage
-                        anchors.fill: parent
-                        source: (selectedArtist && selectedArtist.image) ? MorphCache.getCachedCover(selectedArtist.image) : ""
-                        fillMode: Image.PreserveAspectCrop
-                        asynchronous: true
-                        smooth: true
-                        layer.enabled: true
-                        layer.smooth: true
-                        layer.effect: OpacityMask {
-                            maskSource: Rectangle { width: 80; height: 80; radius: 40 }
-                        }
-                        onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
-                    }
-                }
-                
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 4
-                    
-                    Text {
-                        text: selectedArtist ? selectedArtist.name : ""
-                        color: "white"
-                        font.family: mainFont.name
-                        font.pixelSize: 24
-                        font.weight: Font.Bold
-                        elide: Text.ElideRight
-                        Layout.fillWidth: true
-                    }
-                    
-                    Text {
-                        text: selectedArtist ? selectedArtist.bio : ""
-                        color: "#888"
-                        font.family: mainFont.name
-                        font.pixelSize: 12
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                        elide: Text.ElideRight
-                        maximumLineCount: 2
-                    }
-                }
-            }
-        }
-        
-        ColumnLayout {
-            anchors.centerIn: parent
-            visible: isSearchingForArtistProfile
-            spacing: 12
-            
-            BusyIndicator {
-                Layout.alignment: Qt.AlignHCenter
-                running: parent.visible
-            }
-            
-            Text {
-                text: "Loading..."
-                color: "#666"
-                font.family: mainFont.name
-                font.pixelSize: 12
-                Layout.alignment: Qt.AlignHCenter
-            }
-        }
-        
-        ColumnLayout {
-            anchors.centerIn: parent
-            visible: !isSearchingForArtistProfile && (!selectedArtist || !selectedArtist.albums || (selectedArtist.albums.length === 0 && (!selectedArtist.tracks || selectedArtist.tracks.length === 0)))
-            spacing: 12
-            
-            Image {
-                source: "qrc:/assets/magnify.svg"
-                Layout.preferredWidth: 32
-                Layout.preferredHeight: 32
-                Layout.alignment: Qt.AlignHCenter
-                layer.enabled: true
-                layer.effect: ColorOverlay { color: "#444" }
-            }
-            
-            Text {
-                text: "No tracks found"
-                color: "#555"
-                font.family: mainFont.name
-                font.pixelSize: 12
-                Layout.alignment: Qt.AlignHCenter
-            }
-        }
-        
-        Flickable {
-            id: artistProfileFlickable
-            anchors.top: popupHeader.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.margins: 20
-            anchors.topMargin: 0
-            contentHeight: artistProfileContent.implicitHeight + 10
-            clip: true
-            visible: !!(selectedArtist && !isSearchingForArtistProfile && ((selectedArtist.albums && selectedArtist.albums.length > 0) || (selectedArtist.tracks && selectedArtist.tracks.length > 0)))
-            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-            
-            onContentYChanged: {
-                if (contentHeight > height && contentY >= contentHeight - height - 100) {
-                    var fullList = artistProfilePopup.cachedFullTracks
-                    if (artistProfilePopup.visibleTracksCount < fullList.length) {
-                        artistProfilePopup.visibleTracksCount = Math.min(artistProfilePopup.visibleTracksCount + 20, fullList.length)
-                    }
-                }
-            }
-            
+            anchors.fill: parent
+
             ColumnLayout {
-                id: artistProfileContent
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.rightMargin: 15
-                spacing: 20
-                
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 10
-                    visible: selectedArtist && selectedArtist.albums && selectedArtist.albums.length > 0
-                    
-                    Text {
-                        text: "ALBUMS"
-                        color: "#888"
-                        font.family: mainFont.name
-                        font.pixelSize: 12
-                        font.weight: Font.Bold
+                anchors.centerIn: parent
+                visible: isSearchingForArtistProfile
+                spacing: 12
+                z: 10
+
+                BusyIndicator {
+                    Layout.alignment: Qt.AlignHCenter
+                    running: parent.visible
+                }
+
+                Text {
+                    text: "Loading artist profile..."
+                    color: "#888888"
+                    font.pixelSize: 13
+                    Layout.alignment: Qt.AlignHCenter
+                }
+            }
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                visible: !isSearchingForArtistProfile && (!selectedArtist || !selectedArtist.albums || (selectedArtist.albums.length === 0 && (!selectedArtist.tracks || selectedArtist.tracks.length === 0)))
+                spacing: 12
+                z: 10
+
+                Image {
+                    source: "qrc:/assets/magnify.svg"
+                    Layout.preferredWidth: 32
+                    Layout.preferredHeight: 32
+                    Layout.alignment: Qt.AlignHCenter
+                    layer.enabled: true
+                    layer.effect: ColorOverlay { color: "#555555" }
+                }
+
+                Text {
+                    text: "No tracks found"
+                    color: "#777777"
+                    font.pixelSize: 13
+                    Layout.alignment: Qt.AlignHCenter
+                }
+            }
+
+            Flickable {
+                id: artistProfileFlickable
+                anchors.fill: parent
+                contentHeight: profileMainColumn.implicitHeight + 30
+                clip: true
+                visible: !!(selectedArtist && !isSearchingForArtistProfile && ((selectedArtist.albums && selectedArtist.albums.length > 0) || (selectedArtist.tracks && selectedArtist.tracks.length > 0)))
+                boundsBehavior: Flickable.StopAtBounds
+                ScrollBar.vertical: ScrollBar {
+                    policy: ScrollBar.AsNeeded
+                    parent: artistProfilePopup
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.topMargin: 16
+                    anchors.bottomMargin: 16
+                    anchors.rightMargin: 4
+                }
+
+                onContentYChanged: {
+                    if (contentHeight > height && contentY >= contentHeight - height - 150) {
+                        var fullList = artistProfilePopup.cachedFullTracks
+                        if (artistProfilePopup.visibleTracksCount < fullList.length) {
+                            artistProfilePopup.visibleTracksCount = Math.min(artistProfilePopup.visibleTracksCount + 30, fullList.length)
+                        }
                     }
-                    
-                    Rectangle {
+                }
+
+                ColumnLayout {
+                    id: profileMainColumn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 24
+                    anchors.rightMargin: 24
+                    anchors.top: parent.top
+                    anchors.topMargin: 20
+                    spacing: 20
+
+                    Item {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 120
-                        color: "#1a1a1a"
-                        radius: 12
-                        border.color: "#333"
-                        border.width: 1
-                        clip: true
-                        
-                        Item {
+                        Layout.preferredHeight: 100
+
+                        RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 10
-                            
+                            spacing: 18
+
+                            Rectangle {
+                                Layout.preferredWidth: 90
+                                Layout.preferredHeight: 90
+                                radius: 45
+                                color: "#202020"
+                                border.color: "#303030"
+                                border.width: 1
+
+                                Image {
+                                    id: artistHeroImage
+                                    anchors.fill: parent
+                                    source: (selectedArtist && selectedArtist.image) ? MorphCache.getCachedCover(selectedArtist.image) : ""
+                                    fillMode: Image.PreserveAspectCrop
+                                    asynchronous: true
+                                    smooth: true
+                                    layer.enabled: true
+                                    layer.effect: OpacityMask { maskSource: Rectangle { width: 90; height: 90; radius: 45 } }
+                                    onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: selectedArtist && selectedArtist.name ? selectedArtist.name.charAt(0).toUpperCase() : "♪"
+                                    color: "#555"
+                                    font.pixelSize: 32
+                                    font.bold: true
+                                    visible: artistHeroImage.status !== Image.Ready
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: 4
+
+                                Text {
+                                    text: selectedArtist ? selectedArtist.name : ""
+                                    color: "white"
+                                    font.pixelSize: 24
+                                    font.bold: true
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
+
+                                Text {
+                                    text: {
+                                        var tCount = selectedArtist && selectedArtist.tracks ? selectedArtist.tracks.length : 0
+                                        var aCount = selectedArtist && selectedArtist.albums ? selectedArtist.albums.length : 0
+                                        var info = tCount + " tracks"
+                                        if (aCount > 0) info += " • " + aCount + " albums"
+                                        return info
+                                    }
+                                    color: "#888888"
+                                    font.pixelSize: 12
+                                    Layout.fillWidth: true
+                                }
+
+                                RowLayout {
+                                    spacing: 10
+                                    Layout.topMargin: 4
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 32
+                                        Layout.preferredHeight: 32
+                                        radius: 16
+                                        color: playAllMouse.containsMouse ? "#c98243" : "#b57339"
+                                        Behavior on color { ColorAnimation { duration: 120 } }
+
+                                        Image {
+                                            anchors.centerIn: parent
+                                            source: "qrc:/assets/play.svg"
+                                            width: 14
+                                            height: 14
+                                            fillMode: Image.PreserveAspectFit
+                                            layer.enabled: true
+                                            layer.effect: ColorOverlay { color: "black" }
+                                        }
+
+                                        MouseArea {
+                                            id: playAllMouse
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
+                                            onClicked: {
+                                                var tracksList = artistProfilePopup.cachedFullTracks
+                                                if (tracksList && tracksList.length > 0) {
+                                                    currentPlaylist = "ARTIST_" + selectedArtist.name.toUpperCase().replace(/\s+/g, "_")
+                                                    saveLastImport = false
+                                                    fullPlaylistTracks = tracksList
+                                                    libraryModel.clear()
+                                                    loadedTracksCount = 0
+                                                    loadNextChunk()
+                                                    playTrack(tracksList[0], 0)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+                        visible: selectedArtist && selectedArtist.albums && selectedArtist.albums.length > 0
+
+                        RowLayout {
+                            Layout.fillWidth: true
+
+                            Text {
+                                text: "Albums"
+                                color: "white"
+                                font.pixelSize: 14
+                                font.bold: true
+                            }
+
+                            Item { Layout.fillWidth: true }
+
+                            Rectangle {
+                                visible: selectedAlbum !== null
+                                Layout.preferredWidth: clearAlbumFilterText.implicitWidth + 16
+                                Layout.preferredHeight: 22
+                                radius: 11
+                                color: clearAlbumFilterMouse.containsMouse ? "#303030" : "#202020"
+                                border.color: "#3a3a3a"
+                                border.width: 1
+
+                                Text {
+                                    id: clearAlbumFilterText
+                                    anchors.centerIn: parent
+                                    text: "✕ All tracks"
+                                    color: "#cccccc"
+                                    font.pixelSize: 11
+                                }
+
+                                MouseArea {
+                                    id: clearAlbumFilterMouse
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+                                    onClicked: selectedAlbum = null
+                                }
+                            }
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 145
+
                             ListView {
                                 id: albumsListView
                                 anchors.fill: parent
                                 orientation: ListView.Horizontal
-                                spacing: 15
+                                spacing: 12
                                 model: selectedArtist ? selectedArtist.albums : []
                                 boundsBehavior: Flickable.StopAtBounds
-                                
+                                clip: true
+
                                 delegate: Item {
                                     width: 100
-                                    height: 100
-                                    
+                                    height: 145
+
+                                    property bool isSelected: (selectedAlbum && selectedAlbum.title === modelData.title)
+
                                     Rectangle {
-                                        id: albumTileRect
                                         anchors.fill: parent
-                                        radius: 16
-                                        color: "#1a1a1a"
-                                        border.color: (selectedAlbum && selectedAlbum.title === modelData.title) ? "#b57339" : "#333"
-                                        border.width: (selectedAlbum && selectedAlbum.title === modelData.title) ? 2 : 1
-                                        clip: true
-                                        
-                                        Image {
-                                            id: albumImage
+                                        radius: 12
+                                        color: albumMouseArea.containsMouse ? "#1e1e1e" : (isSelected ? "#241810" : "transparent")
+                                        border.color: isSelected ? "#b57339" : "transparent"
+                                        border.width: 1
+                                        Behavior on color { ColorAnimation { duration: 120 } }
+
+                                        ColumnLayout {
                                             anchors.fill: parent
-                                            source: MorphCache.getCachedCover(modelData.coverUrl || "")
-                                            fillMode: Image.PreserveAspectCrop
-                                            asynchronous: true
-                                            smooth: true
-                                            layer.enabled: true
-                                            layer.smooth: true
-                                            layer.effect: OpacityMask {
-                                                maskSource: Rectangle { width: 100; height: 100; radius: 16 }
+                                            anchors.margins: 6
+                                            spacing: 6
+
+                                            Rectangle {
+                                                Layout.preferredWidth: 88
+                                                Layout.preferredHeight: 88
+                                                radius: 10
+                                                color: "#1c1c1c"
+
+                                                Image {
+                                                    id: albumImage
+                                                    anchors.fill: parent
+                                                    source: MorphCache.getCachedCover(modelData.coverUrl || "")
+                                                    fillMode: Image.PreserveAspectCrop
+                                                    asynchronous: true
+                                                    smooth: true
+                                                    layer.enabled: true
+                                                    layer.effect: OpacityMask { maskSource: Rectangle { width: 88; height: 88; radius: 10 } }
+                                                    onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
+                                                }
+
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: "♪"
+                                                    color: "#444"
+                                                    font.pixelSize: 24
+                                                    visible: albumImage.status !== Image.Ready
+                                                }
                                             }
-                                            onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
-                                        }
-                                        
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "♪"
-                                            color: "#333"
-                                            font.family: mainFont.name
-                                            font.pixelSize: 32
-                                            visible: albumImage.status !== Image.Ready
-                                        }
-                                        
-                                        Rectangle {
-                                            anchors.fill: parent
-                                            color: "#e6151515"
-                                            visible: albumMouseArea.containsMouse || (selectedAlbum && selectedAlbum.title === modelData.title)
-                                            radius: 16
-                                            
+
                                             Text {
-                                                anchors.fill: parent
-                                                anchors.margins: 8
-                                                text: modelData.title
-                                                color: "white"
-                                                font.family: mainFont.name
+                                                Layout.fillWidth: true
+                                                text: modelData.title || "Album"
+                                                color: isSelected ? "#b57339" : "white"
+                                                font.pixelSize: 11
+                                                font.bold: true
+                                                elide: Text.ElideRight
+                                                maximumLineCount: 1
+                                            }
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: (modelData.tracks ? modelData.tracks.length : 0) + " tracks"
+                                                color: "#777777"
                                                 font.pixelSize: 10
-                                                font.weight: Font.Bold
-                                                wrapMode: Text.Wrap
-                                                horizontalAlignment: Text.AlignHCenter
-                                                verticalAlignment: Text.AlignVCenter
+                                                elide: Text.ElideRight
                                             }
                                         }
-                                        
+
                                         MouseArea {
                                             id: albumMouseArea
                                             anchors.fill: parent
@@ -4400,262 +4496,225 @@ function playTrack(track, index) {
                                     }
                                 }
                             }
-
-                            Rectangle {
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 32
-                                height: 32
-                                radius: 16
-                                color: "#cc000000"
-                                visible: albumsListView.contentWidth > albumsListView.width && albumsListView.contentX > 10
-                                Image {
-                                    anchors.centerIn: parent
-                                    source: "qrc:/assets/chevron-left.svg"
-                                    width: 16
-                                    height: 16
-                                    layer.enabled: true
-                                    layer.effect: ColorOverlay { color: "white" }
-                                }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: true
-                                    onClicked: (mouse) => albumsListView.flick(2000, 0)
-                                }
-                            }
-
-                            Rectangle {
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 32
-                                height: 32
-                                radius: 16
-                                color: "#cc000000"
-                                visible: albumsListView.contentWidth > albumsListView.width && albumsListView.contentX < albumsListView.contentWidth - albumsListView.width - 10
-                                Image {
-                                    anchors.centerIn: parent
-                                    source: "qrc:/assets/chevron-right.svg"
-                                    width: 16
-                                    height: 16
-                                    layer.enabled: true
-                                    layer.effect: ColorOverlay { color: "white" }
-                                }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: true
-                                    onClicked: (mouse) => albumsListView.flick(-2000, 0)
-                                }
-                            }
                         }
                     }
-                }
-                
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 10
-                    
-                    Text {
-                        text: selectedAlbum ? "TRACKS IN " + selectedAlbum.title.toUpperCase() : "TRACKS"
-                        color: "#888"
-                        font.family: mainFont.name
-                        font.pixelSize: 12
-                        font.weight: Font.Bold
-                    }
-                    
+
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 4
-                        
-                        Repeater {
-                            id: popupTracksRepeater
-                            model: artistProfilePopup.cachedFullTracks.slice(0, artistProfilePopup.visibleTracksCount)
-                            
-                            delegate: Rectangle {
-                                 id: trackRow
-                                 Layout.fillWidth: true
-                                 Layout.preferredHeight: 54
-                                 radius: 12
-                                 color: "transparent"
- 
-                                 property bool isCurrent: (currentTrack && currentTrack.id === modelData.id)
-                                 property bool isLikedTrack: (window.likesVersion, MorphSettings.isLiked(modelData.id))
-                                 property bool isCachedTrack: (window.cacheVersion, MorphCache.isTrackCached(modelData.id))
- 
-                                 Rectangle {
-                                     anchors.fill: parent
-                                     color: parent.isCurrent ? "#3d2b1f" : "#282828"
-                                     radius: 12
-                                     border.color: parent.isCurrent ? "#b57339" : (trackRowMouse.containsMouse ? "#555" : "transparent")
-                                     border.width: 1.5
-                                     opacity: (parent.isCurrent || trackRowMouse.containsMouse) ? 1 : 0
-                                     Behavior on opacity { NumberAnimation { duration: 150 } }
-                                      MouseArea {
-                                     id: trackRowMouse
-                                     anchors.fill: parent
-                                     hoverEnabled: true
-                                     cursorShape: Qt.PointingHandCursor
-                                     onClicked: {
-                                         var tracksList = artistProfilePopup.cachedFullTracks
-                                         
-                                         currentPlaylist = "ARTIST_" + selectedArtist.name.toUpperCase().replace(" ", "_")
-                                         saveLastImport = false
-                                         fullPlaylistTracks = tracksList
-                                         
-                                         libraryModel.clear()
-                                         loadedTracksCount = 0
-                                         loadNextChunk()
-                                         
-                                         playTrack(modelData, index)
-                                     }
-                                 }                             }
-                                
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 10
-                                    anchors.rightMargin: 10
-                                    spacing: 15
-                                    
-                                     Rectangle {
-                                         Layout.preferredWidth: 36; Layout.preferredHeight: 36; color: "#333"; radius: 10
-                                         Image {
-                                             id: popupTrackImage
-                                             anchors.fill: parent
-                                             source: MorphCache.getCachedCover(modelData.coverUrl || "")
-                                             fillMode: Image.PreserveAspectCrop
-                                             asynchronous: true
-                                             smooth: true
-                                             layer.enabled: true
-                                             layer.smooth: true
-                                             layer.effect: OpacityMask { maskSource: Rectangle { width: 36; height: 36; radius: 10 } }
-                                            onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
-                                        }
-                                        Text { anchors.centerIn: parent; text: "♪"; color: "#444"; font.family: mainFont.name; font.pixelSize: 18; visible: popupTrackImage.status !== Image.Ready }
-                                    }
-                                    
-                                    ColumnLayout {
-                                        Layout.fillWidth: true; spacing: 2; Layout.alignment: Qt.AlignVCenter
-                                        Text {
-                                            Layout.fillWidth: true
-                                            text: modelData.title || ""
-                                            color: (currentTrack && currentTrack.id === modelData.id) ? "#b57339" : "white"
-                                            font.family: mainFont.name; font.pixelSize: 14; font.weight: Font.Bold; elide: Text.ElideRight
-                                            Behavior on color { ColorAnimation { duration: 150 } }
-                                        }
-                                        RowLayout {
-                                            Layout.fillWidth: true; spacing: 6
-                                            Image { source: getServiceIcon(modelData.service || "Yandex"); Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
-                                            Text {
-                                                      id: popupTrackArtistText
-                                                      Layout.preferredWidth: contentWidth
-                                                      textFormat: Text.RichText
-                                                      property string hoveredArtist: ""
-                                                      text: modelData.artist ? getArtistsRichText(modelData.artist, "", trackRow.width - 180) : ""
-                                                      font.family: mainFont.name
-                                                      font.pixelSize: 12
-                                                      onLinkHovered: (link) => { hoveredArtist = link }
-                                                      onLinkActivated: (link) => {
-                                                          showArtistProfile(link, modelData)
-                                                      }
-                                                      property bool useOverlay2: false
-                                                      onHoveredArtistChanged: {
-                                                          if (hoveredArtist !== "") {
-                                                              if (useOverlay2) {
-                                                                  popupTrackArtistTextHovered1.activeHovered = hoveredArtist
-                                                                  useOverlay2 = false
-                                                              } else {
-                                                                  popupTrackArtistTextHovered2.activeHovered = hoveredArtist
-                                                                  useOverlay2 = true
-                                                              }
-                                                          }
-                                                      }
+                        spacing: 8
 
-                                                      Text {
-                                                          id: popupTrackArtistTextHovered1
-                                                          anchors.fill: parent
-                                                          textFormat: Text.RichText
-                                                          font: parent.font
-                                                          property string activeHovered: ""
-                                                          text: modelData.artist ? getArtistsRichText(modelData.artist, activeHovered, trackRow.width - 180, true) : ""
-                                                          opacity: (parent.hoveredArtist !== "" && !parent.useOverlay2) ? 1 : 0
-                                                          Behavior on opacity { NumberAnimation { duration: 150 } }
-                                                          onLinkHovered: (link) => { parent.hoveredArtist = link }
-                                                          onLinkActivated: (link) => {
-                                                              showArtistProfile(link, modelData)
-                                                          }
-                                                      }
+                        RowLayout {
+                            Layout.fillWidth: true
 
-                                                      Text {
-                                                          id: popupTrackArtistTextHovered2
-                                                          anchors.fill: parent
-                                                          textFormat: Text.RichText
-                                                          font: parent.font
-                                                          property string activeHovered: ""
-                                                          text: (activeHovered !== "" && modelData.artist) ? getArtistsRichText(modelData.artist, activeHovered, trackRow.width - 180, true) : ""
-                                                          opacity: (parent.hoveredArtist !== "" && parent.useOverlay2) ? 1 : 0
-                                                          Behavior on opacity { NumberAnimation { duration: 150 } }
-                                                          onLinkHovered: (link) => { parent.hoveredArtist = link }
-                                                          onLinkActivated: (link) => {
-                                                              showArtistProfile(link, modelData)
-                                                          }
-                                                      }
-                                                 }
+                            Text {
+                                text: selectedAlbum ? selectedAlbum.title : "Tracks"
+                                color: "white"
+                                font.pixelSize: 14
+                                font.bold: true
+                            }
+
+                            Item { Layout.fillWidth: true }
+
+                            Text {
+                                text: artistProfilePopup.cachedFullTracks.length + " tracks"
+                                color: "#666666"
+                                font.pixelSize: 11
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            Repeater {
+                                id: popupTracksRepeater
+                                model: artistProfilePopup.cachedFullTracks.slice(0, artistProfilePopup.visibleTracksCount)
+
+                                delegate: Rectangle {
+                                    id: trackRow
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 46
+                                    radius: 8
+
+                                    property bool isCurrent: (currentTrack && currentTrack.id === modelData.id)
+                                    property bool isLikedTrack: (window.likesVersion, MorphSettings.isLiked(modelData.id))
+                                    property bool isCachedTrack: (window.cacheVersion, MorphCache.isTrackCached(modelData.id))
+
+                                    color: isCurrent ? "#241810" : (trackRowMouse.containsMouse ? "#1c1c1c" : "transparent")
+                                    border.color: isCurrent ? "#b57339" : "transparent"
+                                    border.width: 1
+                                    Behavior on color { ColorAnimation { duration: 100 } }
+
+                                    MouseArea {
+                                        id: trackRowMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            var tracksList = artistProfilePopup.cachedFullTracks
+                                            currentPlaylist = "ARTIST_" + selectedArtist.name.toUpperCase().replace(/\s+/g, "_")
+                                            saveLastImport = false
+                                            fullPlaylistTracks = tracksList
+                                            libraryModel.clear()
+                                            loadedTracksCount = 0
+                                            loadNextChunk()
+                                            playTrack(modelData, index)
                                         }
                                     }
-                                    
+
                                     RowLayout {
-                                        spacing: 6
-                                        Layout.alignment: Qt.AlignVCenter
-                                        
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 10
+                                        anchors.rightMargin: 10
+                                        spacing: 10
+
+                                        Item {
+                                            Layout.preferredWidth: 20
+                                            Layout.preferredHeight: 20
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: (index + 1).toString()
+                                                color: trackRow.isCurrent ? "#b57339" : "#666666"
+                                                font.pixelSize: 11
+                                                visible: !trackRowMouse.containsMouse && !trackRow.isCurrent
+                                            }
+
+                                            Image {
+                                                anchors.centerIn: parent
+                                                source: trackRow.isCurrent && MorphAudio.isPlaying ? "qrc:/assets/pause.svg" : "qrc:/assets/play.svg"
+                                                width: 12
+                                                height: 12
+                                                fillMode: Image.PreserveAspectFit
+                                                visible: trackRowMouse.containsMouse || trackRow.isCurrent
+                                                layer.enabled: true
+                                                layer.effect: ColorOverlay { color: trackRow.isCurrent ? "#b57339" : "white" }
+                                            }
+                                        }
+
                                         Rectangle {
-                                            width: 6; height: 6; radius: 3; color: "#b57339"
-                                            visible: trackRow.isCachedTrack
+                                            Layout.preferredWidth: 32
+                                            Layout.preferredHeight: 32
+                                            color: "#1c1c1c"
+                                            radius: 8
+
+                                            Image {
+                                                id: popupTrackImage
+                                                anchors.fill: parent
+                                                source: MorphCache.getCachedCover(modelData.coverUrl || "")
+                                                fillMode: Image.PreserveAspectCrop
+                                                asynchronous: true
+                                                smooth: true
+                                                layer.enabled: true
+                                                layer.effect: OpacityMask { maskSource: Rectangle { width: 32; height: 32; radius: 8 } }
+                                                onStatusChanged: if (status === Image.Ready && source.toString().startsWith("http")) MorphCache.cacheCover(source)
+                                            }
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: "♪"
+                                                color: "#444"
+                                                font.pixelSize: 14
+                                                visible: popupTrackImage.status !== Image.Ready
+                                            }
                                         }
-                                        Text {
-                                            text: formatTime(modelData.durationMs || 0)
-                                            color: "#666"; font.family: mainFont.name; font.pixelSize: 12; visible: (modelData.durationMs || 0) > 0
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            Layout.alignment: Qt.AlignVCenter
+                                            spacing: 1
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: modelData.title || "Unknown Title"
+                                                color: trackRow.isCurrent ? "#b57339" : "white"
+                                                font.pixelSize: 12
+                                                font.bold: true
+                                                elide: Text.ElideRight
+                                            }
+
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: modelData.artist || ""
+                                                color: "#888888"
+                                                font.pixelSize: 11
+                                                elide: Text.ElideRight
+                                            }
                                         }
-                                         Image {
-                                             id: popupHeartIcon
-                                             source: trackRow.isLikedTrack ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"
-                                             Layout.preferredWidth: 18
-                                             Layout.preferredHeight: 18
-                                             Layout.leftMargin: 4
-                                             sourceSize: Qt.size(36, 36)
-                                             fillMode: Image.PreserveAspectFit
-                                             smooth: true
-                                             layer.enabled: true
-                                             layer.smooth: true
-                                             layer.effect: ColorOverlay { color: trackRow.isLikedTrack ? "#b57339" : (popupHeartMouseArea.containsMouse ? "white" : "#888") }
-                                             MouseArea {
-                                                 id: popupHeartMouseArea
-                                                 anchors.fill: parent
-                                                 cursorShape: Qt.PointingHandCursor
-                                                 hoverEnabled: true
-                                                 onClicked: {
-                                                     var cleanTrack = {
-                                                         "id": modelData.id,
-                                                         "title": modelData.title || "Unknown Title",
-                                                         "artist": modelData.artist || "Unknown Artist",
-                                                         "album": modelData.album || "",
-                                                         "coverUrl": modelData.coverUrl || "",
-                                                         "service": modelData.service || "",
-                                                         "webUrl": modelData.webUrl || "",
-                                                         "durationMs": modelData.durationMs || 0
-                                                     }
-                                                     if (cleanTrack.service === "") {
-                                                         if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("yandex") !== -1) cleanTrack.service = "Yandex"
-                                                         else if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
-                                                         else cleanTrack.service = "Yandex"
-                                                     }
-                                                     var isL = MorphSettings.isLiked(cleanTrack.id)
-                                                     MorphSettings.toggleLike(cleanTrack)
-                                                     showToast(isL ? "Removed from Liked" : "Added to Liked")
-                                                     likesVersion++
-                                                 }
-                                             }
-                                         }
+
+                                        RowLayout {
+                                            spacing: 6
+                                            Layout.alignment: Qt.AlignVCenter
+
+                                            Image {
+                                                source: getServiceIcon(modelData.service || "Yandex")
+                                                Layout.preferredWidth: 12
+                                                Layout.preferredHeight: 12
+                                                fillMode: Image.PreserveAspectFit
+                                                opacity: 0.7
+                                            }
+
+                                            Rectangle {
+                                                Layout.preferredWidth: 4
+                                                Layout.preferredHeight: 4
+                                                radius: 2
+                                                color: "#b57339"
+                                                visible: trackRow.isCachedTrack
+                                            }
+
+                                            Text {
+                                                text: formatTime(modelData.durationMs || 0)
+                                                color: "#666666"
+                                                font.pixelSize: 11
+                                                visible: (modelData.durationMs || 0) > 0
+                                            }
+
+                                            Item {
+                                                Layout.preferredWidth: 20
+                                                Layout.preferredHeight: 20
+
+                                                Image {
+                                                    id: popupHeartIcon
+                                                    anchors.centerIn: parent
+                                                    source: trackRow.isLikedTrack ? "qrc:/assets/heart.svg" : "qrc:/assets/heart-outline.svg"
+                                                    width: 14
+                                                    height: 14
+                                                    fillMode: Image.PreserveAspectFit
+                                                    layer.enabled: true
+                                                    layer.effect: ColorOverlay {
+                                                        color: trackRow.isLikedTrack ? "#b57339" : (popupHeartMouseArea.containsMouse ? "white" : "#666666")
+                                                    }
+                                                }
+
+                                                MouseArea {
+                                                    id: popupHeartMouseArea
+                                                    anchors.fill: parent
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    hoverEnabled: true
+                                                    onClicked: {
+                                                        var cleanTrack = {
+                                                            "id": modelData.id,
+                                                            "title": modelData.title || "Unknown Title",
+                                                            "artist": modelData.artist || "Unknown Artist",
+                                                            "album": modelData.album || "",
+                                                            "coverUrl": modelData.coverUrl || "",
+                                                            "service": modelData.service || "",
+                                                            "webUrl": modelData.webUrl || "",
+                                                            "durationMs": modelData.durationMs || 0
+                                                        }
+                                                        if (cleanTrack.service === "") {
+                                                            if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("yandex") !== -1) cleanTrack.service = "Yandex"
+                                                            else if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
+                                                            else cleanTrack.service = "Yandex"
+                                                        }
+                                                        var isL = MorphSettings.isLiked(cleanTrack.id)
+                                                        MorphSettings.toggleLike(cleanTrack)
+                                                        showToast(isL ? "Removed from Liked" : "Added to Liked")
+                                                        likesVersion++
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -4663,34 +4722,39 @@ function playTrack(track, index) {
                     }
                 }
             }
-        }
-        
-        Button {
-            id: closeArtistProfileBtn
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.margins: 15
-            width: 28
-            height: 28
-            background: Rectangle {
+
+            Rectangle {
+                id: closeArtistProfileBtn
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: 14
+                width: 28
+                height: 28
                 radius: 14
-                color: closeArtistProfileBtn.hovered ? "#333" : "#222"
-                border.color: "#444"
+                color: closeArtistMouse.containsMouse ? "#303030" : "#1f1f1f"
+                border.color: closeArtistMouse.containsMouse ? "#444444" : "#2a2a2a"
                 border.width: 1
+                z: 20
+                Behavior on color { ColorAnimation { duration: 120 } }
+
+                Image {
+                    anchors.centerIn: parent
+                    source: "qrc:/assets/close.svg"
+                    width: 12
+                    height: 12
+                    fillMode: Image.PreserveAspectFit
+                    layer.enabled: true
+                    layer.effect: ColorOverlay { color: closeArtistMouse.containsMouse ? "white" : "#888888" }
+                }
+
+                MouseArea {
+                    id: closeArtistMouse
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onClicked: artistProfilePopup.close()
+                }
             }
-            contentItem: Image {
-                source: "qrc:/assets/close.svg"
-                sourceSize.width: 36
-                sourceSize.height: 36
-                fillMode: Image.PreserveAspectFit
-                opacity: closeArtistProfileBtn.hovered ? 1.0 : 0.7
-                smooth: true
-                layer.enabled: true
-                layer.smooth: true
-                layer.effect: ColorOverlay { color: "white" }
-            }
-            onClicked: artistProfilePopup.close()
-            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
         }
     }
 }
