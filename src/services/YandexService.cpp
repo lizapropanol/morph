@@ -202,8 +202,8 @@ void YandexService::resolveStreamUrl(const QString& trackId) {
         if (results.isEmpty()) return;
 
         int targetBitrate = 320;
-        if (m_quality == "low") targetBitrate = 192;
-        else if (m_quality == "high") targetBitrate = 2000;
+        if (m_quality == "192" || m_quality == "low") targetBitrate = 192;
+        else targetBitrate = 320;
 
         int bestIdx = 0;
         int minDiff = 10000;

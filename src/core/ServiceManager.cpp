@@ -214,5 +214,13 @@ void ServiceManager::setSoundCloudClientId(const QString& clientId) {
 }
 
 void ServiceManager::setAudioQuality(const QString& quality) {
+    setYandexQuality(quality);
+}
+
+void ServiceManager::setYandexQuality(const QString& quality) {
     yandex->setAudioQuality(quality);
+}
+
+void ServiceManager::setSoundCloudQuality(const QString& quality) {
+    soundcloud->setAudioQuality(quality);
 }

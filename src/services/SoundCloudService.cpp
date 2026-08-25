@@ -12,6 +12,13 @@ void SoundCloudService::setToken(const QString& token) {
     m_token = token;
 }
 
+void SoundCloudService::setAudioQuality(const QString& quality) {
+    if (m_quality != quality) {
+        m_quality = quality;
+        m_trackLinks.clear();
+    }
+}
+
 static QMap<QString, QByteArray> scAuthHeader(const QString& token) {
     QMap<QString, QByteArray> h;
     if (token.startsWith("2-")) {
@@ -40,12 +47,30 @@ QVariantList SoundCloudService::parseSoundCloudTracks(const QJsonArray& tracks) 
         track.webUrl = obj["permalink_url"].toString();
 
         QJsonArray transcodings = obj["media"].toObject()["transcodings"].toArray();
-        for (const QJsonValue& t : transcodings) {
-            QJsonObject to = t.toObject();
-            if (to["format"].toObject()["protocol"].toString() == "progressive") {
-                m_trackLinks[track.id] = to["url"].toString();
-                break;
+        QString transcodingUrl;
+        if (m_quality == "256" || m_quality == "hq" || m_quality == "high") {
+            for (const QJsonValue& t : transcodings) {
+                QJsonObject to = t.toObject();
+                if (to["quality"].toString() == "hq") {
+                    transcodingUrl = to["url"].toString();
+                    break;
+                }
             }
+        }
+        if (transcodingUrl.isEmpty()) {
+            for (const QJsonValue& t : transcodings) {
+                QJsonObject to = t.toObject();
+                if (to["format"].toObject()["protocol"].toString() == "progressive") {
+                    transcodingUrl = to["url"].toString();
+                    break;
+                }
+            }
+        }
+        if (transcodingUrl.isEmpty() && !transcodings.isEmpty()) {
+            transcodingUrl = transcodings[0].toObject()["url"].toString();
+        }
+        if (!transcodingUrl.isEmpty()) {
+            m_trackLinks[track.id] = transcodingUrl;
         }
 
         track.service = "SoundCloud";
@@ -339,12 +364,26 @@ void SoundCloudService::resolveStreamUrl(const QString& trackId) {
             QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
             QJsonArray transcodings = doc.object()["media"].toObject()["transcodings"].toArray();
             QString transcodingUrl;
-            for (const QJsonValue& t : transcodings) {
-                QJsonObject to = t.toObject();
-                if (to["format"].toObject()["protocol"].toString() == "progressive") {
-                    transcodingUrl = to["url"].toString();
-                    break;
+            if (m_quality == "256" || m_quality == "hq" || m_quality == "high") {
+                for (const QJsonValue& t : transcodings) {
+                    QJsonObject to = t.toObject();
+                    if (to["quality"].toString() == "hq") {
+                        transcodingUrl = to["url"].toString();
+                        break;
+                    }
                 }
+            }
+            if (transcodingUrl.isEmpty()) {
+                for (const QJsonValue& t : transcodings) {
+                    QJsonObject to = t.toObject();
+                    if (to["format"].toObject()["protocol"].toString() == "progressive") {
+                        transcodingUrl = to["url"].toString();
+                        break;
+                    }
+                }
+            }
+            if (transcodingUrl.isEmpty() && !transcodings.isEmpty()) {
+                transcodingUrl = transcodings[0].toObject()["url"].toString();
             }
 
             if (!transcodingUrl.isEmpty()) {

@@ -1430,17 +1430,17 @@ ApplicationWindow {
                                         }
                                         ColumnLayout {
                                             Layout.fillWidth: true; spacing: 10
-                                            Text { text: "Audio Quality"; color: "#555555"; font.family: mainFont.name; font.pixelSize: 11 }
+                                            Text { text: "Yandex Music Quality"; color: "#555555"; font.family: mainFont.name; font.pixelSize: 11 }
                                             RowLayout {
                                                 spacing: 10
                                                 Button {
-                                                    id: lowQualBtn; text: "192k"; Layout.preferredWidth: 100
-                                                    property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "low")
+                                                    id: ymLowQualBtn; text: "192k"; Layout.preferredWidth: 100
+                                                    property bool active: (window.settingsVersion, MorphSettings.getYandexQuality() === "192")
                                                     onClicked: (mouse) => {
-                                                        MorphSettings.setAudioQuality("low")
-                                                        MorphServices.setAudioQuality("low")
+                                                        MorphSettings.setYandexQuality("192")
+                                                        MorphServices.setYandexQuality("192")
                                                         streamUrlCache = ({})
-                                                        showToast("Quality set to 192k")
+                                                        showToast("Yandex Music quality set to 192k")
                                                         if (currentTrack && currentTrack.service === "Yandex") {
                                                             lastKnownPosition = MorphAudio.position
                                                             MorphServices.resolve(currentTrack.service, currentTrack.id)
@@ -1448,17 +1448,17 @@ ApplicationWindow {
                                                         }
                                                     }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: lowQualBtn.active ? "#ffffff" : "#111111"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                                    background: Rectangle { color: lowQualBtn.active ? "#111111" : "#f0f0f0"; radius: 6; border.color: "#cccccc" }
+                                                    contentItem: Text { text: parent.text; color: ymLowQualBtn.active ? "#ffffff" : "#111111"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    background: Rectangle { color: ymLowQualBtn.active ? "#111111" : "#f0f0f0"; radius: 6; border.color: "#cccccc" }
                                                 }
                                                 Button {
-                                                    id: medQualBtn; text: "320k"; Layout.preferredWidth: 100
-                                                    property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "medium")
+                                                    id: ymHighQualBtn; text: "320k"; Layout.preferredWidth: 100
+                                                    property bool active: (window.settingsVersion, MorphSettings.getYandexQuality() === "320")
                                                     onClicked: (mouse) => {
-                                                        MorphSettings.setAudioQuality("medium")
-                                                        MorphServices.setAudioQuality("medium")
+                                                        MorphSettings.setYandexQuality("320")
+                                                        MorphServices.setYandexQuality("320")
                                                         streamUrlCache = ({})
-                                                        showToast("Quality set to 320k")
+                                                        showToast("Yandex Music quality set to 320k")
                                                         if (currentTrack && currentTrack.service === "Yandex") {
                                                             lastKnownPosition = MorphAudio.position
                                                             MorphServices.resolve(currentTrack.service, currentTrack.id)
@@ -1466,26 +1466,51 @@ ApplicationWindow {
                                                         }
                                                     }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: medQualBtn.active ? "#ffffff" : "#111111"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                                    background: Rectangle { color: medQualBtn.active ? "#111111" : "#f0f0f0"; radius: 6; border.color: "#cccccc" }
+                                                    contentItem: Text { text: parent.text; color: ymHighQualBtn.active ? "#ffffff" : "#111111"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    background: Rectangle { color: ymHighQualBtn.active ? "#111111" : "#f0f0f0"; radius: 6; border.color: "#cccccc" }
+                                                }
+                                            }
+                                        }
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 10
+                                            Text { text: "SoundCloud Quality"; color: "#555555"; font.family: mainFont.name; font.pixelSize: 11 }
+                                            RowLayout {
+                                                spacing: 10
+                                                Button {
+                                                    id: scLowQualBtn; text: "128k"; Layout.preferredWidth: 100
+                                                    property bool active: (window.settingsVersion, MorphSettings.getSoundCloudQuality() === "128")
+                                                    onClicked: (mouse) => {
+                                                        MorphSettings.setSoundCloudQuality("128")
+                                                        MorphServices.setSoundCloudQuality("128")
+                                                        streamUrlCache = ({})
+                                                        showToast("SoundCloud quality set to 128k")
+                                                        if (currentTrack && currentTrack.service === "SoundCloud") {
+                                                            lastKnownPosition = MorphAudio.position
+                                                            MorphServices.resolve(currentTrack.service, currentTrack.id)
+                                                            currentTrackIndex = -1
+                                                        }
+                                                    }
+                                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
+                                                    contentItem: Text { text: parent.text; color: scLowQualBtn.active ? "#ffffff" : "#111111"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    background: Rectangle { color: scLowQualBtn.active ? "#111111" : "#f0f0f0"; radius: 6; border.color: "#cccccc" }
                                                 }
                                                 Button {
-                                                    id: highQualBtn; text: "LOSSLESS"; Layout.preferredWidth: 100
-                                                    property bool active: (window.settingsVersion, MorphSettings.getAudioQuality() === "high")
+                                                    id: scHighQualBtn; text: "256k (HQ)"; Layout.preferredWidth: 100
+                                                    property bool active: (window.settingsVersion, MorphSettings.getSoundCloudQuality() === "256")
                                                     onClicked: (mouse) => {
-                                                        MorphSettings.setAudioQuality("high")
-                                                        MorphServices.setAudioQuality("high")
+                                                        MorphSettings.setSoundCloudQuality("256")
+                                                        MorphServices.setSoundCloudQuality("256")
                                                         streamUrlCache = ({})
-                                                        showToast("Quality set to LOSSLESS")
-                                                        if (currentTrack && currentTrack.service === "Yandex") {
+                                                        showToast("SoundCloud quality set to 256k")
+                                                        if (currentTrack && currentTrack.service === "SoundCloud") {
                                                             lastKnownPosition = MorphAudio.position
                                                             MorphServices.resolve(currentTrack.service, currentTrack.id)
                                                             currentTrackIndex = -1
                                                         }
                                                     }
                                                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton }
-                                                    contentItem: Text { text: parent.text; color: highQualBtn.active ? "#ffffff" : "#111111"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                                                    background: Rectangle { color: highQualBtn.active ? "#111111" : "#f0f0f0"; radius: 6; border.color: "#cccccc" }
+                                                    contentItem: Text { text: parent.text; color: scHighQualBtn.active ? "#ffffff" : "#111111"; font.family: mainFont.name; font.pixelSize: 11; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                                                    background: Rectangle { color: scHighQualBtn.active ? "#111111" : "#f0f0f0"; radius: 6; border.color: "#cccccc" }
                                                 }
                                             }
                                         }

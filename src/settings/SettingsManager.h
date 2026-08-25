@@ -56,6 +56,10 @@ public slots:
 
     void setAudioQuality(const QString& quality);
     QString getAudioQuality();
+    void setYandexQuality(const QString& quality);
+    QString getYandexQuality();
+    void setSoundCloudQuality(const QString& quality);
+    QString getSoundCloudQuality();
 
     void setCacheLimit(qint64 bytes);
     qint64 getCacheLimit();

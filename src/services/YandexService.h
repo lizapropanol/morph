@@ -25,7 +25,7 @@ private:
 private:
     NetworkManager* net;
     QString m_token;
-    QString m_quality = "high";
+    QString m_quality = "320";
 };
 
 #endif

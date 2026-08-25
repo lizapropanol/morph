@@ -182,14 +182,40 @@ void SettingsManager::clearVibeHistory() {
 }
 
 void SettingsManager::setAudioQuality(const QString& quality) {
-    m_data["audio_quality"] = quality;
+    setYandexQuality(quality);
+}
+
+QString SettingsManager::getAudioQuality() {
+    return getYandexQuality();
+}
+
+void SettingsManager::setYandexQuality(const QString& quality) {
+    m_data["yandex_quality"] = quality;
     save();
     emit settingsChanged();
 }
 
-QString SettingsManager::getAudioQuality() {
-    if (!m_data.contains("audio_quality")) return "high";
-    return m_data["audio_quality"].toString();
+QString SettingsManager::getYandexQuality() {
+    if (m_data.contains("yandex_quality")) {
+        return m_data["yandex_quality"].toString();
+    }
+    if (m_data.contains("audio_quality") && m_data["audio_quality"].toString() == "low") {
+        return "192";
+    }
+    return "320";
+}
+
+void SettingsManager::setSoundCloudQuality(const QString& quality) {
+    m_data["soundcloud_quality"] = quality;
+    save();
+    emit settingsChanged();
+}
+
+QString SettingsManager::getSoundCloudQuality() {
+    if (m_data.contains("soundcloud_quality")) {
+        return m_data["soundcloud_quality"].toString();
+    }
+    return "128";
 }
 
 void SettingsManager::setCacheLimit(qint64 bytes) {

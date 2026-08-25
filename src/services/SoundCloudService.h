@@ -11,6 +11,7 @@ class SoundCloudService : public BaseService {
 public:
     explicit SoundCloudService(NetworkManager* network, QObject* parent = nullptr);
     void setToken(const QString& token);
+    void setAudioQuality(const QString& quality);
     void search(const QString& query) override;
     void resolveStreamUrl(const QString& trackId) override;
     void getCharts() override;
@@ -28,6 +29,7 @@ private:
 private:
     NetworkManager* net;
     QString m_token;
+    QString m_quality = "128";
     QMap<QString, QString> m_trackLinks;
 };
 

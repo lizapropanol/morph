@@ -57,7 +57,8 @@ Application::Application(QObject *parent) : QObject(parent) {
     connect(services, &ServiceManager::bitrateReady, this, [this](const QString&, int bitrate) {
         audio->setBitrate(bitrate);
     });
-    services->setAudioQuality(settings->getAudioQuality());
+    services->setYandexQuality(settings->getYandexQuality());
+    services->setSoundCloudQuality(settings->getSoundCloudQuality());
 
     QTimer* gcTimer = new QTimer(this);
     connect(gcTimer, &QTimer::timeout, this, [this]() {
