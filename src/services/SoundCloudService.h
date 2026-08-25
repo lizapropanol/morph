@@ -19,9 +19,11 @@ public:
     void getDailyMixes() override;
     void reportPlay(const QString& trackId, const QString& albumId) override;
     void importPlaylist(const QString& url) override;
+signals:
+    void bitrateReady(const QString& trackId, int bitrate);
 
 private:
-    void fetchStreamUrl(const QString& trackId, const QString& transcodingUrl);
+    void fetchStreamUrl(const QString& trackId, const QString& transcodingUrl, int bitrate);
     void fetchPlaylistTracksMetadata(const QString& playlistName, const QString& coverUrl, const QStringList& trackIds);
     void fetchNextPlaylistChunk(const QString& playlistName, const QString& coverUrl, QStringList* remainingIds, QVariantList* allTracks, const QStringList& originalIds);
     QVariantList parseSoundCloudTracks(const QJsonArray& tracks);

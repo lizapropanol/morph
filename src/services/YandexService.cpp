@@ -217,6 +217,8 @@ void YandexService::resolveStreamUrl(const QString& trackId) {
             }
         }
 
+        int br = results[bestIdx].toObject()["bitrateInKbps"].toInt();
+        emit bitrateReady(trackId, br > 0 ? br : targetBitrate);
         QString downloadInfoUrl = results[bestIdx].toObject()["downloadInfoUrl"].toString();
         fetchDownloadInfo(trackId, QUrl(downloadInfoUrl));
     });

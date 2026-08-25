@@ -119,6 +119,8 @@ ServiceManager::ServiceManager(NetworkManager* net, CacheManager* cache, QObject
         emit playlistImported(name, coverUrl, tracks);
     });
 
+    connect(yandex, &YandexService::bitrateReady, this, &ServiceManager::bitrateReady);
+    connect(soundcloud, &SoundCloudService::bitrateReady, this, &ServiceManager::bitrateReady);
     connect(youtube, &YouTubeService::bitrateReady, this, &ServiceManager::bitrateReady);
 
     connect(yandex, &BaseService::errorOccurred, this, &ServiceManager::errorOccurred);

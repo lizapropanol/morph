@@ -17,6 +17,8 @@ public:
     void getDailyMixes() override;
     void reportPlay(const QString& trackId, const QString& albumId) override;
     void importPlaylist(const QString& url) override;
+signals:
+    void bitrateReady(const QString& trackId, int bitrate);
 
 private:
     void fetchDownloadInfo(const QString& trackId, const QUrl& url);

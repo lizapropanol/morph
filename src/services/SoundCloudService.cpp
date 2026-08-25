@@ -46,33 +46,6 @@ QVariantList SoundCloudService::parseSoundCloudTracks(const QJsonArray& tracks) 
         track.coverUrl = obj["artwork_url"].toString().replace("-large", "-t500x500");
         track.webUrl = obj["permalink_url"].toString();
 
-        QJsonArray transcodings = obj["media"].toObject()["transcodings"].toArray();
-        QString transcodingUrl;
-        if (m_quality == "256" || m_quality == "hq" || m_quality == "high") {
-            for (const QJsonValue& t : transcodings) {
-                QJsonObject to = t.toObject();
-                if (to["quality"].toString() == "hq") {
-                    transcodingUrl = to["url"].toString();
-                    break;
-                }
-            }
-        }
-        if (transcodingUrl.isEmpty()) {
-            for (const QJsonValue& t : transcodings) {
-                QJsonObject to = t.toObject();
-                if (to["format"].toObject()["protocol"].toString() == "progressive") {
-                    transcodingUrl = to["url"].toString();
-                    break;
-                }
-            }
-        }
-        if (transcodingUrl.isEmpty() && !transcodings.isEmpty()) {
-            transcodingUrl = transcodings[0].toObject()["url"].toString();
-        }
-        if (!transcodingUrl.isEmpty()) {
-            m_trackLinks[track.id] = transcodingUrl;
-        }
-
         track.service = "SoundCloud";
         results.append(track.toVariantMap());
     }
@@ -348,54 +321,7 @@ void SoundCloudService::fetchNextPlaylistChunk(const QString& playlistName, cons
 void SoundCloudService::resolveStreamUrl(const QString& trackId) {
     if (m_token.isEmpty()) return;
 
-    if (m_trackLinks.contains(trackId)) {
-        fetchStreamUrl(trackId, m_trackLinks[trackId]);
-    } else {
-        QUrl url("https://api-v2.soundcloud.com/tracks/" + trackId);
-        QUrlQuery q;
-        if (!m_token.startsWith("2-")) {
-            q.addQueryItem("client_id", m_token);
-        }
-        url.setQuery(q);
-
-        net->get(url, scAuthHeader(m_token), [this, trackId](QNetworkReply* reply) {
-            if (reply->error() != QNetworkReply::NoError) return;
-
-            QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-            QJsonArray transcodings = doc.object()["media"].toObject()["transcodings"].toArray();
-            QString transcodingUrl;
-            if (m_quality == "256" || m_quality == "hq" || m_quality == "high") {
-                for (const QJsonValue& t : transcodings) {
-                    QJsonObject to = t.toObject();
-                    if (to["quality"].toString() == "hq") {
-                        transcodingUrl = to["url"].toString();
-                        break;
-                    }
-                }
-            }
-            if (transcodingUrl.isEmpty()) {
-                for (const QJsonValue& t : transcodings) {
-                    QJsonObject to = t.toObject();
-                    if (to["format"].toObject()["protocol"].toString() == "progressive") {
-                        transcodingUrl = to["url"].toString();
-                        break;
-                    }
-                }
-            }
-            if (transcodingUrl.isEmpty() && !transcodings.isEmpty()) {
-                transcodingUrl = transcodings[0].toObject()["url"].toString();
-            }
-
-            if (!transcodingUrl.isEmpty()) {
-                m_trackLinks[trackId] = transcodingUrl;
-                fetchStreamUrl(trackId, transcodingUrl);
-            }
-        });
-    }
-}
-
-void SoundCloudService::fetchStreamUrl(const QString& trackId, const QString& transcodingUrl) {
-    QUrl url(transcodingUrl);
+    QUrl url("https://api-v2.soundcloud.com/tracks/" + trackId);
     QUrlQuery q;
     if (!m_token.startsWith("2-")) {
         q.addQueryItem("client_id", m_token);
@@ -406,7 +332,58 @@ void SoundCloudService::fetchStreamUrl(const QString& trackId, const QString& tr
         if (reply->error() != QNetworkReply::NoError) return;
 
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+        QJsonArray transcodings = doc.object()["media"].toObject()["transcodings"].toArray();
+        QString transcodingUrl;
+        int detectedBitrate = 128;
+
+        if (m_quality == "256" || m_quality == "hq" || m_quality == "high") {
+            for (const QJsonValue& t : transcodings) {
+                QJsonObject to = t.toObject();
+                QString qStr = to["quality"].toString();
+                QString preset = to["preset"].toString();
+                QString mime = to["format"].toObject()["mime_type"].toString();
+                if (qStr == "hq" || preset.contains("256") || preset.contains("hq") || mime.contains("mp4a.40.2")) {
+                    transcodingUrl = to["url"].toString();
+                    detectedBitrate = 256;
+                    break;
+                }
+            }
+        }
+        if (transcodingUrl.isEmpty()) {
+            for (const QJsonValue& t : transcodings) {
+                QJsonObject to = t.toObject();
+                if (to["format"].toObject()["protocol"].toString() == "progressive") {
+                    transcodingUrl = to["url"].toString();
+                    detectedBitrate = 128;
+                    break;
+                }
+            }
+        }
+        if (transcodingUrl.isEmpty() && !transcodings.isEmpty()) {
+            transcodingUrl = transcodings[0].toObject()["url"].toString();
+            detectedBitrate = 128;
+        }
+
+        if (!transcodingUrl.isEmpty()) {
+            fetchStreamUrl(trackId, transcodingUrl, detectedBitrate);
+        }
+    });
+}
+
+void SoundCloudService::fetchStreamUrl(const QString& trackId, const QString& transcodingUrl, int bitrate) {
+    QUrl url(transcodingUrl);
+    QUrlQuery q;
+    if (!m_token.startsWith("2-")) {
+        q.addQueryItem("client_id", m_token);
+    }
+    url.setQuery(q);
+
+    net->get(url, scAuthHeader(m_token), [this, trackId, bitrate](QNetworkReply* reply) {
+        if (reply->error() != QNetworkReply::NoError) return;
+
+        QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         QString streamUrl = doc.object()["url"].toString();
+        emit bitrateReady(trackId, bitrate);
         emit streamUrlReady(trackId, streamUrl);
     });
 }
