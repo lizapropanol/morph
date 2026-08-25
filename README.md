@@ -70,6 +70,7 @@ sudo pacman -S qt6-base qt6-declarative qt6-multimedia qt6-svg qt6-5compat gst-p
 
 ### Building from Source
 
+#### Linux
 ```bash
 # Clone the repository
 git clone https://github.com/lizapropanol/morph.git
@@ -84,6 +85,20 @@ make
 
 # Run the application
 ./morph
+```
+
+#### Windows
+```powershell
+# Prerequisites: Qt 6.8+ (MSVC 2022 x64), OpenSSL 3.x, Inno Setup 6 (optional, for installer)
+# Inno Setup can be installed via: winget install JRSoftware.InnoSetup
+
+# Quick build with PowerShell script (compiles morph and creates setup installer):
+.\scripts\build_installer.ps1
+
+# Or manual CMake build:
+cmake -B build -S . -DCMAKE_PREFIX_PATH="C:/Qt/6.8.0/msvc2022_64;C:/Qt/Tools/OpenSSLv3/Win_x64"
+cmake --build build --config Release
+# Installer will be generated at build/morph-v<version>-setup.exe
 ```
 
 ---
