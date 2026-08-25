@@ -41,7 +41,7 @@ QString CacheManager::getTrackUrl(const QString& trackId) {
 }
 
 void CacheManager::cacheTrack(const QString& trackId, const QString& url) {
-    if (!m_saveTracks || isTrackCached(trackId) || url.isEmpty() || url.startsWith("file://")) return;
+    if (!m_saveTracks || isTrackCached(trackId) || url.isEmpty() || url.startsWith("file://") || url.contains(".m3u8") || url.contains("/hls")) return;
     performTrackDownload(trackId, QUrl(url));
 }
 
@@ -58,10 +58,13 @@ void CacheManager::performTrackDownload(const QString& trackId, const QUrl& url,
         }
 
         if (reply->error() == QNetworkReply::NoError) {
+            QByteArray data = reply->readAll();
+            if (data.startsWith("#EXTM3U") || data.isEmpty()) return;
+
             QString trackPath = getTrackPath(trackId);
             QFile file(trackPath);
             if (file.open(QIODevice::WriteOnly)) {
-                file.write(reply->readAll());
+                file.write(data);
                 file.close();
                 QString safeId = trackId;
                 safeId.replace("/", "_").replace(":", "_").replace("?", "_").replace("*", "_");

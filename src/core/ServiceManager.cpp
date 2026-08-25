@@ -89,7 +89,9 @@ ServiceManager::ServiceManager(NetworkManager* net, CacheManager* cache, QObject
         emit streamUrlReady(trackId, streamUrl);
     });
     connect(soundcloud, &BaseService::streamUrlReady, [this](const QString& trackId, const QString& streamUrl) {
-        this->cache->cacheTrack(trackId, streamUrl);
+        if (!streamUrl.contains(".m3u8") && !streamUrl.contains("/hls")) {
+            this->cache->cacheTrack(trackId, streamUrl);
+        }
         emit streamUrlReady(trackId, streamUrl);
     });
     connect(youtube, &BaseService::streamUrlReady, [this](const QString& trackId, const QString& streamUrl) {
