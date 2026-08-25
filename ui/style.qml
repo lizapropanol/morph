@@ -91,6 +91,7 @@ ApplicationWindow {
     property int playlistsVersion: 0
     property int settingsVersion: 0
     property int cacheVersion: 0
+    property var pendingDownloadTrackIds: ({})
     property bool repeatOne: false
     property var fullPlaylistTracks: []
     property int loadedTracksCount: 0
@@ -2886,12 +2887,15 @@ function playTrack(track, index) {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onPressed: (mouse) => {
                     if (mouse.button === Qt.RightButton) {
-                        var trackObj;
-                        if (currentView === "search") {
-                            var view = ListView.view
-                            trackObj = view ? view.model.get(index) : (searchModel.count > 0 ? searchModel.get(index) : historyModel.get(index))
-                        } else {
-                            trackObj = libraryModel.get(index)
+                        var trackObj = {
+                            "id": model.id ? model.id.toString() : "",
+                            "title": model.title || "Unknown Title",
+                            "artist": model.artist || "Unknown Artist",
+                            "album": model.album || "",
+                            "coverUrl": model.coverUrl || "",
+                            "service": model.service || "",
+                            "webUrl": model.webUrl || "",
+                            "durationMs": model.durationMs || 0
                         }
                         trackContextMenu.openAt(mouse.x, mouse.y, trackMouseArea, trackObj)
                     }
@@ -3098,8 +3102,8 @@ function playTrack(track, index) {
         id: trackContextMenu
         property bool openedUpwards: false
         parent: Overlay.overlay
-        width: 160; height: {
-            var count = 2
+        width: 170; height: {
+            var count = 3
             if (openedUpwards) count++
             if (currentView === "library" && currentPlaylist !== "" && saveLastImport) count++
             return (count * 40) + 10
@@ -3110,6 +3114,41 @@ function playTrack(track, index) {
         
         contentItem: ColumnLayout {
             spacing: 0
+            Rectangle {
+                Layout.fillWidth: true; Layout.preferredHeight: 40; color: downloadItemMouse.containsMouse ? "#333" : "transparent"; radius: 4
+                property bool isCached: targetContextTrack && targetContextTrack.id ? (window.cacheVersion, MorphCache.isTrackCached(targetContextTrack.id.toString())) : false
+                Text {
+                    anchors.centerIn: parent
+                    text: parent.isCached ? "DELETE CACHE" : "DOWNLOAD TRACK"
+                    color: parent.isCached ? "#e57373" : "#b57339"
+                    font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black
+                }
+                MouseArea {
+                    id: downloadItemMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                    onClicked: (mouse) => {
+                        if (!targetContextTrack || !targetContextTrack.id) return
+                        var tid = targetContextTrack.id.toString()
+                        if (MorphCache.isTrackCached(tid)) {
+                            MorphCache.removeCacheFile(tid + ".mp3", true)
+                            window.cacheVersion++
+                            showToast("Removed from downloads")
+                        } else {
+                            var sUrl = streamUrlCache[tid]
+                            if (sUrl && !sUrl.startsWith("file://")) {
+                                MorphCache.cacheTrack(tid, sUrl)
+                                showToast("Downloading track...")
+                            } else {
+                                var currentPending = Object.assign({}, pendingDownloadTrackIds)
+                                currentPending[tid] = true
+                                pendingDownloadTrackIds = currentPending
+                                MorphServices.resolve(targetContextTrack.service || "Yandex", tid)
+                                showToast("Downloading track...")
+                            }
+                        }
+                        trackContextMenu.close()
+                    }
+                }
+            }
             Rectangle {
                 Layout.fillWidth: true; Layout.preferredHeight: 40; color: copyItemMouse.containsMouse ? "#333" : "transparent"; radius: 4
                 Text { anchors.centerIn: parent; text: "COPY LINK"; color: "white"; font.family: mainFont.name; font.pixelSize: 12; font.weight: Font.Black }
@@ -3189,14 +3228,19 @@ function playTrack(track, index) {
                 "webUrl": track.webUrl || "",
                 "durationMs": track.durationMs || 0
             }
-            if (cleanTrack.service === "") {
-                if (cleanTrack.coverUrl.indexOf("yandex") !== -1) cleanTrack.service = "Yandex"
-                else if (cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
+            if (!cleanTrack.service || cleanTrack.service === "") {
+                if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("yandex") !== -1) cleanTrack.service = "Yandex"
+                else if (cleanTrack.coverUrl && cleanTrack.coverUrl.indexOf("sndcdn") !== -1) cleanTrack.service = "SoundCloud"
                 else cleanTrack.service = "Yandex"
             }
             targetContextTrack = cleanTrack
             var coords = targetItem.mapToItem(Overlay.overlay, mx, my)
-            x = coords.x; y = openedUpwards ? coords.y - height : coords.y
+            x = Math.max(10, Math.min(coords.x, Overlay.overlay ? Overlay.overlay.width - width - 10 : coords.x))
+            y = openedUpwards ? coords.y - height : coords.y
+            if (Overlay.overlay && y + height > Overlay.overlay.height - 10) {
+                y = Overlay.overlay.height - height - 10
+            }
+            if (y < 10) y = 10
             open()
         }
     }
@@ -3397,8 +3441,17 @@ function playTrack(track, index) {
             }
         }
     function onStreamUrlReady(trackId, streamUrl) {
-        streamUrlCache[trackId] = streamUrl
-        if (currentTrack && currentTrack.id === trackId) {
+        var strId = trackId ? trackId.toString() : ""
+        streamUrlCache[strId] = streamUrl
+        if (pendingDownloadTrackIds && pendingDownloadTrackIds[strId]) {
+            var currentPending = Object.assign({}, pendingDownloadTrackIds)
+            delete currentPending[strId]
+            pendingDownloadTrackIds = currentPending
+            if (!streamUrl.startsWith("file://")) {
+                MorphCache.cacheTrack(strId, streamUrl)
+            }
+        }
+        if (currentTrack && currentTrack.id && currentTrack.id.toString() === strId) {
             if (isRestoringSession || isRecovering) {
                 if (isRestoringSession) MorphAudio.load(streamUrl)
                 else MorphAudio.play(streamUrl)
@@ -3410,12 +3463,12 @@ function playTrack(track, index) {
                 MorphAudio.play(streamUrl)
             }
             if (!streamUrl.startsWith("file://") && streamUrl.indexOf(".m3u8") === -1 && streamUrl.indexOf("/hls") === -1) {
-                MorphCache.cacheTrack(trackId, streamUrl)
+                MorphCache.cacheTrack(strId, streamUrl)
             }
             
             if (currentTrackIndex === -1) {
                 for (var i = 0; i < fullPlaylistTracks.length; i++) {
-                    if (fullPlaylistTracks[i].id === trackId && fullPlaylistTracks[i].service === currentTrack.service) {
+                    if (fullPlaylistTracks[i].id && fullPlaylistTracks[i].id.toString() === strId && fullPlaylistTracks[i].service === currentTrack.service) {
                         currentTrackIndex = i
                         break
                     }
@@ -3516,7 +3569,9 @@ function playTrack(track, index) {
         target: MorphCache
         function onTrackCached(trackId, localPath) { 
             streamUrlCache[trackId] = localPath
+            window.cacheVersion++
             cacheUpdateTimer.restart()
+            showToast("Track downloaded")
         }
         function onCoverCached() { cacheUpdateTimer.restart() }
     }
@@ -4556,15 +4611,20 @@ function playTrack(track, index) {
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            var tracksList = artistProfilePopup.cachedFullTracks
-                                            currentPlaylist = "ARTIST_" + selectedArtist.name.toUpperCase().replace(/\s+/g, "_")
-                                            saveLastImport = false
-                                            fullPlaylistTracks = tracksList
-                                            libraryModel.clear()
-                                            loadedTracksCount = 0
-                                            loadNextChunk()
-                                            playTrack(modelData, index)
+                                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                        onClicked: (mouse) => {
+                                            if (mouse.button === Qt.RightButton) {
+                                                trackContextMenu.openAt(mouse.x, mouse.y, trackRow, modelData, false)
+                                            } else {
+                                                var tracksList = artistProfilePopup.cachedFullTracks
+                                                currentPlaylist = "ARTIST_" + selectedArtist.name.toUpperCase().replace(/\s+/g, "_")
+                                                saveLastImport = false
+                                                fullPlaylistTracks = tracksList
+                                                libraryModel.clear()
+                                                loadedTracksCount = 0
+                                                loadNextChunk()
+                                                playTrack(modelData, index)
+                                            }
                                         }
                                     }
 

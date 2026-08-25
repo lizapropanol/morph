@@ -1,11 +1,14 @@
 #include "CacheManager.h"
 #include <memory>
+#include <QFileInfo>
 
 CacheManager::CacheManager(NetworkManager* net, QObject* parent) : QObject(parent), net(net) {}
 
 void CacheManager::scanCacheSets() {
     m_cachedTracks.clear();
-    QDir trackDir(PathProvider::getTrackCachePath());
+    QString trackPath = PathProvider::getTrackCachePath();
+    QDir().mkpath(trackPath);
+    QDir trackDir(trackPath);
     trackDir.setNameFilters(QStringList() << "*.mp3");
     for (const QFileInfo& fi : trackDir.entryInfoList(QDir::Files)) {
         if (fi.size() > 4096) {
@@ -15,14 +18,16 @@ void CacheManager::scanCacheSets() {
         }
     }
 
-    QDir trackDirPart(PathProvider::getTrackCachePath());
+    QDir trackDirPart(trackPath);
     trackDirPart.setNameFilters(QStringList() << "*.part" << "*.tmp");
     for (const QString& file : trackDirPart.entryList(QDir::Files)) {
         QFile::remove(trackDirPart.filePath(file));
     }
 
     m_cachedCovers.clear();
-    QDir coverDir(PathProvider::getCoverCachePath());
+    QString coverPath = PathProvider::getCoverCachePath();
+    QDir().mkpath(coverPath);
+    QDir coverDir(coverPath);
     for (const QFileInfo& fi : coverDir.entryInfoList(QDir::Files)) {
         if (fi.fileName().endsWith(".part") || fi.fileName().endsWith(".tmp")) {
             QFile::remove(fi.absoluteFilePath());
@@ -56,25 +61,8 @@ QString CacheManager::getTrackUrl(const QString& trackId) {
     return QUrl::fromLocalFile(getTrackPath(trackId)).toString();
 }
 
-void CacheManager::cancelOtherTrackDownloads(const QString& currentSafeId) {
-    auto keys = m_activeTrackReplies.keys();
-    for (const QString& key : keys) {
-        if (key != currentSafeId) {
-            QNetworkReply* r = m_activeTrackReplies.value(key);
-            if (r) {
-                r->abort();
-            }
-            m_activeTrackReplies.remove(key);
-            QFile::remove(PathProvider::getTrackCachePath() + "/" + key + ".mp3.part");
-        }
-    }
-}
-
 void CacheManager::cacheTrack(const QString& trackId, const QString& url) {
-    if (!m_saveTracks || isTrackCached(trackId) || url.isEmpty() || url.startsWith("file://") || url.contains(".m3u8") || url.contains("/hls")) return;
-    QString safeId = trackId;
-    safeId.replace("/", "_").replace(":", "_").replace("?", "_").replace("*", "_");
-    cancelOtherTrackDownloads(safeId);
+    if (isTrackCached(trackId) || url.isEmpty() || url.startsWith("file://")) return;
     performTrackDownload(trackId, QUrl(url));
 }
 
@@ -84,12 +72,114 @@ void CacheManager::performTrackDownload(const QString& trackId, const QUrl& url,
     QString safeId = trackId;
     safeId.replace("/", "_").replace(":", "_").replace("?", "_").replace("*", "_");
 
-    if (m_activeTrackReplies.contains(safeId)) {
+    if (m_activeTrackReplies.contains(safeId) && redirectionDepth == 0) {
         return;
     }
 
     QString finalTrackPath = getTrackPath(trackId);
     QString tempTrackPath = finalTrackPath + ".part";
+    QDir().mkpath(QFileInfo(finalTrackPath).dir().absolutePath());
+
+    if (url.toString().contains(".m3u8") || url.toString().contains("/hls")) {
+        QNetworkRequest req(url);
+        req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        req.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+        QNetworkReply* reply = net->getNetworkAccessManager()->get(req);
+        reply->ignoreSslErrors();
+        m_activeTrackReplies.insert(safeId, reply);
+
+        connect(reply, &QNetworkReply::finished, [this, safeId, trackId, url, finalTrackPath, tempTrackPath, reply, redirectionDepth]() {
+            m_activeTrackReplies.remove(safeId);
+
+            int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            if (statusCode == 301 || statusCode == 302 || statusCode == 303 || statusCode == 307 || statusCode == 308) {
+                QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+                if (redirectUrl.isRelative()) redirectUrl = url.resolved(redirectUrl);
+                reply->deleteLater();
+                performTrackDownload(trackId, redirectUrl, redirectionDepth + 1);
+                return;
+            }
+
+            QByteArray content = reply->readAll();
+            reply->deleteLater();
+
+            QStringList lines = QString::fromUtf8(content).split('\n');
+            QStringList segUrls;
+            for (const QString& line : lines) {
+                QString trimmed = line.trimmed();
+                if (trimmed.startsWith("#EXT-X-MAP:URI=\"")) {
+                    int end = trimmed.lastIndexOf('"');
+                    if (end > 16) {
+                        QString initUri = trimmed.mid(16, end - 16);
+                        QUrl fullInit = initUri.startsWith("http") ? QUrl(initUri) : url.resolved(QUrl(initUri));
+                        segUrls.append(fullInit.toString());
+                    }
+                } else if (!trimmed.isEmpty() && !trimmed.startsWith("#")) {
+                    QUrl fullSeg = trimmed.startsWith("http") ? QUrl(trimmed) : url.resolved(QUrl(trimmed));
+                    segUrls.append(fullSeg.toString());
+                }
+            }
+
+            if (segUrls.isEmpty()) return;
+
+            auto file = std::make_shared<QFile>(tempTrackPath);
+            if (!file->open(QIODevice::WriteOnly | QIODevice::Truncate)) return;
+
+            auto currentIndex = std::make_shared<int>(0);
+            auto downloadStep = std::make_shared<std::function<void()>>();
+
+            *downloadStep = [this, safeId, trackId, finalTrackPath, tempTrackPath, segUrls, file, currentIndex, downloadStep]() {
+                if (*currentIndex >= segUrls.size()) {
+                    file->flush();
+                    file->close();
+                    if (QFileInfo(tempTrackPath).size() > 4096) {
+                        QFile::remove(finalTrackPath);
+                        bool moved = QFile::rename(tempTrackPath, finalTrackPath);
+                        if (!moved) {
+                            if (QFile::copy(tempTrackPath, finalTrackPath)) {
+                                QFile::remove(tempTrackPath);
+                                moved = true;
+                            }
+                        }
+                        if (moved) {
+                            m_cachedTracks.insert(safeId);
+                            enforceLimit();
+                            emit trackCached(trackId, QUrl::fromLocalFile(finalTrackPath).toString());
+                        } else {
+                            QFile::remove(tempTrackPath);
+                        }
+                    } else {
+                        QFile::remove(tempTrackPath);
+                    }
+                    return;
+                }
+
+                QUrl segUrl(segUrls[*currentIndex]);
+                QNetworkRequest segReq(segUrl);
+                segReq.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+                segReq.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+                QNetworkReply* segReply = net->getNetworkAccessManager()->get(segReq);
+                segReply->ignoreSslErrors();
+                m_activeTrackReplies.insert(safeId, segReply);
+
+                connect(segReply, &QNetworkReply::finished, [this, safeId, segReply, file, currentIndex, downloadStep]() {
+                    m_activeTrackReplies.remove(safeId);
+                    if (segReply->error() == QNetworkReply::NoError && file->isOpen()) {
+                        file->write(segReply->readAll());
+                        file->flush();
+                    }
+                    segReply->deleteLater();
+                    (*currentIndex)++;
+                    (*downloadStep)();
+                });
+            };
+
+            (*downloadStep)();
+        });
+        return;
+    }
 
     auto file = std::make_shared<QFile>(tempTrackPath);
     if (!file->open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -97,50 +187,80 @@ void CacheManager::performTrackDownload(const QString& trackId, const QUrl& url,
     }
 
     QNetworkRequest request(url);
-    request.setTransferTimeout(30000);
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
     QNetworkReply* reply = net->getNetworkAccessManager()->get(request);
+    reply->ignoreSslErrors();
     m_activeTrackReplies.insert(safeId, reply);
 
     connect(reply, &QNetworkReply::readyRead, [file, reply]() {
         if (file->isOpen()) {
             file->write(reply->readAll());
+            file->flush();
         }
     });
 
-    connect(reply, &QNetworkReply::finished, [this, safeId, trackId, finalTrackPath, tempTrackPath, file, reply]() {
+    connect(reply, &QNetworkReply::finished, [this, safeId, trackId, url, finalTrackPath, tempTrackPath, file, reply, redirectionDepth]() {
         m_activeTrackReplies.remove(safeId);
 
         if (file->isOpen()) {
+            file->write(reply->readAll());
+            file->flush();
             file->close();
         }
 
-        if (reply->error() == QNetworkReply::NoError) {
-            int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            if (statusCode >= 200 && statusCode < 300) {
-                QFile checkFile(tempTrackPath);
-                if (checkFile.open(QIODevice::ReadOnly)) {
-                    QByteArray header = checkFile.read(16);
-                    checkFile.close();
-                    if (!header.startsWith("#EXTM3U") && checkFile.size() > 4096) {
-                        QFile::remove(finalTrackPath);
-                        if (QFile::rename(tempTrackPath, finalTrackPath)) {
-                            m_cachedTracks.insert(safeId);
-                            enforceLimit();
-                            emit trackCached(trackId, QUrl::fromLocalFile(finalTrackPath).toString());
-                        }
-                    } else {
-                        QFile::remove(tempTrackPath);
-                    }
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (statusCode == 301 || statusCode == 302 || statusCode == 303 || statusCode == 307 || statusCode == 308) {
+            QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            if (redirectUrl.isRelative()) redirectUrl = url.resolved(redirectUrl);
+            QFile::remove(tempTrackPath);
+            reply->deleteLater();
+            performTrackDownload(trackId, redirectUrl, redirectionDepth + 1);
+            return;
+        }
+
+        QFile checkFile(tempTrackPath);
+        qint64 fileSize = checkFile.size();
+        bool valid = false;
+        bool isHlsManifest = false;
+        if (fileSize > 100 && checkFile.open(QIODevice::ReadOnly)) {
+            QByteArray header = checkFile.read(32);
+            checkFile.close();
+            if (header.startsWith("#EXTM3U")) {
+                isHlsManifest = true;
+            } else if (fileSize > 4096 && !header.toLower().startsWith("<!doctype") && !header.toLower().startsWith("<html")) {
+                valid = true;
+            }
+        }
+
+        reply->deleteLater();
+
+        if (isHlsManifest) {
+            QFile::remove(tempTrackPath);
+            performTrackDownload(trackId, url, redirectionDepth);
+            return;
+        }
+
+        if (valid) {
+            QFile::remove(finalTrackPath);
+            bool moved = QFile::rename(tempTrackPath, finalTrackPath);
+            if (!moved) {
+                if (QFile::copy(tempTrackPath, finalTrackPath)) {
+                    QFile::remove(tempTrackPath);
+                    moved = true;
                 }
+            }
+            if (moved) {
+                m_cachedTracks.insert(safeId);
+                enforceLimit();
+                emit trackCached(trackId, QUrl::fromLocalFile(finalTrackPath).toString());
             } else {
                 QFile::remove(tempTrackPath);
             }
         } else {
             QFile::remove(tempTrackPath);
         }
-        reply->deleteLater();
     });
 }
 
@@ -246,41 +366,60 @@ void CacheManager::performCoverDownload(const QString& url, const QString& path,
     if (redirectionDepth > 5) return;
 
     QString hash = getHash(url);
-    if (m_activeCoverReplies.contains(hash)) return;
+    if (m_activeCoverReplies.contains(hash) && redirectionDepth == 0) return;
 
     QString tempPath = path + ".part";
+    QDir().mkpath(QFileInfo(path).dir().absolutePath());
     auto file = std::make_shared<QFile>(tempPath);
     if (!file->open(QIODevice::WriteOnly | QIODevice::Truncate)) return;
 
     QNetworkRequest request(targetUrl);
-    request.setTransferTimeout(15000);
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
     QNetworkReply* reply = net->getNetworkAccessManager()->get(request);
+    reply->ignoreSslErrors();
     m_activeCoverReplies.insert(hash, reply);
 
     connect(reply, &QNetworkReply::readyRead, [file, reply]() {
         if (file->isOpen()) {
             file->write(reply->readAll());
+            file->flush();
         }
     });
 
-    connect(reply, &QNetworkReply::finished, [this, url, hash, path, tempPath, file, reply]() {
+    connect(reply, &QNetworkReply::finished, [this, url, hash, path, tempPath, targetUrl, file, reply, redirectionDepth]() {
         m_activeCoverReplies.remove(hash);
 
         if (file->isOpen()) {
+            file->write(reply->readAll());
+            file->flush();
             file->close();
         }
 
-        if (reply->error() == QNetworkReply::NoError) {
-            int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            if (statusCode >= 200 && statusCode < 300 && QFile::exists(tempPath) && QFileInfo(tempPath).size() > 100) {
-                QFile::remove(path);
-                if (QFile::rename(tempPath, path)) {
-                    m_cachedCovers.insert(hash);
-                    enforceLimit();
-                    emit coverCached(url, QUrl::fromLocalFile(path).toString());
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (statusCode == 301 || statusCode == 302 || statusCode == 303 || statusCode == 307 || statusCode == 308) {
+            QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            if (redirectUrl.isRelative()) redirectUrl = targetUrl.resolved(redirectUrl);
+            QFile::remove(tempPath);
+            reply->deleteLater();
+            performCoverDownload(url, path, redirectUrl, redirectionDepth + 1);
+            return;
+        }
+
+        if (QFile::exists(tempPath) && QFileInfo(tempPath).size() > 100) {
+            QFile::remove(path);
+            bool moved = QFile::rename(tempPath, path);
+            if (!moved) {
+                if (QFile::copy(tempPath, path)) {
+                    QFile::remove(tempPath);
+                    moved = true;
                 }
+            }
+            if (moved) {
+                m_cachedCovers.insert(hash);
+                enforceLimit();
+                emit coverCached(url, QUrl::fromLocalFile(path).toString());
             } else {
                 QFile::remove(tempPath);
             }

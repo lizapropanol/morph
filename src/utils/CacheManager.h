@@ -20,7 +20,7 @@ public:
     Q_INVOKABLE bool isTrackCached(const QString& trackId);
     Q_INVOKABLE QString getTrackPath(const QString& trackId);
     Q_INVOKABLE QString getTrackUrl(const QString& trackId);
-    void cacheTrack(const QString& trackId, const QString& url);
+    Q_INVOKABLE void cacheTrack(const QString& trackId, const QString& url);
     Q_INVOKABLE void clearTrackCache();
 
     Q_INVOKABLE qint64 getTrackCacheSize();
